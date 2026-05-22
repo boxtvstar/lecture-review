@@ -655,24 +655,144 @@ body {
 .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.5s ease; }
 .fade-in.visible { opacity: 1; transform: translateY(0); }
 
+/* ═══ MOBILE NAV MENU ═══ */
+.mobile-menu-btn {
+  display: none; background: none; border: none;
+  font-size: 24px; cursor: pointer; color: var(--navy); padding: 8px;
+  line-height: 1;
+}
+.mobile-nav-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(17,29,53,0.5); z-index: 1500;
+  opacity: 0; transition: opacity 0.3s;
+}
+.mobile-nav-overlay.open { display: block; opacity: 1; }
+.mobile-nav-drawer {
+  position: fixed; top: 0; right: -280px; bottom: 0;
+  width: 280px; background: white; z-index: 1501;
+  transition: right 0.3s ease; box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+  padding: 24px;
+}
+.mobile-nav-drawer.open { right: 0; }
+.mobile-nav-close {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--gray-100); border: none; width: 36px; height: 36px;
+  border-radius: 10px; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gray-500);
+}
+.mobile-nav-close:hover { background: var(--gray-200); }
+.mobile-nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 18px; font-weight: 800; color: var(--navy);
+  margin-bottom: 32px;
+}
+.mobile-nav-logo .logo-icon {
+  width: 36px; height: 36px; background: var(--orange);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 18px; font-weight: 900;
+}
+.mobile-nav-links { display: flex; flex-direction: column; gap: 4px; }
+.mobile-nav-links a {
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none; color: var(--gray-600); font-size: 15px; font-weight: 600;
+  padding: 14px 16px; border-radius: 10px; transition: all 0.2s;
+}
+.mobile-nav-links a:hover { background: var(--gray-100); color: var(--navy); }
+.mobile-nav-links a.active { background: var(--orange-light); color: var(--orange); }
+.mobile-nav-links .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+.mobile-nav-write {
+  display: block; width: 100%; margin-top: 24px; padding: 14px;
+  background: var(--orange); color: white; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer;
+  text-align: center; text-decoration: none; transition: background 0.2s;
+}
+.mobile-nav-write:hover { background: var(--orange-hover); }
+
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 768px) {
+  .mobile-menu-btn { display: block; }
   .nav-links a:not(.btn-write-review) { display: none; }
-  .hero { padding: 60px 20px 48px; }
-  .hero h1 { font-size: 28px; }
-  .hero-stats { gap: 24px; }
-  .hero-stat .num { font-size: 22px; }
-  .categories { padding: 0 20px; gap: 8px; }
-  .cat-pill { padding: 8px 14px; font-size: 13px; }
-  .section { padding: 32px 20px; }
-  .instructor-grid { grid-template-columns: 1fr; }
-  .detector-section { padding: 24px; margin: 20px 0; }
-  .detector-grid { grid-template-columns: 1fr; }
-  .modal { margin: 10px; border-radius: var(--radius-lg); }
-  .modal-header, .modal-body { padding: 20px; }
-  .footer-inner { flex-direction: column; }
-  .footer-links { gap: 32px; }
-  .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+  .nav-links .btn-write-review { display: none; }
+  .nav-inner { padding: 0 16px; height: 56px; }
+  .nav-logo { font-size: 17px; }
+  .nav-logo .logo-icon { width: 30px; height: 30px; font-size: 15px; border-radius: 8px; }
+  .hero { padding: 48px 16px 40px; margin-top: 56px; }
+  .hero h1 { font-size: 24px; letter-spacing: -0.5px; line-height: 1.35; }
+  .hero p { font-size: 14px; margin-bottom: 24px; }
+  .hero-badge { font-size: 11px; padding: 5px 12px; }
+  .search-box input { padding: 14px 48px 14px 44px; font-size: 14px; border-radius: 12px; }
+  .search-icon { left: 14px; font-size: 18px; }
+  .search-btn { width: 34px; height: 34px; border-radius: 10px; font-size: 16px; right: 6px; }
+  .hero-stats { gap: 16px; margin-top: 28px; }
+  .hero-stat .num { font-size: 20px; }
+  .hero-stat .label { font-size: 11px; }
+  .categories { padding: 0 16px; gap: 6px; margin-top: -12px; }
+  .cat-pill { padding: 7px 12px; font-size: 12px; border-width: 1.5px; }
+  .cat-pill .cat-count { font-size: 10px; padding: 1px 6px; margin-left: 4px; }
+  .section { padding: 28px 16px; }
+  .section-title { font-size: 19px; gap: 8px; }
+  .section-title .icon { font-size: 18px; }
+  .section-link { font-size: 13px; }
+  .instructor-grid { grid-template-columns: 1fr; gap: 14px; }
+  .instructor-card { padding: 18px; }
+  .card-score { font-size: 28px; }
+  .card-name { font-size: 15px; }
+  .card-hype { padding: 8px 12px; font-size: 12px; }
+  .card-tag { font-size: 11px; padding: 3px 8px; }
+  .detector-section { padding: 20px; margin: 12px 0; border-radius: 14px; }
+  .detector-grid { grid-template-columns: 1fr; gap: 12px; }
+  .detector-card { padding: 16px; }
+  .detector-course { font-size: 14px; }
+  .detector-reason { font-size: 12px; padding: 8px; }
+  .vote-btn { padding: 8px; font-size: 12px; }
+  .worst-section { padding: 20px; border-radius: 14px; }
+  .worst-tabs { gap: 6px; margin-bottom: 14px; }
+  .worst-tab { padding: 6px 12px; font-size: 12px; }
+  .worst-item { padding: 12px 14px; gap: 10px; }
+  .worst-name { font-size: 13px; }
+  .worst-meta { font-size: 11px; }
+  .worst-score { font-size: 17px; }
+  .worst-hype { font-size: 10px; }
+  .worst-warning { padding: 10px 12px; }
+  .worst-warning-text { font-size: 11px; }
+  .ranking-tabs { gap: 6px; margin-bottom: 14px; }
+  .ranking-tab { padding: 6px 12px; font-size: 12px; }
+  .ranking-item { padding: 12px 14px; gap: 10px; }
+  .rank-name { font-size: 14px; }
+  .rank-meta { font-size: 11px; }
+  .rank-score { font-size: 17px; }
+  .modal-overlay { padding: 0; }
+  .modal { margin: 0; border-radius: 0; min-height: 100vh; max-width: 100%; }
+  .modal-header { padding: 16px 18px; }
+  .modal-body { padding: 18px; }
+  .modal-name { font-size: 18px; }
+  .modal-avatar { width: 48px; height: 48px; font-size: 20px; border-radius: 12px; }
+  .modal-score-num { font-size: 44px; }
+  .modal-score-big { padding: 18px; }
+  .rating-label { width: 80px; font-size: 12px; }
+  .rating-value { font-size: 13px; }
+  .review-item { padding: 14px; }
+  .review-text { font-size: 13px; }
+  .form-rating-label { width: 90px; font-size: 12px; }
+  .form-star { font-size: 20px; }
+  .form-input, .form-textarea { font-size: 16px; }
+  .upload-area { padding: 20px; }
+  .upload-icon { font-size: 24px; }
+  .upload-text { font-size: 13px; }
+  .footer { padding: 32px 16px 24px; margin-top: 20px; }
+  .footer-inner { flex-direction: column; gap: 24px; }
+  .footer-links { gap: 24px; flex-wrap: wrap; }
+  .footer-bottom { flex-direction: column; gap: 6px; text-align: center; font-size: 11px; }
+}
+
+@media (max-width: 380px) {
+  .hero h1 { font-size: 21px; }
+  .hero-stats { flex-wrap: wrap; gap: 12px; }
+  .hero-stat { flex: 1; min-width: 80px; }
+  .categories { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+  .cat-pill { flex-shrink: 0; }
+  .card-score { font-size: 24px; }
 }
 </style>
 </head>
@@ -690,6 +810,7 @@ body {
       <a href="#detector">감별기</a>
       <a href="admin.html" style="font-size:12px;color:var(--gray-400)">관리자</a>
       <a href="#" onclick="openReviewModal(); return false;" class="btn-write-review">✏️ 리뷰 쓰기</a>
+      <button class="mobile-menu-btn" onclick="openMobileNav()">☰</button>
     </div>
   </div>
 </nav>
@@ -861,6 +982,24 @@ body {
       <button class="form-submit" onclick="submitReview()">리뷰 등록하기</button>
     </div>
   </div>
+</div>
+
+<!-- ═══ MOBILE NAV DRAWER ═══ -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobileNavDrawer">
+  <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+  <div class="mobile-nav-logo">
+    <div class="logo-icon">평</div>
+    강의평가단
+  </div>
+  <div class="mobile-nav-links">
+    <a href="#" onclick="closeMobileNav()"><span class="nav-icon">🏠</span> 홈</a>
+    <a href="#rankings" onclick="closeMobileNav()" class="active"><span class="nav-icon">🏆</span> 분야별 랭킹</a>
+    <a href="#worst" onclick="closeMobileNav()"><span class="nav-icon">💀</span> 최악의 강사</a>
+    <a href="#detector" onclick="closeMobileNav()"><span class="nav-icon">🚨</span> 강의팔이 감별기</a>
+    <a href="admin.html"><span class="nav-icon">⚙️</span> 관리자</a>
+  </div>
+  <a href="#" class="mobile-nav-write" onclick="closeMobileNav(); openReviewModal(); return false;">✏️ 리뷰 쓰기</a>
 </div>
 
 <script>
@@ -1408,6 +1547,18 @@ const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1 });
 document.querySelectorAll('.section').forEach(s => { s.classList.add('fade-in'); observer.observe(s); });
+
+// ═══ MOBILE NAV ═══
+function openMobileNav() {
+  document.getElementById('mobileNavOverlay').classList.add('open');
+  document.getElementById('mobileNavDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileNav() {
+  document.getElementById('mobileNavOverlay').classList.remove('open');
+  document.getElementById('mobileNavDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 // ═══ INIT ═══
 renderInstructors();

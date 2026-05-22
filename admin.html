@@ -330,14 +330,105 @@ body {
 .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
 .empty-state .text { font-size: 15px; font-weight: 600; }
 
+/* MOBILE HAMBURGER */
+.mobile-header {
+  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  background: var(--navy); color: white; padding: 0 16px; height: 56px;
+  align-items: center; justify-content: space-between;
+}
+.mobile-header .logo { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.mobile-header .logo .logo-icon { width: 32px; height: 32px; background: var(--orange); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.hamburger { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 8px; }
+.mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+.mobile-overlay.open { display: block; }
+
+/* ADD INSTRUCTOR MODAL */
+.add-modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(17,29,53,0.6); backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center; padding: 24px;
+}
+.add-modal-overlay.open { display: flex; }
+.add-modal {
+  background: white; border-radius: 16px; max-width: 520px; width: 100%;
+  box-shadow: 0 16px 48px rgba(27,42,74,0.16); animation: modalIn 0.3s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+@keyframes modalIn { from { opacity: 0; transform: translateY(20px); } }
+.add-modal-header {
+  padding: 24px 28px 16px; border-bottom: 1px solid var(--gray-200);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.add-modal-title { font-size: 18px; font-weight: 800; color: var(--navy); }
+.add-modal-body { padding: 24px 28px; }
+.add-form-group { margin-bottom: 18px; }
+.add-form-label { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; display: block; }
+.add-form-input {
+  width: 100%; padding: 10px 14px; border: 2px solid var(--gray-200);
+  border-radius: 8px; font-size: 14px; font-family: inherit;
+  transition: border-color 0.2s; background: var(--gray-50);
+}
+.add-form-input:focus { outline: none; border-color: var(--orange); background: white; }
+.add-form-select {
+  width: 100%; padding: 10px 14px; border: 2px solid var(--gray-200);
+  border-radius: 8px; font-size: 14px; font-family: inherit;
+  background: var(--gray-50); cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+.add-form-select:focus { outline: none; border-color: var(--orange); }
+.add-form-row { display: flex; gap: 12px; }
+.add-form-row .add-form-group { flex: 1; }
+.add-modal-actions { display: flex; gap: 10px; padding: 16px 28px 24px; }
+.add-modal-btn {
+  flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: all 0.2s; border: none;
+}
+.add-modal-btn-submit { background: var(--orange); color: white; }
+.add-modal-btn-submit:hover { background: var(--orange-hover); }
+.add-modal-btn-cancel { background: var(--gray-100); color: var(--gray-600); }
+.add-modal-btn-cancel:hover { background: var(--gray-200); }
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .admin-sidebar { display: none; }
-  .admin-main { margin-left: 0; padding: 20px; }
-  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .mobile-header { display: flex; }
+  .admin-topbar { display: none; }
+  .admin-sidebar {
+    position: fixed; left: -260px; top: 0; bottom: 0; z-index: 1001;
+    transition: left 0.3s ease; width: 240px;
+  }
+  .admin-sidebar.open { left: 0; }
+  .admin-main { margin-left: 0; padding: 16px; padding-top: 72px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-card { padding: 16px; }
+  .stat-card .stat-num { font-size: 24px; }
   .verify-info-grid { grid-template-columns: 1fr; }
-  .admin-table { font-size: 13px; }
-  .admin-table th, .admin-table td { padding: 10px 12px; }
+  .admin-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table { font-size: 12px; min-width: 600px; }
+  .admin-table th, .admin-table td { padding: 10px 10px; white-space: nowrap; }
+  .page-header { margin-bottom: 16px; }
+  .page-title { font-size: 20px; }
+  .admin-filter-bar { flex-wrap: wrap; gap: 6px; }
+  .admin-filter-btn { padding: 6px 12px; font-size: 12px; }
+  .verify-modal { max-width: 100%; margin: 10px; border-radius: 12px; }
+  .verify-modal-header { padding: 16px 20px; }
+  .verify-modal-body { padding: 16px 20px; }
+  .verify-modal-actions { flex-direction: column; }
+  .verify-action-btn { font-size: 13px; padding: 12px; }
+  .add-modal { margin: 10px; max-height: 85vh; }
+  .add-modal-header { padding: 16px 20px; }
+  .add-modal-body { padding: 16px 20px; }
+  .add-modal-actions { padding: 12px 20px 20px; flex-direction: column; }
+  .add-form-row { flex-direction: column; gap: 0; }
+  .login-card { padding: 32px 24px; margin: 16px; }
+  .action-btn { padding: 4px 8px; font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .stat-card { padding: 14px; }
+  .admin-main { padding: 12px; padding-top: 68px; }
+  .admin-table { font-size: 11px; min-width: 500px; }
 }
 </style>
 </head>
@@ -367,6 +458,12 @@ body {
 
 <!-- ═══ ADMIN APP ═══ -->
 <div class="admin-app" id="adminApp">
+  <!-- MOBILE HEADER -->
+  <div class="mobile-header" id="mobileHeader">
+    <div class="logo"><div class="logo-icon">평</div> 강의평가단 관리</div>
+    <button class="hamburger" onclick="toggleMobileSidebar()">☰</button>
+  </div>
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileSidebar()"></div>
 
   <!-- TOPBAR -->
   <div class="admin-topbar">
@@ -639,6 +736,7 @@ body {
         <div class="admin-table-wrapper">
           <div class="admin-table-header">
             <div class="admin-table-title">강사 목록</div>
+            <button class="action-btn action-btn-approve" onclick="openAddInstructorModal()" style="padding:8px 16px;font-size:13px">+ 강사 추가</button>
           </div>
           <table class="admin-table">
             <thead>
@@ -672,6 +770,50 @@ body {
       <button class="action-btn action-btn-delete" onclick="closeVerifyModal()" style="font-size:16px">✕</button>
     </div>
     <div class="verify-modal-body" id="vmBody"></div>
+  </div>
+</div>
+
+<!-- ADD INSTRUCTOR MODAL -->
+<div class="add-modal-overlay" id="addInstructorModal" onclick="if(event.target===this)closeAddInstructorModal()">
+  <div class="add-modal">
+    <div class="add-modal-header">
+      <div class="add-modal-title">강사 추가</div>
+      <button class="action-btn action-btn-delete" onclick="closeAddInstructorModal()" style="font-size:16px">✕</button>
+    </div>
+    <div class="add-modal-body">
+      <div class="add-form-group">
+        <label class="add-form-label">강사명 *</label>
+        <input class="add-form-input" id="addName" placeholder="강사명을 입력하세요">
+      </div>
+      <div class="add-form-row">
+        <div class="add-form-group">
+          <label class="add-form-label">분야 *</label>
+          <select class="add-form-select" id="addCategory">
+            <option value="">선택</option>
+            <option value="개발">개발</option>
+            <option value="디자인">디자인</option>
+            <option value="마케팅">마케팅</option>
+            <option value="재테크">재테크</option>
+            <option value="자기계발">자기계발</option>
+          </select>
+        </div>
+        <div class="add-form-group">
+          <label class="add-form-label">플랫폼 *</label>
+          <select class="add-form-select" id="addPlatform">
+            <option value="">선택</option>
+            <option value="인프런">인프런</option>
+            <option value="클래스101">클래스101</option>
+            <option value="패스트캠퍼스">패스트캠퍼스</option>
+            <option value="유데미">유데미</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="add-modal-actions">
+      <button class="add-modal-btn add-modal-btn-cancel" onclick="closeAddInstructorModal()">취소</button>
+      <button class="add-modal-btn add-modal-btn-submit" onclick="addInstructor()">등록하기</button>
+    </div>
   </div>
 </div>
 
@@ -946,7 +1088,7 @@ function renderReportsTable() {
 }
 
 function renderInstructorsTable() {
-  document.getElementById('instructorsTableBody').innerHTML = adminInstructors.map(i => `
+  document.getElementById('instructorsTableBody').innerHTML = adminInstructors.map((i, idx) => `
     <tr>
       <td><strong>${i.name}</strong></td>
       <td>${i.category}</td>
@@ -954,7 +1096,10 @@ function renderInstructorsTable() {
       <td><span style="color:${i.score >= 4 ? 'var(--green)' : i.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${i.score} ★</span></td>
       <td>${i.reviews}개</td>
       <td><span style="color:${i.hype > 70 ? 'var(--red)' : i.hype > 40 ? 'var(--gold)' : 'var(--green)'};font-weight:700">${i.hype}%</span></td>
-      <td><button class="action-btn action-btn-view">관리</button></td>
+      <td>
+        <button class="action-btn action-btn-view">관리</button>
+        <button class="action-btn action-btn-delete" onclick="deleteInstructor(${idx})">삭제</button>
+      </td>
     </tr>
   `).join('');
 }
@@ -1115,6 +1260,53 @@ function renderAll() {
   renderReportsTable();
   renderInstructorsTable();
   updatePendingCount();
+}
+
+// ═══ MOBILE SIDEBAR ═══
+function toggleMobileSidebar() {
+  document.querySelector('.admin-sidebar').classList.toggle('open');
+  document.getElementById('mobileOverlay').classList.toggle('open');
+}
+function closeMobileSidebar() {
+  document.querySelector('.admin-sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('open');
+}
+// Auto close sidebar on page nav (mobile)
+const origShowPage = showPage;
+showPage = function(pageId, el) {
+  origShowPage(pageId, el);
+  if (window.innerWidth <= 768) closeMobileSidebar();
+};
+
+// ═══ ADD INSTRUCTOR ═══
+function openAddInstructorModal() {
+  document.getElementById('addInstructorModal').classList.add('open');
+}
+function closeAddInstructorModal() {
+  document.getElementById('addInstructorModal').classList.remove('open');
+}
+function addInstructor() {
+  const name = document.getElementById('addName').value.trim();
+  const category = document.getElementById('addCategory').value;
+  const platform = document.getElementById('addPlatform').value;
+  if (!name) { showToast('강사명을 입력해주세요.', 'error'); return; }
+  if (!category) { showToast('분야를 선택해주세요.', 'error'); return; }
+  if (!platform) { showToast('플랫폼을 선택해주세요.', 'error'); return; }
+  adminInstructors.push({
+    name, category, platform, score: 0, reviews: 0, hype: 0
+  });
+  renderInstructorsTable();
+  closeAddInstructorModal();
+  document.getElementById('addName').value = '';
+  document.getElementById('addCategory').value = '';
+  document.getElementById('addPlatform').value = '';
+  showToast(`✅ "${name}" 강사가 등록되었습니다.`, 'success');
+}
+function deleteInstructor(idx) {
+  const name = adminInstructors[idx].name;
+  adminInstructors.splice(idx, 1);
+  renderInstructorsTable();
+  showToast(`"${name}" 강사가 삭제되었습니다.`, 'info');
 }
 </script>
 </body>
