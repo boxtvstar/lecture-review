@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>강의평가단 — 진짜 수강생의 솔직한 강의 리뷰</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy: #1B2A4A;
+  --navy-light: #2A3F6A;
+  --navy-dark: #111D35;
+  --orange: #FF6B35;
+  --orange-hover: #E85A28;
+  --orange-light: #FFF0E9;
+  --white: #FFFFFF;
+  --gray-50: #F8F9FB;
+  --gray-100: #F1F3F7;
+  --gray-200: #E2E6EE;
+  --gray-300: #C8CFDB;
+  --gray-400: #9BA3B5;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --green: #10B981;
+  --green-light: #ECFDF5;
+  --red: #EF4444;
+  --red-light: #FEF2F2;
+  --blue: #3B82F6;
+  --blue-light: #EFF6FF;
+  --gold: #F59E0B;
+  --gold-light: #FFFBEB;
+  --shadow-sm: 0 1px 3px rgba(27,42,74,0.06);
+  --shadow-md: 0 4px 16px rgba(27,42,74,0.08);
+  --shadow-lg: 0 8px 32px rgba(27,42,74,0.12);
+  --shadow-xl: 0 16px 48px rgba(27,42,74,0.16);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-700);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ═══ NAV ═══ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gray-200);
+  transition: box-shadow 0.3s;
+}
+.nav.scrolled { box-shadow: var(--shadow-md); }
+.nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; height: 64px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 20px; color: var(--navy);
+  text-decoration: none; letter-spacing: -0.5px;
+}
+.nav-logo .logo-icon {
+  width: 36px; height: 36px; background: var(--orange);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 18px; font-weight: 900;
+}
+.nav-links { display: flex; gap: 8px; align-items: center; }
+.nav-links a {
+  text-decoration: none; color: var(--gray-600);
+  font-size: 14px; font-weight: 600; padding: 8px 14px;
+  border-radius: var(--radius-sm); transition: all 0.2s;
+}
+.nav-links a:hover { color: var(--navy); background: var(--gray-100); }
+.nav-links a.active { color: var(--orange); background: var(--orange-light); }
+.btn-write-review {
+  background: var(--orange); color: white !important;
+  padding: 8px 18px !important; border-radius: var(--radius-sm) !important;
+  font-weight: 700 !important; font-size: 14px !important;
+  transition: all 0.2s !important; border: none; cursor: pointer;
+  text-decoration: none;
+}
+.btn-write-review:hover { background: var(--orange-hover) !important; transform: translateY(-1px); }
+
+/* ═══ HERO ═══ */
+.hero {
+  margin-top: 64px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 50%, #3A5A8A 100%);
+  padding: 80px 24px 60px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-inner {
+  max-width: 800px; margin: 0 auto; text-align: center;
+  position: relative; z-index: 1;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15);
+  padding: 6px 16px; border-radius: 100px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 600;
+  margin-bottom: 24px;
+  animation: fadeInDown 0.6s ease;
+}
+.hero-badge .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+.hero h1 {
+  font-size: clamp(32px, 5vw, 48px); font-weight: 900;
+  color: white; line-height: 1.25; letter-spacing: -1px;
+  margin-bottom: 16px;
+  animation: fadeInDown 0.6s ease 0.1s both;
+}
+.hero h1 em { font-style: normal; color: var(--orange); }
+.hero p {
+  font-size: 17px; color: rgba(255,255,255,0.7);
+  max-width: 500px; margin: 0 auto 32px; font-weight: 400;
+  animation: fadeInDown 0.6s ease 0.2s both;
+}
+.search-box {
+  max-width: 560px; margin: 0 auto;
+  position: relative;
+  animation: fadeInUp 0.6s ease 0.3s both;
+}
+.search-box input {
+  width: 100%; padding: 18px 56px 18px 52px;
+  border: 2px solid transparent; border-radius: 16px;
+  font-size: 16px; font-family: inherit; font-weight: 500;
+  background: white; color: var(--navy);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  outline: none; transition: all 0.3s;
+}
+.search-box input::placeholder { color: var(--gray-400); }
+.search-box input:focus { border-color: var(--orange); box-shadow: 0 8px 32px rgba(255,107,53,0.2); }
+.search-icon {
+  position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  font-size: 20px; color: var(--gray-400); pointer-events: none;
+}
+.search-btn {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: var(--orange); color: white; border: none;
+  width: 40px; height: 40px; border-radius: 12px;
+  font-size: 18px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.search-btn:hover { background: var(--orange-hover); }
+
+.hero-stats {
+  display: flex; justify-content: center; gap: 48px;
+  margin-top: 40px;
+  animation: fadeInUp 0.6s ease 0.4s both;
+}
+.hero-stat { text-align: center; }
+.hero-stat .num { font-size: 28px; font-weight: 900; color: white; }
+.hero-stat .label { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 500; margin-top: 2px; }
+
+/* ═══ SECTIONS ═══ */
+.section {
+  max-width: 1200px; margin: 0 auto;
+  padding: 48px 24px;
+}
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px;
+}
+.section-title {
+  font-size: 24px; font-weight: 800; color: var(--navy);
+  letter-spacing: -0.5px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title .icon { font-size: 22px; }
+.section-link {
+  font-size: 14px; color: var(--orange); font-weight: 600;
+  text-decoration: none; display: flex; align-items: center; gap: 4px;
+  transition: gap 0.2s;
+}
+.section-link:hover { gap: 8px; }
+
+/* ═══ CATEGORIES ═══ */
+.categories {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 0 24px; max-width: 1200px; margin: -20px auto 0;
+  position: relative; z-index: 10;
+  animation: fadeInUp 0.6s ease 0.5s both;
+}
+.cat-pill {
+  padding: 10px 20px; border-radius: 100px;
+  font-size: 14px; font-weight: 700;
+  border: 2px solid var(--gray-200); background: white;
+  color: var(--gray-600); cursor: pointer;
+  transition: all 0.25s; user-select: none;
+}
+.cat-pill:hover { border-color: var(--orange); color: var(--orange); }
+.cat-pill.active {
+  background: var(--navy); color: white;
+  border-color: var(--navy);
+}
+.cat-pill .cat-count {
+  display: inline-block; background: rgba(0,0,0,0.1);
+  padding: 2px 8px; border-radius: 100px; font-size: 11px;
+  margin-left: 6px; font-weight: 600;
+}
+.cat-pill.active .cat-count { background: rgba(255,255,255,0.2); }
+
+/* ═══ INSTRUCTOR CARDS ═══ */
+.instructor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.instructor-card {
+  background: white; border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  padding: 24px; cursor: pointer;
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.instructor-card:hover {
+  border-color: var(--orange);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+.card-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+.card-avatar {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800; color: white; flex-shrink: 0;
+}
+.card-info { flex: 1; min-width: 0; }
+.card-name {
+  font-size: 17px; font-weight: 800; color: var(--navy);
+  margin-bottom: 2px; letter-spacing: -0.3px;
+}
+.card-category {
+  font-size: 12px; font-weight: 600; color: var(--gray-400);
+  display: flex; align-items: center; gap: 6px;
+}
+.card-platform {
+  font-size: 11px; background: var(--gray-100); color: var(--gray-500);
+  padding: 2px 8px; border-radius: 4px; font-weight: 600;
+}
+.card-rating-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
+}
+.card-score {
+  font-size: 32px; font-weight: 900; color: var(--navy);
+  line-height: 1;
+}
+.card-stars { display: flex; gap: 2px; font-size: 16px; }
+.star { color: var(--gray-200); }
+.star.filled { color: var(--gold); }
+.star.half { color: var(--gold); }
+.card-review-count { font-size: 13px; color: var(--gray-400); font-weight: 500; }
+.card-hype {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  margin-bottom: 14px; font-size: 13px; font-weight: 700;
+}
+.card-hype.low { background: var(--green-light); color: #059669; }
+.card-hype.mid { background: var(--gold-light); color: #D97706; }
+.card-hype.high { background: var(--red-light); color: var(--red); }
+.hype-bar {
+  flex: 1; height: 6px; background: var(--gray-200);
+  border-radius: 3px; overflow: hidden;
+}
+.hype-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+.hype-bar-fill.low { background: var(--green); }
+.hype-bar-fill.mid { background: var(--gold); }
+.hype-bar-fill.high { background: var(--red); }
+.card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.card-tag {
+  font-size: 12px; padding: 4px 10px; border-radius: 6px;
+  background: var(--gray-100); color: var(--gray-600);
+  font-weight: 600;
+}
+
+/* ═══ 강의팔이 감별기 ═══ */
+.detector-section { background: var(--navy-dark); border-radius: var(--radius-xl); padding: 40px; margin: 20px 0; }
+.detector-section .section-title { color: white; }
+.detector-section .section-link { color: var(--orange); }
+.detector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.detector-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-md); padding: 20px;
+  transition: all 0.3s;
+}
+.detector-card:hover { background: rgba(255,255,255,0.1); border-color: var(--orange); }
+.detector-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.detector-course { font-size: 15px; font-weight: 700; color: white; flex: 1; }
+.detector-verdict {
+  font-size: 11px; font-weight: 800; padding: 4px 10px;
+  border-radius: 6px; text-transform: uppercase;
+}
+.verdict-sus { background: rgba(239,68,68,0.2); color: #FCA5A5; }
+.verdict-ok { background: rgba(16,185,129,0.2); color: #6EE7B7; }
+.verdict-pending { background: rgba(245,158,11,0.2); color: #FCD34D; }
+.detector-instructor { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
+.detector-reason {
+  font-size: 13px; color: rgba(255,255,255,0.7);
+  padding: 10px; background: rgba(0,0,0,0.2);
+  border-radius: 8px; margin-bottom: 14px; line-height: 1.5;
+}
+.detector-votes { display: flex; gap: 12px; }
+.vote-btn {
+  flex: 1; padding: 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; font-family: inherit;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.8); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.vote-btn:hover { background: rgba(255,255,255,0.12); }
+.vote-btn.voted-yes { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); color: #FCA5A5; }
+.vote-btn.voted-no { background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.4); color: #6EE7B7; }
+
+/* ═══ RANKINGS ═══ */
+.ranking-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.ranking-tab {
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;
+  background: var(--gray-100); color: var(--gray-500); border: none;
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.ranking-tab.active { background: var(--navy); color: white; }
+.ranking-tab:hover:not(.active) { background: var(--gray-200); }
+.ranking-list { display: flex; flex-direction: column; gap: 8px; }
+.ranking-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px; background: white;
+  border-radius: var(--radius-md); border: 1px solid var(--gray-200);
+  transition: all 0.2s; cursor: pointer;
+}
+.ranking-item:hover { border-color: var(--orange); box-shadow: var(--shadow-sm); }
+.rank-num {
+  font-size: 18px; font-weight: 900; color: var(--gray-300);
+  width: 32px; text-align: center; flex-shrink: 0;
+}
+.ranking-item:nth-child(1) .rank-num { color: var(--gold); font-size: 22px; }
+.ranking-item:nth-child(2) .rank-num { color: var(--gray-400); font-size: 20px; }
+.ranking-item:nth-child(3) .rank-num { color: #CD7F32; font-size: 20px; }
+
+/* ═══ WORST INSTRUCTORS ═══ */
+.worst-section {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: var(--radius-xl); padding: 40px; margin: 20px 0;
+  position: relative; overflow: hidden;
+}
+.worst-section::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(239,68,68,0.03) 20px, rgba(239,68,68,0.03) 40px);
+}
+.worst-section .section-header { position: relative; z-index: 1; }
+.worst-section .section-title { color: #FCA5A5; }
+.worst-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; position: relative; z-index: 1; }
+.worst-tab {
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.worst-tab.active { background: rgba(239,68,68,0.2); color: #FCA5A5; border-color: rgba(239,68,68,0.3); }
+.worst-tab:hover:not(.active) { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+.worst-list { display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
+.worst-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md); transition: all 0.25s; cursor: pointer;
+}
+.worst-item:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+.worst-rank {
+  font-size: 18px; font-weight: 900; width: 32px; text-align: center; flex-shrink: 0;
+}
+.worst-item:nth-child(1) .worst-rank { color: var(--red); font-size: 22px; }
+.worst-item:nth-child(2) .worst-rank { color: #FB923C; font-size: 20px; }
+.worst-item:nth-child(3) .worst-rank { color: #FBBF24; font-size: 20px; }
+.worst-item:nth-child(n+4) .worst-rank { color: rgba(255,255,255,0.3); }
+.worst-avatar {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: white; flex-shrink: 0;
+  opacity: 0.8;
+}
+.worst-info { flex: 1; }
+.worst-name { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.9); }
+.worst-meta { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; }
+.worst-score-area { text-align: right; }
+.worst-score {
+  font-size: 20px; font-weight: 900; color: var(--red);
+  display: flex; align-items: center; gap: 6px;
+}
+.worst-hype {
+  font-size: 11px; font-weight: 700; color: #FCA5A5;
+  background: rgba(239,68,68,0.15); padding: 2px 8px;
+  border-radius: 4px; margin-top: 4px; display: inline-block;
+}
+.worst-warning {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.15); border-radius: 8px;
+  margin-top: 16px; position: relative; z-index: 1;
+}
+.worst-warning-text { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+.rank-avatar {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: white; flex-shrink: 0;
+}
+.rank-info { flex: 1; }
+.rank-name { font-size: 15px; font-weight: 700; color: var(--navy); }
+.rank-meta { font-size: 12px; color: var(--gray-400); font-weight: 500; }
+.rank-score {
+  font-size: 20px; font-weight: 900; color: var(--navy);
+  display: flex; align-items: center; gap: 6px;
+}
+.rank-score .rank-stars { font-size: 14px; color: var(--gold); }
+.rank-change { font-size: 12px; font-weight: 700; }
+.rank-change.up { color: var(--green); }
+.rank-change.down { color: var(--red); }
+.rank-change.same { color: var(--gray-400); }
+
+/* ═══ MODAL ═══ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(17,29,53,0.6);
+  backdrop-filter: blur(8px);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 40px 24px; overflow-y: auto;
+  opacity: 0; transition: opacity 0.3s;
+}
+.modal-overlay.open { display: flex; opacity: 1; }
+.modal {
+  background: white; border-radius: var(--radius-xl);
+  max-width: 720px; width: 100%;
+  box-shadow: var(--shadow-xl);
+  animation: modalIn 0.4s ease;
+  margin: 20px 0;
+}
+@keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } }
+.modal-header {
+  padding: 28px 32px 20px;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.modal-close {
+  width: 36px; height: 36px; border-radius: 10px;
+  border: 1px solid var(--gray-200); background: white;
+  font-size: 18px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gray-400);
+}
+.modal-close:hover { background: var(--gray-100); color: var(--navy); }
+.modal-instructor { display: flex; gap: 16px; align-items: center; }
+.modal-avatar {
+  width: 64px; height: 64px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 800; color: white;
+}
+.modal-name { font-size: 22px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; }
+.modal-sub { font-size: 13px; color: var(--gray-400); font-weight: 500; margin-top: 4px; }
+.modal-body { padding: 28px 32px; }
+.modal-score-big {
+  text-align: center; padding: 24px;
+  background: var(--gray-50); border-radius: var(--radius-md);
+  margin-bottom: 24px;
+}
+.modal-score-num { font-size: 56px; font-weight: 900; color: var(--navy); line-height: 1; }
+.modal-score-stars { font-size: 24px; margin: 8px 0 4px; }
+.modal-score-count { font-size: 13px; color: var(--gray-400); }
+.rating-breakdown { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.rating-row { display: flex; align-items: center; gap: 12px; }
+.rating-label { font-size: 13px; font-weight: 600; color: var(--gray-600); width: 100px; flex-shrink: 0; }
+.rating-bar-bg {
+  flex: 1; height: 8px; background: var(--gray-200);
+  border-radius: 4px; overflow: hidden;
+}
+.rating-bar-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--orange), #FF8F65);
+  transition: width 0.8s ease;
+}
+.rating-value { font-size: 14px; font-weight: 800; color: var(--navy); width: 32px; text-align: right; }
+.modal-divider { height: 1px; background: var(--gray-200); margin: 24px 0; }
+.reviews-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.reviews-title { font-size: 17px; font-weight: 800; color: var(--navy); }
+.review-filter {
+  font-size: 13px; padding: 6px 14px; border-radius: 8px;
+  border: 1px solid var(--gray-200); background: white;
+  color: var(--gray-600); font-weight: 600; cursor: pointer;
+  font-family: inherit;
+}
+.review-list { display: flex; flex-direction: column; gap: 16px; }
+.review-item {
+  padding: 18px; background: var(--gray-50);
+  border-radius: var(--radius-md); border: 1px solid var(--gray-100);
+  transition: all 0.2s;
+}
+.review-item.review-verified {
+  background: var(--blue-light); border-color: rgba(59,130,246,0.2);
+  border-left: 3px solid var(--blue);
+}
+.review-item.review-expert {
+  background: var(--gold-light); border-color: rgba(245,158,11,0.2);
+  border-left: 3px solid var(--gold);
+}
+.review-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.review-author { display: flex; align-items: center; gap: 8px; }
+.review-author-name { font-size: 14px; font-weight: 700; color: var(--navy); }
+.badge {
+  font-size: 11px; padding: 3px 8px; border-radius: 4px;
+  font-weight: 700; display: inline-flex; align-items: center; gap: 3px;
+}
+.badge-unverified { background: var(--gray-200); color: var(--gray-500); }
+.badge-verified {
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE); color: var(--blue);
+  border: 1px solid rgba(59,130,246,0.2); box-shadow: 0 1px 3px rgba(59,130,246,0.1);
+}
+.badge-expert {
+  background: linear-gradient(135deg, #FFFBEB, #FEF3C7); color: #B45309;
+  border: 1px solid rgba(245,158,11,0.3); box-shadow: 0 1px 3px rgba(245,158,11,0.15);
+}
+.review-date { font-size: 12px; color: var(--gray-400); }
+.review-stars { margin-bottom: 8px; font-size: 14px; }
+.review-text { font-size: 14px; color: var(--gray-600); line-height: 1.7; }
+.review-helpful {
+  display: flex; gap: 12px; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--gray-200);
+}
+.helpful-btn {
+  font-size: 12px; color: var(--gray-400); font-weight: 600;
+  background: none; border: 1px solid var(--gray-200);
+  padding: 4px 12px; border-radius: 6px; cursor: pointer;
+  font-family: inherit; transition: all 0.2s;
+}
+.helpful-btn:hover { border-color: var(--navy); color: var(--navy); }
+/* Instructor rebuttal */
+.rebuttal {
+  margin-top: 12px; padding: 14px; background: var(--blue-light);
+  border-radius: 8px; border-left: 3px solid var(--blue);
+}
+.rebuttal-label {
+  font-size: 12px; font-weight: 800; color: var(--blue);
+  margin-bottom: 6px; display: flex; align-items: center; gap: 4px;
+}
+.rebuttal-text { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
+
+/* ═══ REVIEW FORM MODAL ═══ */
+.form-section { margin-bottom: 24px; }
+.form-label {
+  font-size: 14px; font-weight: 700; color: var(--navy);
+  margin-bottom: 10px; display: block;
+}
+.form-sublabel { font-size: 12px; color: var(--gray-400); font-weight: 500; margin-left: 6px; }
+.form-input {
+  width: 100%; padding: 12px 16px; border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+  transition: border-color 0.2s; background: var(--gray-50); color: var(--navy);
+}
+.form-input:focus { outline: none; border-color: var(--orange); background: white; }
+.form-textarea {
+  width: 100%; padding: 14px 16px; border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+  resize: vertical; min-height: 120px; transition: border-color 0.2s;
+  background: var(--gray-50); color: var(--navy); line-height: 1.6;
+}
+.form-textarea:focus { outline: none; border-color: var(--orange); background: white; }
+.form-rating-group { display: flex; flex-direction: column; gap: 14px; }
+.form-rating-item { display: flex; align-items: center; gap: 12px; }
+.form-rating-label { font-size: 13px; font-weight: 600; color: var(--gray-600); width: 110px; }
+.form-stars { display: flex; gap: 4px; }
+.form-star {
+  font-size: 24px; color: var(--gray-200); cursor: pointer;
+  transition: all 0.15s; user-select: none;
+}
+.form-star:hover, .form-star.active { color: var(--gold); transform: scale(1.15); }
+.upload-area {
+  border: 2px dashed var(--gray-300); border-radius: var(--radius-md);
+  padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s;
+  background: var(--gray-50);
+}
+.upload-area:hover { border-color: var(--orange); background: var(--orange-light); }
+.upload-icon { font-size: 32px; margin-bottom: 8px; }
+.upload-text { font-size: 14px; color: var(--gray-500); font-weight: 600; }
+.upload-sub { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+.toggle-row { display: flex; align-items: center; gap: 12px; }
+.toggle {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: var(--gray-300); position: relative;
+  cursor: pointer; transition: background 0.2s;
+}
+.toggle.on { background: var(--orange); }
+.toggle-knob {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; position: absolute;
+  top: 2px; left: 2px; transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on .toggle-knob { left: 22px; }
+.toggle-label { font-size: 14px; color: var(--gray-600); font-weight: 600; }
+.form-submit {
+  width: 100%; padding: 16px; background: var(--orange);
+  color: white; border: none; border-radius: var(--radius-md);
+  font-size: 16px; font-weight: 800; font-family: inherit;
+  cursor: pointer; transition: all 0.2s;
+}
+.form-submit:hover { background: var(--orange-hover); transform: translateY(-1px); }
+
+/* ═══ FOOTER ═══ */
+.footer {
+  background: var(--navy-dark); padding: 48px 24px 32px;
+  margin-top: 40px;
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 32px;
+}
+.footer-brand .footer-logo {
+  font-size: 20px; font-weight: 800; color: white;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+}
+.footer-brand p { font-size: 13px; color: rgba(255,255,255,0.4); max-width: 280px; line-height: 1.6; }
+.footer-links { display: flex; gap: 48px; }
+.footer-col h4 { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.5); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px; }
+.footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 4px 0; transition: color 0.2s; }
+.footer-col a:hover { color: var(--orange); }
+.footer-bottom {
+  max-width: 1200px; margin: 32px auto 0;
+  padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px; color: rgba(255,255,255,0.3);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeInDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.fade-in { opacity: 0; transform: translateY(20px); transition: all 0.5s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  .nav-links a:not(.btn-write-review) { display: none; }
+  .hero { padding: 60px 20px 48px; }
+  .hero h1 { font-size: 28px; }
+  .hero-stats { gap: 24px; }
+  .hero-stat .num { font-size: 22px; }
+  .categories { padding: 0 20px; gap: 8px; }
+  .cat-pill { padding: 8px 14px; font-size: 13px; }
+  .section { padding: 32px 20px; }
+  .instructor-grid { grid-template-columns: 1fr; }
+  .detector-section { padding: 24px; margin: 20px 0; }
+  .detector-grid { grid-template-columns: 1fr; }
+  .modal { margin: 10px; border-radius: var(--radius-lg); }
+  .modal-header, .modal-body { padding: 20px; }
+  .footer-inner { flex-direction: column; }
+  .footer-links { gap: 32px; }
+  .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="logo-icon">평</div>
+      강의평가단
+    </a>
+    <div class="nav-links">
+      <a href="#rankings" class="active">랭킹</a>
+      <a href="#detector">감별기</a>
+      <a href="admin.html" style="font-size:12px;color:var(--gray-400)">관리자</a>
+      <a href="#" onclick="openReviewModal(); return false;" class="btn-write-review">✏️ 리뷰 쓰기</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="dot"></span> 실시간 리뷰 업데이트 중</div>
+    <h1>강의팔이에 속지 마세요.<br><em>진짜 수강생</em>의 솔직 리뷰</h1>
+    <p>수강 인증된 리뷰로 강사와 강의를 비교하고, 현명한 수강 결정을 내리세요.</p>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="강사명 또는 강의명을 검색하세요" oninput="filterInstructors()">
+      <button class="search-btn" onclick="filterInstructors()">→</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">2,847</div><div class="label">등록된 리뷰</div></div>
+      <div class="hero-stat"><div class="num">438</div><div class="label">등록된 강사</div></div>
+      <div class="hero-stat"><div class="num">1,203</div><div class="label">인증된 수강생</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CATEGORIES ═══ -->
+<div class="categories" id="categories">
+  <div class="cat-pill active" onclick="selectCategory(this, '전체')">전체 <span class="cat-count">438</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, '개발')">💻 개발 <span class="cat-count">156</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, '디자인')">🎨 디자인 <span class="cat-count">89</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, '마케팅')">📢 마케팅 <span class="cat-count">72</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, '재테크')">💰 재테크 <span class="cat-count">64</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, '자기계발')">📚 자기계발 <span class="cat-count">57</span></div>
+</div>
+
+<!-- ═══ TRENDING INSTRUCTORS ═══ -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title"><span class="icon">🔥</span> 지금 뜨는 강사</h2>
+    <a href="#" class="section-link">전체 보기 →</a>
+  </div>
+  <div class="instructor-grid" id="instructorGrid"></div>
+</section>
+
+<!-- ═══ 분야별 최악의 강사 ═══ -->
+<section class="section" id="worst">
+  <div class="worst-section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="icon">💀</span> 분야별 최악의 강사</h2>
+    </div>
+    <div class="worst-tabs" id="worstTabs"></div>
+    <div class="worst-list" id="worstList"></div>
+    <div class="worst-warning">
+      <span style="font-size:16px">⚠️</span>
+      <span class="worst-warning-text">수강생 리뷰 기반 순위입니다. 강사 본인은 이의제기를 통해 소명할 수 있습니다. 인증 리뷰 비율이 높을수록 신뢰도가 높습니다.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 강의팔이 감별기 ═══ -->
+<section class="section" id="detector">
+  <div class="detector-section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="icon">🚨</span> 강의팔이 감별기</h2>
+      <a href="#" class="section-link">제보하기 →</a>
+    </div>
+    <div class="detector-grid" id="detectorGrid"></div>
+  </div>
+</section>
+
+<!-- ═══ RANKINGS ═══ -->
+<section class="section" id="rankings">
+  <div class="section-header">
+    <h2 class="section-title"><span class="icon">🏆</span> 분야별 TOP 강사</h2>
+  </div>
+  <div class="ranking-tabs" id="rankingTabs"></div>
+  <div class="ranking-list" id="rankingList"></div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">📋 강의평가단</div>
+      <p>수강생이 만드는 투명한 강의 생태계. 인증된 리뷰로 더 나은 학습 선택을 도와드립니다.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>서비스</h4>
+        <a href="#">강사 검색</a>
+        <a href="#">분야별 랭킹</a>
+        <a href="#">강의팔이 감별기</a>
+        <a href="#">리뷰 작성</a>
+      </div>
+      <div class="footer-col">
+        <h4>안내</h4>
+        <a href="#">이용약관</a>
+        <a href="#">개인정보처리방침</a>
+        <a href="#">리뷰 가이드라인</a>
+        <a href="#">강사 이의제기</a>
+      </div>
+      <div class="footer-col">
+        <h4>소통</h4>
+        <a href="#">공지사항</a>
+        <a href="#">문의하기</a>
+        <a href="#">제휴 문의</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 강의평가단. All rights reserved.</span>
+    <span>통신판매업 신고번호: 제2026-서울강남-XXXXX호</span>
+  </div>
+</footer>
+
+<!-- ═══ INSTRUCTOR DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="detailModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-instructor">
+        <div class="modal-avatar" id="modalAvatar"></div>
+        <div>
+          <div class="modal-name" id="modalName"></div>
+          <div class="modal-sub" id="modalSub"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ═══ REVIEW FORM MODAL ═══ -->
+<div class="modal-overlay" id="reviewModal" onclick="if(event.target===this)closeReviewModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-name">리뷰 작성하기</div>
+        <div class="modal-sub">솔직한 수강 후기를 남겨주세요</div>
+      </div>
+      <button class="modal-close" onclick="closeReviewModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <label class="form-label">강사 / 강의명 <span class="form-sublabel">필수</span></label>
+        <input class="form-input" placeholder="예: 김코딩 — 실전 React 마스터클래스" id="reviewTarget">
+      </div>
+      <div class="form-section">
+        <label class="form-label">평가 항목 <span class="form-sublabel">각 항목을 클릭하세요</span></label>
+        <div class="form-rating-group" id="formRatings"></div>
+      </div>
+      <div class="form-section">
+        <label class="form-label">수강 후기 <span class="form-sublabel">최소 30자</span></label>
+        <textarea class="form-textarea" placeholder="강의에 대한 솔직한 의견을 남겨주세요. 구체적인 내용일수록 다른 수강생에게 도움이 됩니다." id="reviewText"></textarea>
+      </div>
+      <div class="form-section">
+        <label class="form-label">수강 인증 <span class="form-sublabel">선택 (인증 시 뱃지 부여)</span></label>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📎</div>
+          <div class="upload-text">결제 영수증 또는 수료증을 업로드하세요</div>
+          <div class="upload-sub">JPG, PNG, PDF (최대 10MB) · 개인정보는 자동 마스킹됩니다</div>
+        </div>
+        <input type="file" id="fileInput" style="display:none" accept=".jpg,.jpeg,.png,.pdf">
+      </div>
+      <div class="form-section">
+        <div class="toggle-row">
+          <div class="toggle" id="anonToggle" onclick="toggleAnon()"><div class="toggle-knob"></div></div>
+          <span class="toggle-label">익명으로 작성하기</span>
+        </div>
+      </div>
+      <button class="form-submit" onclick="submitReview()">리뷰 등록하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ DATA ═══
+const instructors = [
+  { id: 1, name: '김코딩', category: '개발', platform: '인프런', avatar: '#3B82F6',
+    score: 4.7, reviews: 342, hype: 15, hypeLv: 'low',
+    tags: ['React', '실무 중심', '친절한 답변'],
+    ratings: { quality: 4.8, value: 4.5, expertise: 4.9, hype: 1.5, growth: 4.6, support: 4.7 },
+    reviewList: [
+      { author: '개발자지망생', badge: 'expert', date: '2026.05.15', stars: 5,
+        text: '실무에서 바로 쓸 수 있는 내용이 많아서 정말 만족합니다. 특히 에러 핸들링 파트가 다른 강의에서 다루지 않는 심화 내용이라 좋았어요. 질문에 대한 답변도 빠르고 친절합니다.',
+        helpful: 47, rebuttal: null },
+      { author: '주니어개발자', badge: 'verified', date: '2026.05.10', stars: 4,
+        text: '전반적으로 좋은 강의입니다. 다만 후반부로 갈수록 난이도가 급상승해서 초보자에게는 조금 어려울 수 있어요.',
+        helpful: 23, rebuttal: '안녕하세요, 김코딩입니다. 소중한 피드백 감사합니다. 후반부 난이도 관련 보충 자료를 현재 준비 중입니다. 6월 중 업데이트 예정이니 조금만 기다려주세요!' }
+    ]
+  },
+  { id: 2, name: '박마케터', category: '마케팅', platform: '클래스101', avatar: '#8B5CF6',
+    score: 4.3, reviews: 189, hype: 62, hypeLv: 'mid',
+    tags: ['퍼포먼스 마케팅', '구글 애즈', '사례 풍부'],
+    ratings: { quality: 4.2, value: 3.8, expertise: 4.5, hype: 3.8, growth: 4.0, support: 4.1 },
+    reviewList: [
+      { author: '마케터3년차', badge: 'verified', date: '2026.05.12', stars: 4,
+        text: '실제 운영 사례가 많아서 좋았어요. 다만 썸네일에서 말한 "매출 10배" 는 좀 과장된 느낌...',
+        helpful: 31, rebuttal: null },
+      { author: '스타트업대표', badge: 'unverified', date: '2026.04.28', stars: 5,
+        text: '구글 애즈 기초부터 최적화까지 체계적으로 배울 수 있었습니다. 실제로 ROAS 개선에 도움이 많이 됐어요.',
+        helpful: 18, rebuttal: null }
+    ]
+  },
+  { id: 3, name: '이디자이너', category: '디자인', platform: '패스트캠퍼스', avatar: '#EC4899',
+    score: 4.8, reviews: 276, hype: 8, hypeLv: 'low',
+    tags: ['Figma', 'UI/UX', '포트폴리오'],
+    ratings: { quality: 4.9, value: 4.7, expertise: 4.8, hype: 0.8, growth: 4.9, support: 4.8 },
+    reviewList: [
+      { author: '디자인전공생', badge: 'expert', date: '2026.05.18', stars: 5,
+        text: '수강 후 포트폴리오 퀄리티가 확 올라갔어요. 실무 프로세스를 그대로 보여줘서 회사에서 바로 적용 가능합니다. 강추!',
+        helpful: 56, rebuttal: null }
+    ]
+  },
+  { id: 4, name: '최재테크', category: '재테크', platform: '유데미', avatar: '#F59E0B',
+    score: 2.1, reviews: 467, hype: 89, hypeLv: 'high',
+    tags: ['주식', '부동산', '논란 있음'],
+    ratings: { quality: 2.0, value: 1.5, expertise: 2.3, hype: 4.8, growth: 1.8, support: 1.2 },
+    reviewList: [
+      { author: '호구탈출', badge: 'verified', date: '2026.05.19', stars: 1,
+        text: '"3개월 만에 1억" 광고 보고 들었는데, 내용은 유튜브 무료 영상 수준입니다. 환불 요청했는데 연락도 안 됨. 전형적인 강의팔이.',
+        helpful: 203, rebuttal: null },
+      { author: '피해자모임', badge: 'expert', date: '2026.05.17', stars: 1,
+        text: '수강생 단톡방에서 추가 유료 코칭 압박이 심합니다. 강의 내용은 빈약하고, 계속 상위 과정을 결제하라고 유도해요.',
+        helpful: 178, rebuttal: '사실과 다른 내용이 포함되어 있어 법적 대응을 검토 중입니다.' }
+    ]
+  },
+  { id: 5, name: '정파이썬', category: '개발', platform: '인프런', avatar: '#10B981',
+    score: 4.5, reviews: 523, hype: 20, hypeLv: 'low',
+    tags: ['Python', '데이터분석', '입문자 추천'],
+    ratings: { quality: 4.6, value: 4.7, expertise: 4.4, hype: 2.0, growth: 4.3, support: 4.5 },
+    reviewList: [
+      { author: '문과출신개발자', badge: 'verified', date: '2026.05.14', stars: 5,
+        text: '비전공자도 이해할 수 있게 정말 쉽게 설명해주세요. 파이썬 기초부터 판다스까지 한 강의로 끝낼 수 있었습니다.',
+        helpful: 89, rebuttal: null }
+    ]
+  },
+  { id: 6, name: '한성장', category: '자기계발', platform: '클래스101', avatar: '#6366F1',
+    score: 3.2, reviews: 134, hype: 71, hypeLv: 'high',
+    tags: ['습관', '시간관리', '과대광고 주의'],
+    ratings: { quality: 3.0, value: 2.5, expertise: 3.5, hype: 4.2, growth: 3.0, support: 2.8 },
+    reviewList: [
+      { author: '직장인A', badge: 'unverified', date: '2026.05.11', stars: 2,
+        text: '"인생이 바뀐다"는 광고에 비해 내용은 자기계발서 요약 수준. 이미 책 많이 읽은 사람이라면 새로운 건 거의 없습니다.',
+        helpful: 42, rebuttal: null }
+    ]
+  },
+  { id: 7, name: '오UI', category: '디자인', platform: '패스트캠퍼스', avatar: '#F43F5E',
+    score: 4.6, reviews: 198, hype: 12, hypeLv: 'low',
+    tags: ['웹디자인', 'Framer', '트렌드 분석'],
+    ratings: { quality: 4.7, value: 4.4, expertise: 4.6, hype: 1.2, growth: 4.7, support: 4.5 },
+    reviewList: [
+      { author: '프리랜서디자이너', badge: 'expert', date: '2026.05.16', stars: 5,
+        text: 'Framer 실무 강의 중 최고입니다. 실제 클라이언트 프로젝트를 함께 진행하는 형식이라 실전 감각을 기를 수 있어요.',
+        helpful: 34, rebuttal: null }
+    ]
+  },
+  { id: 8, name: '노자동화', category: '마케팅', platform: '유데미', avatar: '#0EA5E9',
+    score: 4.1, reviews: 87, hype: 35, hypeLv: 'mid',
+    tags: ['자동화', 'Make', '노코드'],
+    ratings: { quality: 4.2, value: 4.0, expertise: 4.3, hype: 2.8, growth: 3.9, support: 3.8 },
+    reviewList: [
+      { author: '1인사업자', badge: 'verified', date: '2026.05.09', stars: 4,
+        text: 'Make(구 Integromat) 활용법을 잘 알려줍니다. 다만 후반 고급 시나리오는 좀 더 자세한 설명이 필요해요.',
+        helpful: 15, rebuttal: null }
+    ]
+  },
+  { id: 9, name: '강부동산', category: '재테크', platform: '클래스101', avatar: '#D946EF',
+    score: 3.8, reviews: 312, hype: 45, hypeLv: 'mid',
+    tags: ['부동산', '갭투자', '실전 사례'],
+    ratings: { quality: 3.9, value: 3.5, expertise: 4.2, hype: 3.2, growth: 3.6, support: 3.4 },
+    reviewList: [
+      { author: '부린이', badge: 'verified', date: '2026.05.13', stars: 4,
+        text: '부동산 기초 지식을 쌓기에 좋았어요. 다만 강의에서 추천하는 매물 정보는 이미 시세가 많이 올라서 현실성이 떨어져요.',
+        helpful: 28, rebuttal: null }
+    ]
+  },
+  { id: 10, name: '윤AI', category: '개발', platform: '인프런', avatar: '#14B8A6',
+    score: 4.9, reviews: 156, hype: 5, hypeLv: 'low',
+    tags: ['AI/ML', 'LLM', '최신 트렌드'],
+    ratings: { quality: 4.9, value: 4.8, expertise: 5.0, hype: 0.5, growth: 4.9, support: 4.8 },
+    reviewList: [
+      { author: 'ML엔지니어', badge: 'expert', date: '2026.05.20', stars: 5,
+        text: 'LLM 파인튜닝부터 프로덕션 배포까지 이 정도 퀄리티의 한국어 강의는 처음입니다. 현업 시니어의 노하우가 그대로 담겨있어요.',
+        helpful: 67, rebuttal: null }
+    ]
+  }
+];
+
+// ═══ WORST INSTRUCTORS DATA (additional low-rated ones per category) ═══
+const worstInstructors = [
+  ...instructors.filter(i => i.score < 3.5),
+  { id: 11, name: '속성코딩', category: '개발', platform: '클래스101', avatar: '#94A3B8',
+    score: 1.8, reviews: 289, hype: 93, hypeLv: 'high',
+    tags: ['1주일 완성', '기초만', '환불 불가'],
+    ratings: { quality: 1.5, value: 1.3, expertise: 2.0, hype: 4.8, growth: 1.2, support: 1.0 },
+    reviewList: [
+      { author: '시간낭비', badge: 'verified', date: '2026.05.18', stars: 1,
+        text: '"1주일 앱 개발 마스터"라고 해서 들었는데 Hello World 찍고 끝났습니다. 나머지는 전부 "심화과정 별도 구매" 유도. 완전 낚시.',
+        helpful: 156, rebuttal: null },
+      { author: '초보개발자', badge: 'verified', date: '2026.05.10', stars: 2,
+        text: '기초 문법 설명은 괜찮은데, 광고에서 말한 앱 완성은 절대 불가능합니다. 과대광고가 심해요.',
+        helpful: 89, rebuttal: '강의 리뉴얼 예정입니다. 불편을 드려 죄송합니다.' }
+    ]
+  },
+  { id: 12, name: '돈벼락', category: '재테크', platform: '유데미', avatar: '#78716C',
+    score: 1.4, reviews: 512, hype: 96, hypeLv: 'high',
+    tags: ['코인', '선물거래', '피해 다수'],
+    ratings: { quality: 1.2, value: 1.0, expertise: 1.5, hype: 4.9, growth: 1.0, support: 0.8 },
+    reviewList: [
+      { author: '피해자1호', badge: 'expert', date: '2026.05.19', stars: 1,
+        text: '강의 내용은 30분짜리 유튜브 수준인데 가격은 50만원. 수강 후 "VIP 리딩방" 가입을 강요합니다. 리딩방 비용 월 100만원. 전형적인 사기 구조.',
+        helpful: 312, rebuttal: null },
+      { author: '코인피해자모임', badge: 'verified', date: '2026.05.16', stars: 1,
+        text: '리딩방에서 시킨대로 했다가 2000만원 잃었습니다. 현재 집단 소송 준비 중입니다.',
+        helpful: 289, rebuttal: '투자는 개인의 판단이며, 손실에 대한 책임은 본인에게 있습니다.' }
+    ]
+  },
+  { id: 13, name: '꿀디자인', category: '디자인', platform: '클래스101', avatar: '#A1A1AA',
+    score: 2.5, reviews: 98, hype: 68, hypeLv: 'high',
+    tags: ['포토샵', '짜깁기', '유튜브 수준'],
+    ratings: { quality: 2.3, value: 2.0, expertise: 2.8, hype: 4.0, growth: 2.2, support: 2.5 },
+    reviewList: [
+      { author: '디자인학도', badge: 'verified', date: '2026.05.14', stars: 2,
+        text: '유튜브 무료 영상 짜깁기한 느낌. 새로운 내용이 거의 없고, 포토샵 기초 툴 설명만 반복합니다.',
+        helpful: 45, rebuttal: null }
+    ]
+  },
+  { id: 14, name: '매출폭발러', category: '마케팅', platform: '유데미', avatar: '#71717A',
+    score: 1.9, reviews: 234, hype: 91, hypeLv: 'high',
+    tags: ['SNS 마케팅', '과장광고', '내용 부실'],
+    ratings: { quality: 1.8, value: 1.5, expertise: 2.0, hype: 4.7, growth: 1.6, support: 1.3 },
+    reviewList: [
+      { author: '소상공인', badge: 'verified', date: '2026.05.17', stars: 1,
+        text: '"매출 10배 보장"이라고 해서 들었는데, 인스타 릴스 만드는 법이 전부. 이건 네이버 블로그에도 있는 정보입니다. 환불도 거부당함.',
+        helpful: 167, rebuttal: null },
+      { author: '마케팅실무자', badge: 'expert', date: '2026.05.11', stars: 2,
+        text: '현업 3년차인데, 이 강의에서 새로 배운 건 0입니다. 초보자에게도 비추. 틀린 정보가 꽤 있어요.',
+        helpful: 134, rebuttal: null }
+    ]
+  },
+  { id: 15, name: '인생역전코치', category: '자기계발', platform: '유데미', avatar: '#9CA3AF',
+    score: 2.0, reviews: 178, hype: 85, hypeLv: 'high',
+    tags: ['마인드셋', '세미나 유도', '추가결제'],
+    ratings: { quality: 2.0, value: 1.5, expertise: 2.2, hype: 4.5, growth: 1.8, support: 1.5 },
+    reviewList: [
+      { author: '자기계발중독탈출', badge: 'verified', date: '2026.05.15', stars: 1,
+        text: '강의 자체는 동기부여 영상 모음. 핵심은 30만원짜리 오프라인 세미나 유도. 세미나 가면 또 200만원짜리 코칭 프로그램 권유. 다단계 구조.',
+        helpful: 198, rebuttal: null }
+    ]
+  },
+  { id: 16, name: '카피의신', category: '마케팅', platform: '클래스101', avatar: '#6B7280',
+    score: 2.8, reviews: 67, hype: 55, hypeLv: 'mid',
+    tags: ['카피라이팅', '얕은 내용', '비쌈'],
+    ratings: { quality: 2.8, value: 2.2, expertise: 3.0, hype: 3.5, growth: 2.5, support: 2.8 },
+    reviewList: [
+      { author: '카피라이터지망', badge: 'unverified', date: '2026.05.08', stars: 3,
+        text: '나쁘진 않은데 가격 대비 내용이 얕아요. 책 한 권 읽는 게 더 나을 수도.',
+        helpful: 22, rebuttal: null }
+    ]
+  },
+  { id: 17, name: '노코드왕', category: '개발', platform: '패스트캠퍼스', avatar: '#A3A3A3',
+    score: 2.3, reviews: 145, hype: 75, hypeLv: 'high',
+    tags: ['노코드', '버블', '미완성 강의'],
+    ratings: { quality: 2.0, value: 2.0, expertise: 2.5, hype: 4.2, growth: 2.0, support: 1.8 },
+    reviewList: [
+      { author: '노코드입문자', badge: 'verified', date: '2026.05.12', stars: 2,
+        text: '강의 중반부터 "준비 중" 표시로 비어있습니다. 완성도 안 된 강의를 파는 게 말이 되나요? 6개월째 업데이트 없음.',
+        helpful: 98, rebuttal: '업데이트 일정을 조율 중입니다. 양해 부탁드립니다.' }
+    ]
+  },
+  { id: 18, name: '주식천재', category: '재테크', platform: '클래스101', avatar: '#B91C1C',
+    score: 1.6, reviews: 398, hype: 94, hypeLv: 'high',
+    tags: ['단타', '리딩방 유도', '신고 다수'],
+    ratings: { quality: 1.5, value: 1.0, expertise: 1.8, hype: 4.9, growth: 1.0, support: 0.9 },
+    reviewList: [
+      { author: '주식초보탈출', badge: 'expert', date: '2026.05.20', stars: 1,
+        text: '강의는 미끼. 본 목적은 월 50만원 리딩방 모집. 리딩 성적은 처참. 금감원 신고 접수했습니다.',
+        helpful: 267, rebuttal: null },
+      { author: '2천만원손실', badge: 'verified', date: '2026.05.18', stars: 1,
+        text: '리딩방 3개월 따라했다가 원금의 60% 날렸습니다. 절대 듣지 마세요.',
+        helpful: 245, rebuttal: null }
+    ]
+  },
+  { id: 19, name: '디자인떡상', category: '디자인', platform: '유데미', avatar: '#92400E',
+    score: 2.2, reviews: 112, hype: 72, hypeLv: 'high',
+    tags: ['일러스트', '템플릿만', '실습 없음'],
+    ratings: { quality: 2.0, value: 1.8, expertise: 2.5, hype: 4.0, growth: 1.8, support: 2.0 },
+    reviewList: [
+      { author: '일러스트지망생', badge: 'verified', date: '2026.05.13', stars: 2,
+        text: '실습이라고 해놓고 템플릿 위에 글자만 바꾸는 수준. 디자인 실력 향상은 전혀 안 됩니다.',
+        helpful: 56, rebuttal: null }
+    ]
+  },
+];
+
+const detectorItems = [
+  { course: '"3개월 만에 월 1000만원 자동 수익 시스템"', instructor: '최재테크 · 유데미',
+    verdict: 'sus', verdictText: '의심',
+    reason: '수강생 제보 다수. 광고 대비 실제 내용 괴리가 크고, 상위 과정 결제 유도 패턴 확인됨.',
+    yes: 342, no: 28 },
+  { course: '"아무것도 몰라도 OK! 1주일 앱 개발 마스터"', instructor: '속성코딩 · 클래스101',
+    verdict: 'sus', verdictText: '의심',
+    reason: '1주일 만에 앱 개발이 가능하다는 광고. 실제 수강생 리뷰: "Hello World 수준에서 끝남"',
+    yes: 187, no: 45 },
+  { course: '"디자인 감각 없어도 월 500 프리랜서 가능"', instructor: '한성장 · 클래스101',
+    verdict: 'pending', verdictText: '검증 중',
+    reason: '과장 광고 의심 제보 접수. 현재 수강생 의견 수집 중.',
+    yes: 89, no: 67 },
+  { course: '"실전 React 마스터클래스"', instructor: '김코딩 · 인프런',
+    verdict: 'ok', verdictText: '적정',
+    reason: '광고 내용과 실제 강의 내용 일치. 인증된 수강생 리뷰 92% 긍정 평가.',
+    yes: 12, no: 298 }
+];
+
+const ratingLabels = {
+  quality: '강의 퀄리티', value: '가성비', expertise: '전문성',
+  hype: '과대광고', growth: '실력 향상', support: 'AS/답변'
+};
+
+let currentCategory = '전체';
+
+// ═══ RENDER FUNCTIONS ═══
+
+function generateStars(score, size = 16) {
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    if (i <= Math.floor(score)) html += `<span class="star filled" style="font-size:${size}px">★</span>`;
+    else if (i - 0.5 <= score) html += `<span class="star filled" style="font-size:${size}px">★</span>`;
+    else html += `<span class="star" style="font-size:${size}px">★</span>`;
+  }
+  return html;
+}
+
+function renderInstructors(filter = '전체', search = '') {
+  const grid = document.getElementById('instructorGrid');
+  let filtered = instructors;
+  if (filter !== '전체') filtered = filtered.filter(i => i.category === filter);
+  if (search) {
+    const s = search.toLowerCase();
+    filtered = filtered.filter(i =>
+      i.name.toLowerCase().includes(s) ||
+      i.tags.some(t => t.toLowerCase().includes(s)) ||
+      i.category.toLowerCase().includes(s)
+    );
+  }
+
+  grid.innerHTML = filtered.map(inst => `
+    <div class="instructor-card" onclick="openDetail(${inst.id})">
+      <div class="card-top">
+        <div class="card-avatar" style="background:${inst.avatar}">${inst.name[0]}</div>
+        <div class="card-info">
+          <div class="card-name">${inst.name}</div>
+          <div class="card-category">
+            ${inst.category}
+            <span class="card-platform">${inst.platform}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-rating-row">
+        <div class="card-score">${inst.score}</div>
+        <div>
+          <div class="card-stars">${generateStars(inst.score)}</div>
+          <div class="card-review-count">리뷰 ${inst.reviews}개</div>
+        </div>
+      </div>
+      <div class="card-hype ${inst.hypeLv}">
+        <span>과대광고 지수</span>
+        <div class="hype-bar"><div class="hype-bar-fill ${inst.hypeLv}" style="width:${inst.hype}%"></div></div>
+        <span>${inst.hype}%</span>
+      </div>
+      <div class="card-tags">
+        ${inst.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDetector() {
+  document.getElementById('detectorGrid').innerHTML = detectorItems.map((d, i) => `
+    <div class="detector-card">
+      <div class="detector-top">
+        <div class="detector-course">${d.course}</div>
+        <span class="detector-verdict verdict-${d.verdict}">${d.verdictText}</span>
+      </div>
+      <div class="detector-instructor">${d.instructor}</div>
+      <div class="detector-reason">${d.reason}</div>
+      <div class="detector-votes">
+        <button class="vote-btn" onclick="vote(${i},'yes')" id="voteYes${i}">
+          🚩 강의팔이 같아요 <span>${d.yes}</span>
+        </button>
+        <button class="vote-btn" onclick="vote(${i},'no')" id="voteNo${i}">
+          ✅ 괜찮은 것 같아요 <span>${d.no}</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRankings(category = '전체') {
+  const cats = ['전체', '개발', '디자인', '마케팅', '재테크', '자기계발'];
+  document.getElementById('rankingTabs').innerHTML = cats.map(c =>
+    `<button class="ranking-tab ${c === category ? 'active' : ''}" onclick="renderRankings('${c}')">${c}</button>`
+  ).join('');
+
+  let ranked = [...instructors];
+  if (category !== '전체') ranked = ranked.filter(i => i.category === category);
+  ranked.sort((a, b) => b.score - a.score);
+  ranked = ranked.slice(0, 5);
+
+  const changes = ['up', 'same', 'down', 'up', 'same'];
+  const changeIcons = { up: '▲', down: '▼', same: '—' };
+
+  document.getElementById('rankingList').innerHTML = ranked.map((inst, i) => `
+    <div class="ranking-item" onclick="openDetail(${inst.id})">
+      <div class="rank-num">${i + 1}</div>
+      <div class="rank-avatar" style="background:${inst.avatar}">${inst.name[0]}</div>
+      <div class="rank-info">
+        <div class="rank-name">${inst.name}</div>
+        <div class="rank-meta">${inst.category} · ${inst.platform} · 리뷰 ${inst.reviews}개</div>
+      </div>
+      <div class="rank-score">
+        ${inst.score}
+        <span class="rank-stars">★</span>
+        <span class="rank-change ${changes[i]}">${changeIcons[changes[i]]}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderWorst(category = '전체') {
+  const cats = ['전체', '개발', '디자인', '마케팅', '재테크', '자기계발'];
+  document.getElementById('worstTabs').innerHTML = cats.map(c =>
+    `<button class="worst-tab ${c === category ? 'active' : ''}" onclick="renderWorst('${c}')">${c}</button>`
+  ).join('');
+
+  let all = [...worstInstructors];
+  if (category !== '전체') all = all.filter(i => i.category === category);
+  all.sort((a, b) => a.score - b.score);
+  all = all.slice(0, 5);
+
+  document.getElementById('worstList').innerHTML = all.map((inst, i) => `
+    <div class="worst-item" onclick="openDetail(${inst.id})">
+      <div class="worst-rank">${i + 1}</div>
+      <div class="worst-avatar" style="background:${inst.avatar}">${inst.name[0]}</div>
+      <div class="worst-info">
+        <div class="worst-name">${inst.name}</div>
+        <div class="worst-meta">${inst.category} · ${inst.platform} · 리뷰 ${inst.reviews}개</div>
+      </div>
+      <div class="worst-score-area">
+        <div class="worst-score">
+          ${inst.score}
+          <span style="font-size:14px;color:#FCA5A5">★</span>
+        </div>
+        <div class="worst-hype">과대광고 ${inst.hype}%</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderFormRatings() {
+  const items = ['강의 퀄리티', '가성비', '강사 전문성', '과대광고 지수', '실력 향상도', 'AS/답변 만족도'];
+  document.getElementById('formRatings').innerHTML = items.map((label, idx) => `
+    <div class="form-rating-item">
+      <span class="form-rating-label">${label}</span>
+      <div class="form-stars" id="formStarGroup${idx}">
+        ${[1,2,3,4,5].map(s => `<span class="form-star" onclick="setFormStar(${idx},${s})" data-group="${idx}" data-val="${s}">★</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══ INTERACTIONS ═══
+
+function selectCategory(el, cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderInstructors(cat, document.getElementById('searchInput').value);
+}
+
+function filterInstructors() {
+  renderInstructors(currentCategory, document.getElementById('searchInput').value);
+}
+
+function openDetail(id) {
+  const inst = instructors.find(i => i.id === id) || worstInstructors.find(i => i.id === id);
+  if (!inst) return;
+
+  document.getElementById('modalAvatar').style.background = inst.avatar;
+  document.getElementById('modalAvatar').textContent = inst.name[0];
+  document.getElementById('modalName').textContent = inst.name;
+  document.getElementById('modalSub').textContent = `${inst.category} · ${inst.platform} · 리뷰 ${inst.reviews}개`;
+
+  const badgeHTML = { unverified: '<span class="badge badge-unverified">일반</span>', verified: '<span class="badge badge-verified">✓ 인증 수강생</span>', expert: '<span class="badge badge-expert">⭐ 핵심 리뷰어</span>' };
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-score-big">
+      <div class="modal-score-num">${inst.score}</div>
+      <div class="modal-score-stars">${generateStars(inst.score, 24)}</div>
+      <div class="modal-score-count">전체 ${inst.reviews}개 리뷰 기준</div>
+    </div>
+    <div class="rating-breakdown">
+      ${Object.entries(inst.ratings).map(([key, val]) => `
+        <div class="rating-row">
+          <span class="rating-label">${ratingLabels[key]}</span>
+          <div class="rating-bar-bg">
+            <div class="rating-bar-fill" style="width:${(val/5)*100}%"></div>
+          </div>
+          <span class="rating-value">${val.toFixed(1)}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="modal-divider"></div>
+    <div class="reviews-header">
+      <span class="reviews-title">수강생 리뷰</span>
+      <select class="review-filter">
+        <option>최신순</option><option>도움순</option><option>인증 리뷰만</option>
+      </select>
+    </div>
+    <div class="review-list">
+      ${inst.reviewList.map(r => `
+        <div class="review-item ${r.badge === 'verified' ? 'review-verified' : r.badge === 'expert' ? 'review-expert' : ''}">
+          <div class="review-top">
+            <div class="review-author">
+              <span class="review-author-name">${r.author}</span>
+              ${badgeHTML[r.badge]}
+            </div>
+            <span class="review-date">${r.date}</span>
+          </div>
+          <div class="review-stars">${generateStars(r.stars, 14)}</div>
+          <div class="review-text">${r.text}</div>
+          ${r.rebuttal ? `
+            <div class="rebuttal">
+              <div class="rebuttal-label">💬 강사 답변</div>
+              <div class="rebuttal-text">${r.rebuttal}</div>
+            </div>
+          ` : ''}
+          <div class="review-helpful">
+            <button class="helpful-btn" onclick="event.stopPropagation()">👍 도움이 됐어요 ${r.helpful}</button>
+            <button class="helpful-btn" onclick="event.stopPropagation()">🚩 신고</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  const modal = document.getElementById('detailModal');
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(() => {
+    document.querySelectorAll('.rating-bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => bar.style.width = w, 50);
+    });
+  }, 100);
+}
+
+function closeModal() {
+  document.getElementById('detailModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openReviewModal() {
+  renderFormRatings();
+  document.getElementById('reviewModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReviewModal() {
+  document.getElementById('reviewModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function setFormStar(group, val) {
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+  });
+}
+
+function toggleAnon() {
+  document.getElementById('anonToggle').classList.toggle('on');
+}
+
+function vote(idx, type) {
+  const yesBtn = document.getElementById(`voteYes${idx}`);
+  const noBtn = document.getElementById(`voteNo${idx}`);
+  if (type === 'yes') {
+    yesBtn.classList.add('voted-yes');
+    noBtn.classList.remove('voted-no');
+    detectorItems[idx].yes++;
+  } else {
+    noBtn.classList.add('voted-no');
+    yesBtn.classList.remove('voted-yes');
+    detectorItems[idx].no++;
+  }
+  yesBtn.querySelector('span').textContent = detectorItems[idx].yes;
+  noBtn.querySelector('span').textContent = detectorItems[idx].no;
+}
+
+function submitReview() {
+  const target = document.getElementById('reviewTarget').value;
+  const text = document.getElementById('reviewText').value;
+  if (!target || !text) { alert('강사/강의명과 리뷰 내용을 입력해주세요.'); return; }
+  if (text.length < 30) { alert('리뷰는 최소 30자 이상 작성해주세요.'); return; }
+  alert('리뷰가 등록되었습니다! 인증 자료를 제출하셨다면 검토 후 인증 뱃지가 부여됩니다.');
+  closeReviewModal();
+}
+
+// ═══ SCROLL EFFECTS ═══
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 10);
+});
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.section').forEach(s => { s.classList.add('fade-in'); observer.observe(s); });
+
+// ═══ INIT ═══
+renderInstructors();
+renderWorst();
+renderDetector();
+renderRankings();
+</script>
+</body>
+</html>
