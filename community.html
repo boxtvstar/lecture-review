@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>팔이피플 — 커뮤니티</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --navy: #1B2A4A; --navy-light: #2A3F6A; --navy-dark: #111D35;
+  --orange: #FF6B35; --orange-hover: #E85A28; --orange-light: #FFF0E9;
+  --white: #FFFFFF;
+  --gray-50: #F8F9FB; --gray-100: #F1F3F7; --gray-200: #E2E6EE;
+  --gray-300: #C8CFDB; --gray-400: #9BA3B5; --gray-500: #6B7280;
+  --gray-600: #4B5563; --gray-700: #374151;
+  --green: #10B981; --green-light: #ECFDF5;
+  --red: #EF4444; --red-light: #FEF2F2;
+  --blue: #3B82F6; --blue-light: #EFF6FF;
+  --gold: #F59E0B;
+  --shadow-sm: 0 1px 3px rgba(27,42,74,0.06);
+  --shadow-md: 0 4px 16px rgba(27,42,74,0.08);
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  background: var(--gray-50); color: var(--gray-700);
+  line-height: 1.6; -webkit-font-smoothing: antialiased;
+}
+
+/* NAV */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gray-200);
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; height: 64px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 20px; color: var(--navy);
+  text-decoration: none; letter-spacing: -0.5px;
+}
+.nav-logo .logo-icon {
+  width: 36px; height: 36px; background: var(--orange);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 15px; font-weight: 900; letter-spacing: -1px;
+}
+.nav-links { display: flex; gap: 8px; align-items: center; }
+.nav-links a {
+  text-decoration: none; color: var(--gray-600);
+  font-size: 14px; font-weight: 600; padding: 8px 14px;
+  border-radius: var(--radius-sm); transition: all 0.2s;
+}
+.nav-links a:hover { color: var(--navy); background: var(--gray-100); }
+.nav-links a.active { color: var(--orange); background: var(--orange-light); }
+
+/* CONTAINER */
+.container {
+  max-width: 800px; margin: 0 auto; padding: 88px 24px 60px;
+}
+
+/* PAGE HEADER */
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.page-title {
+  font-size: 26px; font-weight: 900; color: var(--navy);
+  letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px;
+}
+.page-title .icon { font-size: 24px; }
+.btn-write {
+  padding: 10px 20px; background: var(--orange); color: white;
+  border: none; border-radius: var(--radius-sm); font-size: 14px;
+  font-weight: 700; font-family: inherit; cursor: pointer;
+  transition: all 0.2s; text-decoration: none;
+}
+.btn-write:hover { background: var(--orange-hover); transform: translateY(-1px); }
+
+/* CATEGORY TABS */
+.category-tabs {
+  display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.cat-tab {
+  padding: 7px 16px; border-radius: 100px; font-size: 13px; font-weight: 700;
+  border: 1.5px solid var(--gray-200); background: white; color: var(--gray-500);
+  cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.cat-tab.active { background: var(--navy); color: white; border-color: var(--navy); }
+.cat-tab:hover:not(.active) { border-color: var(--gray-300); color: var(--navy); }
+
+/* POST LIST */
+.post-list { display: flex; flex-direction: column; gap: 1px; }
+.post-item {
+  background: white; padding: 18px 20px;
+  border: 1px solid var(--gray-200); border-radius: var(--radius-md);
+  cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
+}
+.post-item:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.post-top {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.post-category-badge {
+  padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  background: var(--blue-light); color: var(--blue);
+}
+.post-category-badge.free { background: var(--green-light); color: var(--green); }
+.post-category-badge.review { background: var(--orange-light); color: var(--orange); }
+.post-category-badge.tip { background: #F3E8FF; color: #7C3AED; }
+.post-category-badge.question { background: var(--gold); color: white; }
+.post-hot {
+  padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 800;
+  background: var(--red); color: white;
+}
+.post-title {
+  font-size: 16px; font-weight: 700; color: var(--navy);
+  margin-bottom: 6px; line-height: 1.4;
+}
+.post-preview {
+  font-size: 13px; color: var(--gray-500); line-height: 1.5;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 100%;
+}
+.post-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px; font-size: 12px; color: var(--gray-400);
+}
+.post-author { font-weight: 600; color: var(--gray-500); }
+.post-stats { display: flex; gap: 12px; }
+.post-stat { display: flex; align-items: center; gap: 3px; }
+
+/* POST DETAIL MODAL */
+.detail-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  padding: 24px; overflow-y: auto;
+}
+.detail-overlay.open { display: flex; justify-content: center; align-items: flex-start; }
+.detail-modal {
+  background: white; border-radius: var(--radius-lg); max-width: 700px;
+  width: 100%; margin-top: 40px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.detail-header {
+  padding: 24px 28px 0; display: flex; justify-content: space-between; align-items: flex-start;
+}
+.detail-category {
+  padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;
+  display: inline-block; margin-bottom: 12px;
+}
+.detail-title {
+  font-size: 22px; font-weight: 900; color: var(--navy); line-height: 1.35;
+  letter-spacing: -0.5px;
+}
+.detail-close {
+  background: none; border: none; font-size: 22px; color: var(--gray-400);
+  cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s;
+}
+.detail-close:hover { background: var(--gray-100); color: var(--navy); }
+.detail-meta {
+  padding: 12px 28px; font-size: 13px; color: var(--gray-400);
+  border-bottom: 1px solid var(--gray-100);
+  display: flex; gap: 12px; align-items: center;
+}
+.detail-meta strong { color: var(--gray-600); }
+.detail-body {
+  padding: 24px 28px; font-size: 15px; line-height: 1.8; color: var(--gray-700);
+  white-space: pre-wrap;
+}
+.detail-actions {
+  padding: 16px 28px; border-top: 1px solid var(--gray-100);
+  display: flex; gap: 12px;
+}
+.action-btn {
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  border: 1.5px solid var(--gray-200); background: white; color: var(--gray-500);
+  cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.action-btn:hover { border-color: var(--gray-300); color: var(--navy); }
+.action-btn.liked { border-color: var(--orange); color: var(--orange); background: var(--orange-light); }
+
+/* COMMENT SECTION IN DETAIL */
+.detail-comments {
+  padding: 0 28px 24px; border-top: 1px solid var(--gray-100); margin-top: 0;
+}
+.detail-comments-title {
+  font-size: 14px; font-weight: 800; color: var(--navy); margin: 16px 0 12px;
+}
+.dc-input-area { display: flex; gap: 8px; margin-bottom: 14px; }
+.dc-input {
+  flex: 1; padding: 10px 14px; border: 1.5px solid var(--gray-200);
+  border-radius: 10px; font-size: 14px; font-family: inherit; outline: none;
+  transition: border-color 0.2s;
+}
+.dc-input:focus { border-color: var(--orange); }
+.dc-submit {
+  padding: 10px 16px; background: var(--navy); color: white;
+  border: none; border-radius: 10px; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+}
+.dc-submit:hover { background: var(--navy-light); }
+.dc-item { padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+.dc-item:last-child { border-bottom: none; }
+.dc-item-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.dc-item-author { font-size: 13px; font-weight: 700; color: var(--navy); }
+.dc-item-date { font-size: 11px; color: var(--gray-400); }
+.dc-item-text { font-size: 13px; color: var(--gray-600); line-height: 1.5; }
+.dc-login-msg {
+  text-align: center; padding: 14px; background: var(--gray-50);
+  border-radius: 10px; font-size: 13px; color: var(--gray-400);
+}
+.dc-login-msg a { color: var(--orange); font-weight: 700; cursor: pointer; text-decoration: none; }
+
+/* WRITE MODAL */
+.write-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  padding: 24px; overflow-y: auto;
+}
+.write-overlay.open { display: flex; justify-content: center; align-items: flex-start; }
+.write-modal {
+  background: white; border-radius: var(--radius-lg); max-width: 600px;
+  width: 100%; margin-top: 40px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.write-header {
+  padding: 24px 28px; border-bottom: 1px solid var(--gray-100);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.write-title { font-size: 20px; font-weight: 900; color: var(--navy); }
+.write-body { padding: 24px 28px; }
+.write-field { margin-bottom: 18px; }
+.write-label {
+  display: block; font-size: 13px; font-weight: 700; color: var(--navy);
+  margin-bottom: 6px;
+}
+.write-select, .write-input, .write-textarea {
+  width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200);
+  border-radius: 10px; font-size: 14px; font-family: inherit;
+  outline: none; transition: border-color 0.2s; background: white;
+}
+.write-select:focus, .write-input:focus, .write-textarea:focus {
+  border-color: var(--orange);
+}
+.write-textarea { min-height: 180px; resize: vertical; line-height: 1.7; }
+.write-footer {
+  padding: 16px 28px; border-top: 1px solid var(--gray-100);
+  display: flex; justify-content: flex-end; gap: 10px;
+}
+.write-cancel {
+  padding: 10px 20px; background: var(--gray-100); color: var(--gray-600);
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+}
+.write-submit {
+  padding: 10px 24px; background: var(--orange); color: white;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background 0.2s;
+}
+.write-submit:hover { background: var(--orange-hover); }
+
+/* LOGIN POPUP */
+.login-overlay {
+  display: none; position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,0.5); justify-content: center; align-items: center;
+}
+.login-overlay.open { display: flex; }
+.login-box {
+  background: white; border-radius: var(--radius-lg); padding: 32px;
+  max-width: 380px; width: 100%; text-align: center;
+}
+.login-icon { font-size: 40px; margin-bottom: 12px; }
+.login-title { font-size: 18px; font-weight: 900; color: var(--navy); margin-bottom: 8px; }
+.login-desc { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; }
+.google-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 14px; background: white; border: 1.5px solid var(--gray-200);
+  border-radius: 12px; font-size: 15px; font-weight: 700; font-family: inherit;
+  color: var(--gray-700); cursor: pointer; transition: all 0.2s;
+}
+.google-btn:hover { border-color: var(--gray-300); box-shadow: var(--shadow-sm); }
+.google-btn svg { width: 20px; height: 20px; }
+.login-skip {
+  display: block; margin-top: 12px; font-size: 13px; color: var(--gray-400);
+  background: none; border: none; cursor: pointer; font-family: inherit;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--gray-400);
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-text { font-size: 15px; font-weight: 600; }
+
+/* MOBILE */
+.mobile-menu-btn {
+  display: none; background: none; border: none;
+  font-size: 22px; cursor: pointer; color: var(--navy); padding: 4px;
+}
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: block; }
+  .nav-links a { display: none; }
+  .nav-inner { padding: 0 16px; height: 56px; }
+  .nav-logo { font-size: 17px; }
+  .nav-logo .logo-icon { width: 30px; height: 30px; font-size: 13px; border-radius: 8px; }
+  .container { padding: 72px 16px 40px; }
+  .page-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .page-title { font-size: 22px; }
+  .post-title { font-size: 15px; }
+  .post-preview { font-size: 12px; }
+  .post-item { padding: 14px 16px; }
+  .detail-modal, .write-modal { margin-top: 0; border-radius: 0; min-height: 100vh; }
+  .detail-header, .detail-meta, .detail-body, .detail-actions, .detail-comments { padding-left: 18px; padding-right: 18px; }
+  .write-header, .write-body, .write-footer { padding-left: 18px; padding-right: 18px; }
+  .detail-title { font-size: 19px; }
+  .category-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .cat-tab { flex-shrink: 0; }
+}
+
+/* MOBILE NAV DRAWER */
+.mobile-nav-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1500;
+  background: rgba(0,0,0,0.4); transition: opacity 0.3s;
+}
+.mobile-nav-overlay.open { display: block; }
+.mobile-nav-drawer {
+  position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
+  background: white; z-index: 1600; transition: right 0.3s;
+  padding: 24px 20px; display: flex; flex-direction: column; gap: 8px;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+}
+.mobile-nav-drawer.open { right: 0; }
+.mobile-nav-close {
+  align-self: flex-end; background: none; border: none;
+  font-size: 24px; color: var(--gray-400); cursor: pointer; padding: 4px;
+}
+.mobile-nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 18px; color: var(--navy);
+  margin-bottom: 16px;
+}
+.mobile-nav-links { display: flex; flex-direction: column; gap: 4px; }
+.mobile-nav-links a {
+  padding: 12px 14px; border-radius: 10px; font-size: 15px; font-weight: 600;
+  color: var(--gray-600); text-decoration: none; display: flex; align-items: center; gap: 10px;
+  transition: all 0.2s;
+}
+.mobile-nav-links a:hover { background: var(--gray-100); color: var(--navy); }
+.mobile-nav-links a.active { background: var(--orange-light); color: var(--orange); }
+.nav-icon { font-size: 16px; width: 22px; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">82</div>
+      팔이피플
+    </a>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="community.html" class="active">커뮤니티</a>
+      <a href="admin.html" style="font-size:12px;color:var(--gray-400)">관리자</a>
+      <button class="mobile-menu-btn" onclick="openMobileNav()">☰</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobileNavDrawer">
+  <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+  <div class="mobile-nav-logo"><div class="logo-icon" style="width:30px;height:30px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:900;letter-spacing:-1px">82</div> 팔이피플</div>
+  <div class="mobile-nav-links">
+    <a href="index.html"><span class="nav-icon">🏠</span> 홈</a>
+    <a href="community.html" class="active"><span class="nav-icon">💬</span> 커뮤니티</a>
+    <a href="admin.html"><span class="nav-icon">⚙️</span> 관리자</a>
+  </div>
+</div>
+
+<!-- CONTAINER -->
+<div class="container">
+  <div class="page-header">
+    <div class="page-title"><span class="icon">💬</span> 커뮤니티</div>
+    <button class="btn-write" onclick="openWriteModal()">✏️ 글쓰기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs">
+    <button class="cat-tab active" onclick="filterPosts('전체', this)">전체</button>
+    <button class="cat-tab" onclick="filterPosts('자유', this)">자유</button>
+    <button class="cat-tab" onclick="filterPosts('수강후기', this)">수강후기</button>
+    <button class="cat-tab" onclick="filterPosts('질문', this)">질문</button>
+    <button class="cat-tab" onclick="filterPosts('꿀팁', this)">꿀팁</button>
+  </div>
+
+  <div class="post-list" id="postList"></div>
+</div>
+
+<!-- POST DETAIL -->
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-modal">
+    <div class="detail-header">
+      <div>
+        <div class="detail-category" id="detailCategory"></div>
+        <div class="detail-title" id="detailTitle"></div>
+      </div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-meta" id="detailMeta"></div>
+    <div class="detail-body" id="detailBody"></div>
+    <div class="detail-actions" id="detailActions"></div>
+    <div class="detail-comments" id="detailComments"></div>
+  </div>
+</div>
+
+<!-- WRITE MODAL -->
+<div class="write-overlay" id="writeOverlay" onclick="if(event.target===this)closeWriteModal()">
+  <div class="write-modal">
+    <div class="write-header">
+      <div class="write-title">글쓰기</div>
+      <button class="detail-close" onclick="closeWriteModal()">✕</button>
+    </div>
+    <div class="write-body">
+      <div class="write-field">
+        <label class="write-label">카테고리</label>
+        <select class="write-select" id="writeCategory">
+          <option value="자유">자유</option>
+          <option value="수강후기">수강후기</option>
+          <option value="질문">질문</option>
+          <option value="꿀팁">꿀팁</option>
+        </select>
+      </div>
+      <div class="write-field">
+        <label class="write-label">제목</label>
+        <input class="write-input" id="writeTitle" placeholder="제목을 입력하세요">
+      </div>
+      <div class="write-field">
+        <label class="write-label">내용</label>
+        <textarea class="write-textarea" id="writeContent" placeholder="내용을 입력하세요"></textarea>
+      </div>
+    </div>
+    <div class="write-footer">
+      <button class="write-cancel" onclick="closeWriteModal()">취소</button>
+      <button class="write-submit" onclick="submitPost()">등록하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN POPUP -->
+<div class="login-overlay" id="loginOverlay" onclick="if(event.target===this)closeLogin()">
+  <div class="login-box">
+    <div class="login-icon">🔐</div>
+    <div class="login-title">로그인이 필요합니다</div>
+    <div class="login-desc">글을 작성하려면 먼저 로그인해주세요.</div>
+    <button class="google-btn" onclick="googleLogin()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Google로 계속하기
+    </button>
+    <button class="login-skip" onclick="closeLogin()">나중에 할게요</button>
+  </div>
+</div>
+
+<script>
+// ═══ AUTH ═══
+let currentUser = null;
+
+function googleLogin() {
+  closeLogin();
+  if (typeof google !== 'undefined' && google.accounts) {
+    google.accounts.id.prompt();
+  } else {
+    currentUser = { name: '사용자', email: 'user@gmail.com' };
+    if (pendingAction === 'write') openWriteModal();
+  }
+}
+
+function handleGoogleCredential(response) {
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  currentUser = { name: payload.name, email: payload.email };
+  if (pendingAction === 'write') openWriteModal();
+}
+
+let pendingAction = null;
+
+window.addEventListener('load', () => {
+  if (typeof google !== 'undefined' && google.accounts) {
+    google.accounts.id.initialize({
+      client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+      callback: handleGoogleCredential
+    });
+  }
+});
+
+// ═══ DATA ═══
+const posts = [
+  { id: 1, category: '수강후기', title: '인프런 김코딩 React 강의 솔직 후기', author: '개발자지망생',
+    date: '2026.05.22', views: 342, likes: 47, commentCount: 12,
+    content: '3개월 동안 수강했는데, 확실히 실무에서 바로 쓸 수 있는 내용이 많습니다.\n\n특히 에러 핸들링 파트가 다른 강의에서는 잘 안 다루는 심화 내용이라 좋았어요.\n\n질문 올리면 보통 하루 안에 답변이 옵니다. 이 부분은 진짜 다른 강사들도 배웠으면 좋겠어요.\n\n다만 후반부로 갈수록 난이도가 급격히 올라가서 초보자는 중간에 다른 강의로 보충이 필요할 수도 있습니다.\n\n총평: 4.7/5 추천합니다.',
+    comments: [
+      { author: '주니어개발자', date: '2026.05.22', text: '저도 이 강의 듣고 있는데 에러 핸들링 파트 진짜 좋죠!' },
+      { author: '취준생A', date: '2026.05.22', text: '난이도 급상승 부분 공감.. 중간에 포기할 뻔했어요' },
+    ]
+  },
+  { id: 2, category: '자유', title: '강의팔이 구별하는 제 나름의 기준 공유합니다', author: '호구탈출',
+    date: '2026.05.21', views: 1203, likes: 189, commentCount: 34,
+    content: '여러 강의에 수백만원 쏟아본 경험자로서 강의팔이 구별법을 공유합니다.\n\n1. "~만에 ~억" 류 제목 → 99% 과장\n2. 무료 콘텐츠가 거의 없는 강사 → 실력 검증 불가\n3. 수강 후 "상위 코스" 결제 유도 → 다단계 구조 의심\n4. 환불 정책이 불명확 → 자신감 없는 증거\n5. 수강생 후기가 전부 극찬 → 조작 가능성\n\n반대로 좋은 강사 특징:\n- 유튜브나 블로그에 무료 콘텐츠가 풍부\n- 환불 정책이 명확\n- 실제 현업 경력이 검증 가능\n- 커리큘럼이 구체적\n\n참고하시고 현명한 수강 결정하세요!',
+    comments: [
+      { author: '마케팅3년차', date: '2026.05.21', text: '6번 추가요: 수료증이 아닌 포트폴리오를 강조하는 강사가 진짜입니다' },
+      { author: '피해자모임', date: '2026.05.21', text: '3번에 완전 당한 사람입니다.. 추가결제만 300만원 넘게 했어요' },
+    ]
+  },
+  { id: 3, category: '질문', title: '패스트캠퍼스 vs 인프런 어디가 더 좋나요?', author: '고민중',
+    date: '2026.05.21', views: 567, likes: 23, commentCount: 18,
+    content: '프론트엔드 개발 공부 시작하려고 하는데\n패스트캠퍼스랑 인프런 중에 고민 중입니다.\n\n패캠은 올인원 패키지가 가성비 좋아 보이고\n인프런은 강의 단위로 살 수 있어서 선택 폭이 넓은 것 같은데..\n\n혹시 둘 다 써보신 분 있으면 장단점 알려주세요!',
+    comments: [
+      { author: '풀스택개발자', date: '2026.05.21', text: '인프런 추천합니다. 단과로 좋은 강사만 골라 들을 수 있어요' },
+    ]
+  },
+  { id: 4, category: '꿀팁', title: '강의 환불받는 확실한 방법 (플랫폼별 정리)', author: '환불마스터',
+    date: '2026.05.20', views: 2341, likes: 312, commentCount: 56,
+    content: '각 플랫폼별 환불 정책을 정리했습니다.\n\n[인프런]\n- 수강 시작 후 7일 이내, 진도율 10% 이하 → 전액 환불\n- 고객센터 빠르게 대응\n\n[클래스101]\n- 구독제는 해지만 가능, 단건은 7일/5강 이내\n- 환불 처리 좀 느린 편\n\n[패스트캠퍼스]\n- 환급 챌린지 실패 시 환불 어려움\n- 일반 강의는 7일 이내 환불 가능\n\n[유데미]\n- 30일 이내 무조건 환불 (이게 제일 좋음)\n- 글로벌 플랫폼이라 환불이 쉬움\n\n핵심: 결제 후 바로 시작해보고 아니다 싶으면 빨리 환불하세요!',
+    comments: []
+  },
+  { id: 5, category: '수강후기', title: '콜로소 디자인 강의 들어본 후기 (실망)', author: '디자인학도',
+    date: '2026.05.20', views: 876, likes: 65, commentCount: 8,
+    content: '기대하고 들었는데 솔직히 실망했습니다.\n\n장점:\n- 영상 퀄리티는 좋음\n- 현업 디자이너가 강사\n\n단점:\n- 가격이 너무 비쌈 (40만원대)\n- 실습 파일 제공이 부실\n- 질문 답변이 거의 안 됨\n- 커리큘럼 업데이트가 느림\n\n같은 돈이면 인프런에서 3~4개 강의 들을 수 있어요.\n영상 퀄리티만으로는 가격 정당화가 안 됩니다.',
+    comments: [
+      { author: '프리랜서', date: '2026.05.20', text: '콜로소 영상미는 좋은데 가성비가 안 좋은 건 맞아요' },
+    ]
+  },
+  { id: 6, category: '자유', title: '여기 사이트 괜찮네요 이런 거 필요했는데', author: '수강생A',
+    date: '2026.05.19', views: 432, likes: 78, commentCount: 5,
+    content: '그동안 강의 살 때 네이버 블로그 후기만 보고 샀는데\n광고성 글이 너무 많아서 진짜 후기를 구분하기 어려웠어요.\n\n여기는 인증 수강생만 리뷰를 쓸 수 있다니까 훨씬 신뢰가 가네요.\n계속 발전했으면 좋겠습니다!',
+    comments: []
+  },
+];
+
+let currentFilter = '전체';
+let nextId = posts.length + 1;
+
+// ═══ RENDER ═══
+const categoryStyles = {
+  '자유': 'free', '수강후기': 'review', '질문': 'question', '꿀팁': 'tip'
+};
+
+function renderPosts() {
+  const list = document.getElementById('postList');
+  let filtered = currentFilter === '전체' ? posts : posts.filter(p => p.category === currentFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">아직 작성된 글이 없습니다.</div></div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(p => `
+    <div class="post-item" onclick="openPost(${p.id})">
+      <div class="post-top">
+        <span class="post-category-badge ${categoryStyles[p.category] || ''}">${p.category}</span>
+        ${p.likes >= 100 ? '<span class="post-hot">HOT</span>' : ''}
+      </div>
+      <div class="post-title">${p.title}</div>
+      <div class="post-preview">${p.content.replace(/\n/g, ' ').substring(0, 80)}...</div>
+      <div class="post-bottom">
+        <span class="post-author">${p.author}</span>
+        <div class="post-stats">
+          <span class="post-stat">👁 ${p.views}</span>
+          <span class="post-stat">❤️ ${p.likes}</span>
+          <span class="post-stat">💬 ${p.commentCount + (p.comments?.length || 0)}</span>
+          <span class="post-stat">${p.date}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterPosts(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderPosts();
+}
+
+// ═══ DETAIL ═══
+let currentPostId = null;
+
+function openPost(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  currentPostId = id;
+  p.views++;
+
+  const catStyle = categoryStyles[p.category] || '';
+  document.getElementById('detailCategory').className = `detail-category post-category-badge ${catStyle}`;
+  document.getElementById('detailCategory').textContent = p.category;
+  document.getElementById('detailTitle').textContent = p.title;
+  document.getElementById('detailMeta').innerHTML = `<strong>${p.author}</strong> · ${p.date} · 조회 ${p.views}`;
+  document.getElementById('detailBody').textContent = p.content;
+  document.getElementById('detailActions').innerHTML = `
+    <button class="action-btn" id="likeBtn" onclick="toggleLike(${id})">❤️ 좋아요 ${p.likes}</button>
+    <button class="action-btn">🔗 공유</button>
+    <button class="action-btn">🚩 신고</button>
+  `;
+  renderDetailComments(p);
+  document.getElementById('detailOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderDetailComments(p) {
+  const el = document.getElementById('detailComments');
+  const allComments = p.comments || [];
+  el.innerHTML = `
+    <div class="detail-comments-title">댓글 ${allComments.length}개</div>
+    ${currentUser
+      ? `<div class="dc-input-area"><input class="dc-input" id="dcInput" placeholder="댓글을 입력하세요"><button class="dc-submit" onclick="submitDetailComment()">등록</button></div>`
+      : `<div class="dc-login-msg">댓글을 작성하려면 <a onclick="pendingAction=null;document.getElementById('loginOverlay').classList.add('open')">로그인</a>이 필요합니다.</div>`
+    }
+    ${allComments.map(c => `
+      <div class="dc-item">
+        <div class="dc-item-top"><span class="dc-item-author">${c.author}</span><span class="dc-item-date">${c.date}</span></div>
+        <div class="dc-item-text">${c.text}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function submitDetailComment() {
+  const input = document.getElementById('dcInput');
+  if (!input || !input.value.trim()) { alert('댓글을 입력해주세요.'); return; }
+  const p = posts.find(x => x.id === currentPostId);
+  if (!p) return;
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+  p.comments.push({ author: currentUser.name, date: dateStr, text: input.value.trim() });
+  renderDetailComments(p);
+  renderPosts();
+}
+
+function toggleLike(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  const btn = document.getElementById('likeBtn');
+  if (btn.classList.contains('liked')) {
+    btn.classList.remove('liked');
+    p.likes--;
+  } else {
+    btn.classList.add('liked');
+    p.likes++;
+  }
+  btn.innerHTML = `❤️ 좋아요 ${p.likes}`;
+  renderPosts();
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ═══ WRITE ═══
+function openWriteModal() {
+  if (!currentUser) {
+    pendingAction = 'write';
+    document.getElementById('loginOverlay').classList.add('open');
+    return;
+  }
+  document.getElementById('writeOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWriteModal() {
+  document.getElementById('writeOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function submitPost() {
+  const category = document.getElementById('writeCategory').value;
+  const title = document.getElementById('writeTitle').value.trim();
+  const content = document.getElementById('writeContent').value.trim();
+  if (!title) { alert('제목을 입력해주세요.'); return; }
+  if (!content) { alert('내용을 입력해주세요.'); return; }
+  if (content.length < 10) { alert('내용을 10자 이상 작성해주세요.'); return; }
+
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+
+  posts.unshift({
+    id: nextId++, category, title, author: currentUser.name,
+    date: dateStr, views: 0, likes: 0, commentCount: 0,
+    content, comments: []
+  });
+
+  document.getElementById('writeTitle').value = '';
+  document.getElementById('writeContent').value = '';
+  closeWriteModal();
+  renderPosts();
+}
+
+// ═══ LOGIN ═══
+function closeLogin() {
+  document.getElementById('loginOverlay').classList.remove('open');
+}
+
+// ═══ MOBILE NAV ═══
+function openMobileNav() {
+  document.getElementById('mobileNavOverlay').classList.add('open');
+  document.getElementById('mobileNavDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileNav() {
+  document.getElementById('mobileNavOverlay').classList.remove('open');
+  document.getElementById('mobileNavDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ═══ INIT ═══
+renderPosts();
+</script>
+</body>
+</html>
