@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>강의평가단 — 진짜 수강생의 솔직한 강의 리뷰</title>
+<title>팔이피플 — 진짜 수강생의 솔직한 강의 리뷰</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -76,7 +77,7 @@ body {
 .nav-logo .logo-icon {
   width: 36px; height: 36px; background: var(--orange);
   border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 18px; font-weight: 900;
+  color: white; font-size: 15px; font-weight: 900; letter-spacing: -1px;
 }
 .nav-links { display: flex; gap: 8px; align-items: center; }
 .nav-links a {
@@ -581,6 +582,47 @@ body {
   background: var(--gray-50); color: var(--navy); line-height: 1.6;
 }
 .form-textarea:focus { outline: none; border-color: var(--orange); background: white; }
+
+/* AUTOCOMPLETE DROPDOWN */
+.ac-wrapper { position: relative; }
+.ac-dropdown {
+  position: absolute; left: 0; right: 0; top: 100%; z-index: 10;
+  background: white; border: 2px solid var(--gray-200); border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  max-height: 200px; overflow-y: auto; display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+.ac-dropdown.open { display: block; }
+.ac-item {
+  padding: 10px 14px; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; gap: 10px;
+  transition: background 0.15s; color: var(--navy);
+}
+.ac-item:hover, .ac-item.selected { background: var(--orange-light); }
+.ac-item-avatar {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: white; flex-shrink: 0;
+}
+.ac-item-info { flex: 1; min-width: 0; }
+.ac-item-name { font-weight: 700; font-size: 13px; }
+.ac-item-meta { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+.ac-item-new {
+  color: var(--orange); font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ac-item-new::before { content: '+'; font-size: 16px; font-weight: 800; }
+.ac-selected-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--orange-light); border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 600;
+  color: var(--orange); margin-top: 8px;
+}
+.ac-selected-tag .ac-clear {
+  cursor: pointer; font-size: 14px; opacity: 0.6; transition: opacity 0.2s;
+}
+.ac-selected-tag .ac-clear:hover { opacity: 1; }
+
 .form-rating-group { display: flex; flex-direction: column; gap: 14px; }
 .form-rating-item { display: flex; align-items: center; gap: 12px; }
 .form-rating-label { font-size: 13px; font-weight: 600; color: var(--gray-600); width: 110px; }
@@ -621,6 +663,108 @@ body {
   cursor: pointer; transition: all 0.2s;
 }
 .form-submit:hover { background: var(--orange-hover); transform: translateY(-1px); }
+
+/* ═══ LOGIN POPUP ═══ */
+.popup-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(17,29,53,0.6); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center; padding: 24px;
+}
+.popup-overlay.open { display: flex; }
+.login-popup {
+  background: white; border-radius: 16px; max-width: 400px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: popupIn 0.3s ease;
+  overflow: hidden;
+}
+@keyframes popupIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } }
+.login-popup-header {
+  padding: 28px 28px 0; text-align: center;
+}
+.login-popup-icon { font-size: 48px; margin-bottom: 12px; }
+.login-popup-title { font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 6px; }
+.login-popup-desc { font-size: 14px; color: var(--gray-500); line-height: 1.5; }
+.login-popup-body { padding: 24px 28px 28px; }
+.google-login-btn {
+  width: 100%; padding: 14px 20px; border-radius: 12px;
+  border: 2px solid var(--gray-200); background: white;
+  font-size: 15px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  color: var(--gray-700);
+}
+.google-login-btn:hover { border-color: #4285F4; background: #F8FAFF; }
+.google-login-btn svg { width: 20px; height: 20px; }
+.login-popup-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 0; color: var(--gray-400); font-size: 12px;
+}
+.login-popup-divider::before, .login-popup-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--gray-200);
+}
+.login-popup-skip {
+  width: 100%; padding: 12px; border-radius: 10px;
+  border: none; background: var(--gray-100);
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  cursor: pointer; color: var(--gray-500); transition: all 0.2s;
+}
+.login-popup-skip:hover { background: var(--gray-200); }
+.login-popup-note {
+  text-align: center; font-size: 11px; color: var(--gray-400);
+  margin-top: 14px; line-height: 1.5;
+}
+
+/* ═══ SUCCESS POPUP ═══ */
+.success-popup {
+  background: white; border-radius: 20px; max-width: 420px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: popupIn 0.3s ease;
+  padding: 36px 28px; text-align: center;
+}
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 20px;
+  background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+  display: flex; align-items: center; justify-content: center; font-size: 32px;
+}
+.success-title { font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
+.success-desc { font-size: 14px; color: var(--gray-500); line-height: 1.6; margin-bottom: 8px; }
+.success-highlight {
+  display: inline-block; background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  border: 1px solid rgba(249,115,22,0.2); border-radius: 8px;
+  padding: 10px 16px; font-size: 13px; font-weight: 700;
+  color: var(--orange); margin: 12px 0 20px;
+}
+.success-btn {
+  width: 100%; padding: 14px; border-radius: 12px;
+  background: var(--orange); color: white; border: none;
+  font-size: 15px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: all 0.2s;
+}
+.success-btn:hover { background: var(--orange-hover); }
+.success-user {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-bottom: 20px; padding: 10px 16px; background: var(--gray-50);
+  border-radius: 10px; font-size: 13px; color: var(--gray-600);
+}
+.success-user img {
+  width: 24px; height: 24px; border-radius: 50%;
+}
+@media (max-width: 768px) {
+  .login-popup, .success-popup { margin: 16px; }
+  .login-popup-header { padding: 24px 20px 0; }
+  .login-popup-body { padding: 20px; }
+  .success-popup { padding: 28px 20px; }
+}
+
+/* SORT TABS */
+.sort-tabs {
+  display: flex; gap: 6px; align-items: center;
+}
+.sort-tab {
+  padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  border: 1.5px solid var(--gray-200); background: white; color: var(--gray-500);
+  cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.sort-tab.active { background: var(--navy); color: white; border-color: var(--navy); }
+.sort-tab:hover:not(.active) { border-color: var(--gray-300); color: var(--navy); }
 
 /* ═══ FOOTER ═══ */
 .footer {
@@ -690,7 +834,7 @@ body {
 .mobile-nav-logo .logo-icon {
   width: 36px; height: 36px; background: var(--orange);
   border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 18px; font-weight: 900;
+  color: white; font-size: 15px; font-weight: 900; letter-spacing: -1px;
 }
 .mobile-nav-links { display: flex; flex-direction: column; gap: 4px; }
 .mobile-nav-links a {
@@ -716,7 +860,7 @@ body {
   .nav-links .btn-write-review { display: none; }
   .nav-inner { padding: 0 16px; height: 56px; }
   .nav-logo { font-size: 17px; }
-  .nav-logo .logo-icon { width: 30px; height: 30px; font-size: 15px; border-radius: 8px; }
+  .nav-logo .logo-icon { width: 30px; height: 30px; font-size: 13px; border-radius: 8px; }
   .hero { padding: 48px 16px 40px; margin-top: 56px; }
   .hero h1 { font-size: 24px; letter-spacing: -0.5px; line-height: 1.35; }
   .hero p { font-size: 14px; margin-bottom: 24px; }
@@ -734,6 +878,9 @@ body {
   .section-title { font-size: 19px; gap: 8px; }
   .section-title .icon { font-size: 18px; }
   .section-link { font-size: 13px; }
+  .sort-tabs { gap: 4px; }
+  .sort-tab { padding: 5px 10px; font-size: 11px; }
+  .section-header { flex-wrap: wrap; gap: 8px; }
   .instructor-grid { grid-template-columns: 1fr; gap: 14px; }
   .instructor-card { padding: 18px; }
   .card-score { font-size: 28px; }
@@ -802,8 +949,8 @@ body {
 <nav class="nav" id="nav">
   <div class="nav-inner">
     <a href="#" class="nav-logo">
-      <div class="logo-icon">평</div>
-      강의평가단
+      <div class="logo-icon">82</div>
+      팔이피플
     </a>
     <div class="nav-links">
       <a href="#rankings" class="active">랭킹</a>
@@ -847,8 +994,13 @@ body {
 <!-- ═══ TRENDING INSTRUCTORS ═══ -->
 <section class="section">
   <div class="section-header">
-    <h2 class="section-title"><span class="icon">🔥</span> 지금 뜨는 강사</h2>
-    <a href="#" class="section-link">전체 보기 →</a>
+    <h2 class="section-title"><span class="icon">🔥</span> 강사 목록</h2>
+    <div class="sort-tabs" id="sortTabs">
+      <button class="sort-tab active" onclick="sortInstructors('popular', this)">인기순</button>
+      <button class="sort-tab" onclick="sortInstructors('latest', this)">최신순</button>
+      <button class="sort-tab" onclick="sortInstructors('rating', this)">평점순</button>
+      <button class="sort-tab" onclick="sortInstructors('reviews', this)">리뷰많은순</button>
+    </div>
   </div>
   <div class="instructor-grid" id="instructorGrid"></div>
 </section>
@@ -873,7 +1025,7 @@ body {
   <div class="detector-section">
     <div class="section-header">
       <h2 class="section-title"><span class="icon">🚨</span> 강의팔이 감별기</h2>
-      <a href="#" class="section-link">제보하기 →</a>
+      <a href="#" class="section-link" onclick="openReviewModal(); return false;">제보하기 →</a>
     </div>
     <div class="detector-grid" id="detectorGrid"></div>
   </div>
@@ -892,7 +1044,7 @@ body {
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-brand">
-      <div class="footer-logo">📋 강의평가단</div>
+      <div class="footer-logo">📋 팔이피플</div>
       <p>수강생이 만드는 투명한 강의 생태계. 인증된 리뷰로 더 나은 학습 선택을 도와드립니다.</p>
     </div>
     <div class="footer-links">
@@ -919,7 +1071,7 @@ body {
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 강의평가단. All rights reserved.</span>
+    <span>© 2026 팔이피플. All rights reserved.</span>
     <span>통신판매업 신고번호: 제2026-서울강남-XXXXX호</span>
   </div>
 </footer>
@@ -953,8 +1105,22 @@ body {
     </div>
     <div class="modal-body">
       <div class="form-section">
-        <label class="form-label">강사 / 강의명 <span class="form-sublabel">필수</span></label>
-        <input class="form-input" placeholder="예: 김코딩 — 실전 React 마스터클래스" id="reviewTarget">
+        <label class="form-label">강사 <span class="form-sublabel">필수</span></label>
+        <div class="ac-wrapper" id="instructorAcWrapper">
+          <input class="form-input" placeholder="강사명을 검색하세요 (예: 김코딩)" id="reviewInstructor" autocomplete="off"
+            oninput="acSearch('instructor')" onfocus="acSearch('instructor')">
+          <div class="ac-dropdown" id="instructorDropdown"></div>
+        </div>
+        <div id="instructorSelected"></div>
+      </div>
+      <div class="form-section">
+        <label class="form-label">강의명 <span class="form-sublabel">필수</span></label>
+        <div class="ac-wrapper" id="courseAcWrapper">
+          <input class="form-input" placeholder="강의명을 검색하세요 (예: 실전 React 마스터클래스)" id="reviewCourse" autocomplete="off"
+            oninput="acSearch('course')" onfocus="acSearch('course')">
+          <div class="ac-dropdown" id="courseDropdown"></div>
+        </div>
+        <div id="courseSelected"></div>
       </div>
       <div class="form-section">
         <label class="form-label">평가 항목 <span class="form-sublabel">각 항목을 클릭하세요</span></label>
@@ -970,8 +1136,9 @@ body {
           <div class="upload-icon">📎</div>
           <div class="upload-text">결제 영수증 또는 수료증을 업로드하세요</div>
           <div class="upload-sub">JPG, PNG, PDF (최대 10MB) · 개인정보는 자동 마스킹됩니다</div>
+          <div class="upload-sub" style="margin-top:6px;color:var(--gray-500);font-weight:600">🔒 등록하신 인증 파일은 관리자만 확인할 수 있으며, 외부에 공개되지 않습니다.</div>
         </div>
-        <input type="file" id="fileInput" style="display:none" accept=".jpg,.jpeg,.png,.pdf">
+        <input type="file" id="fileInput" style="display:none" accept=".jpg,.jpeg,.png,.pdf" onchange="handleFileUpload(this)">
       </div>
       <div class="form-section">
         <div class="toggle-row">
@@ -984,13 +1151,46 @@ body {
   </div>
 </div>
 
+<!-- ═══ LOGIN POPUP ═══ -->
+<div class="popup-overlay" id="loginPopup" onclick="if(event.target===this)closeLoginPopup()">
+  <div class="login-popup">
+    <div class="login-popup-header">
+      <div class="login-popup-icon">🔐</div>
+      <div class="login-popup-title">로그인이 필요합니다</div>
+      <div class="login-popup-desc">리뷰를 등록하려면 먼저 로그인해주세요.<br>간편하게 구글 계정으로 시작할 수 있어요.</div>
+    </div>
+    <div class="login-popup-body">
+      <button class="google-login-btn" onclick="googleLogin()">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google로 계속하기
+      </button>
+      <div class="login-popup-divider">또는</div>
+      <button class="login-popup-skip" onclick="closeLoginPopup()">나중에 할게요</button>
+      <div class="login-popup-note">로그인하면 작성한 리뷰 관리 및 인증 뱃지 신청이 가능합니다.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS POPUP ═══ -->
+<div class="popup-overlay" id="successPopup" onclick="if(event.target===this)closeSuccessPopup()">
+  <div class="success-popup">
+    <div class="success-icon">✅</div>
+    <div class="success-title">리뷰가 접수되었습니다!</div>
+    <div class="success-user" id="successUser"></div>
+    <div class="success-desc">관리자 검토 후 리뷰가 게시됩니다.<br>허위 리뷰 방지를 위해 모든 리뷰는 검수를 거칩니다.</div>
+    <div class="success-highlight">⏱ 최대 12시간 이내 승인 완료</div>
+    <div class="success-desc" style="font-size:12px;color:var(--gray-400);margin-bottom:20px">인증 자료를 제출하셨다면 승인 시 인증 수강생 뱃지가 부여됩니다.</div>
+    <button class="success-btn" onclick="closeSuccessPopup()">확인</button>
+  </div>
+</div>
+
 <!-- ═══ MOBILE NAV DRAWER ═══ -->
 <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
 <div class="mobile-nav-drawer" id="mobileNavDrawer">
   <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
   <div class="mobile-nav-logo">
-    <div class="logo-icon">평</div>
-    강의평가단
+    <div class="logo-icon">82</div>
+    팔이피플
   </div>
   <div class="mobile-nav-links">
     <a href="#" onclick="closeMobileNav()"><span class="nav-icon">🏠</span> 홈</a>
@@ -1242,12 +1442,33 @@ const detectorItems = [
     yes: 12, no: 298 }
 ];
 
+// ═══ COURSE DATA ═══
+const courseList = [
+  { instructor: '김코딩', name: '실전 React 마스터클래스' },
+  { instructor: '김코딩', name: 'TypeScript 완벽 가이드' },
+  { instructor: '박마케터', name: '퍼포먼스 마케팅 완전정복' },
+  { instructor: '이디자이너', name: 'Figma UI/UX 실전' },
+  { instructor: '최재테크', name: '3개월 만에 월 1000만원 자동 수익 시스템' },
+  { instructor: '정파이썬', name: 'Python 데이터분석 올인원' },
+  { instructor: '한성장', name: '습관 혁명 30일 챌린지' },
+  { instructor: '오UI', name: 'Framer 웹디자인 마스터' },
+  { instructor: '노자동화', name: 'Make 자동화 실전' },
+  { instructor: '강부동산', name: '갭투자 실전 가이드' },
+  { instructor: '윤AI', name: 'LLM 파인튜닝 & 배포' },
+  { instructor: '속성코딩', name: '1주일 앱 개발 마스터' },
+  { instructor: '돈벼락', name: '코인 선물거래 비법' },
+  { instructor: '매출폭발러', name: 'SNS 마케팅으로 매출 10배' },
+];
+
 const ratingLabels = {
   quality: '강의 퀄리티', value: '가성비', expertise: '전문성',
   hype: '과대광고', growth: '실력 향상', support: 'AS/답변'
 };
 
 let currentCategory = '전체';
+let currentSort = 'popular';
+let selectedInstructor = null;
+let selectedCourse = null;
 
 // ═══ RENDER FUNCTIONS ═══
 
@@ -1261,9 +1482,9 @@ function generateStars(score, size = 16) {
   return html;
 }
 
-function renderInstructors(filter = '전체', search = '') {
+function renderInstructors(filter = '전체', search = '', sort = currentSort) {
   const grid = document.getElementById('instructorGrid');
-  let filtered = instructors;
+  let filtered = [...instructors];
   if (filter !== '전체') filtered = filtered.filter(i => i.category === filter);
   if (search) {
     const s = search.toLowerCase();
@@ -1273,6 +1494,10 @@ function renderInstructors(filter = '전체', search = '') {
       i.category.toLowerCase().includes(s)
     );
   }
+  if (sort === 'popular') filtered.sort((a, b) => b.reviews - a.reviews || b.score - a.score);
+  else if (sort === 'latest') filtered.sort((a, b) => b.id - a.id);
+  else if (sort === 'rating') filtered.sort((a, b) => b.score - a.score);
+  else if (sort === 'reviews') filtered.sort((a, b) => b.reviews - a.reviews);
 
   grid.innerHTML = filtered.map(inst => `
     <div class="instructor-card" onclick="openDetail(${inst.id})">
@@ -1405,11 +1630,18 @@ function selectCategory(el, cat) {
   currentCategory = cat;
   document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
-  renderInstructors(cat, document.getElementById('searchInput').value);
+  renderInstructors(cat, document.getElementById('searchInput').value, currentSort);
 }
 
 function filterInstructors() {
-  renderInstructors(currentCategory, document.getElementById('searchInput').value);
+  renderInstructors(currentCategory, document.getElementById('searchInput').value, currentSort);
+}
+
+function sortInstructors(sort, btn) {
+  currentSort = sort;
+  document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderInstructors(currentCategory, document.getElementById('searchInput').value, sort);
 }
 
 function openDetail(id) {
@@ -1443,11 +1675,11 @@ function openDetail(id) {
     <div class="modal-divider"></div>
     <div class="reviews-header">
       <span class="reviews-title">수강생 리뷰</span>
-      <select class="review-filter">
-        <option>최신순</option><option>도움순</option><option>인증 리뷰만</option>
+      <select class="review-filter" onchange="filterReviews(this.value, ${inst.id})">
+        <option value="latest">최신순</option><option value="helpful">도움순</option><option value="verified">인증 리뷰만</option>
       </select>
     </div>
-    <div class="review-list">
+    <div class="review-list" id="reviewListContainer">
       ${inst.reviewList.map(r => `
         <div class="review-item ${r.badge === 'verified' ? 'review-verified' : r.badge === 'expert' ? 'review-expert' : ''}">
           <div class="review-top">
@@ -1466,8 +1698,8 @@ function openDetail(id) {
             </div>
           ` : ''}
           <div class="review-helpful">
-            <button class="helpful-btn" onclick="event.stopPropagation()">👍 도움이 됐어요 ${r.helpful}</button>
-            <button class="helpful-btn" onclick="event.stopPropagation()">🚩 신고</button>
+            <button class="helpful-btn" onclick="event.stopPropagation(); helpfulClick(this, ${r.helpful})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
+            <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this)">🚩 신고</button>
           </div>
         </div>
       `).join('')}
@@ -1529,13 +1761,214 @@ function vote(idx, type) {
   noBtn.querySelector('span').textContent = detectorItems[idx].no;
 }
 
+// ═══ AUTH STATE ═══
+let currentUser = null;
+
+// ═══ AUTOCOMPLETE ═══
+function acSearch(type) {
+  const input = document.getElementById(type === 'instructor' ? 'reviewInstructor' : 'reviewCourse');
+  const dropdown = document.getElementById(type === 'instructor' ? 'instructorDropdown' : 'courseDropdown');
+  const query = input.value.trim().toLowerCase();
+
+  if (type === 'instructor') {
+    if (selectedInstructor) return;
+    const allInst = [...new Map([...instructors, ...worstInstructors].map(i => [i.name, i])).values()];
+    let matches = allInst;
+    if (query) matches = allInst.filter(i => i.name.toLowerCase().includes(query));
+    matches = matches.slice(0, 6);
+    let html = matches.map(i => `
+      <div class="ac-item" onclick="selectAcInstructor('${i.name}', '${i.avatar}', '${i.category} · ${i.platform}')">
+        <div class="ac-item-avatar" style="background:${i.avatar}">${i.name[0]}</div>
+        <div class="ac-item-info">
+          <div class="ac-item-name">${i.name}</div>
+          <div class="ac-item-meta">${i.category} · ${i.platform} · ★ ${i.score}</div>
+        </div>
+      </div>
+    `).join('');
+    if (query && !matches.some(i => i.name.toLowerCase() === query)) {
+      html += `<div class="ac-item" onclick="selectAcInstructorNew('${input.value.trim()}')"><div class="ac-item-new">"${input.value.trim()}" 새 강사로 등록</div></div>`;
+    }
+    dropdown.innerHTML = html;
+    dropdown.classList.toggle('open', html.length > 0);
+  } else {
+    if (selectedCourse) return;
+    let matches = courseList;
+    if (selectedInstructor) matches = matches.filter(c => c.instructor === selectedInstructor.name);
+    if (query) matches = matches.filter(c => c.name.toLowerCase().includes(query));
+    matches = matches.slice(0, 6);
+    let html = matches.map(c => `
+      <div class="ac-item" onclick="selectAcCourse('${c.name}', '${c.instructor}')">
+        <div class="ac-item-info">
+          <div class="ac-item-name">${c.name}</div>
+          <div class="ac-item-meta">${c.instructor}</div>
+        </div>
+      </div>
+    `).join('');
+    if (query && !matches.some(c => c.name.toLowerCase() === query)) {
+      html += `<div class="ac-item" onclick="selectAcCourseNew('${input.value.trim()}')"><div class="ac-item-new">"${input.value.trim()}" 새 강의로 등록</div></div>`;
+    }
+    dropdown.innerHTML = html;
+    dropdown.classList.toggle('open', html.length > 0);
+  }
+}
+
+function selectAcInstructor(name, avatar, meta) {
+  selectedInstructor = { name, avatar, meta };
+  document.getElementById('reviewInstructor').value = '';
+  document.getElementById('reviewInstructor').style.display = 'none';
+  document.getElementById('instructorDropdown').classList.remove('open');
+  document.getElementById('instructorSelected').innerHTML =
+    `<div class="ac-selected-tag"><span style="display:inline-flex;align-items:center;gap:6px"><span class="ac-item-avatar" style="background:${avatar};width:22px;height:22px;font-size:10px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:white">${name[0]}</span>${name}</span><span class="ac-clear" onclick="clearAcInstructor()">✕</span></div>`;
+}
+
+function selectAcInstructorNew(name) {
+  selectedInstructor = { name, avatar: '#94A3B8', meta: '신규 강사' };
+  document.getElementById('reviewInstructor').value = '';
+  document.getElementById('reviewInstructor').style.display = 'none';
+  document.getElementById('instructorDropdown').classList.remove('open');
+  document.getElementById('instructorSelected').innerHTML =
+    `<div class="ac-selected-tag">🆕 ${name} (신규)<span class="ac-clear" onclick="clearAcInstructor()">✕</span></div>`;
+}
+
+function clearAcInstructor() {
+  selectedInstructor = null;
+  document.getElementById('reviewInstructor').style.display = '';
+  document.getElementById('reviewInstructor').value = '';
+  document.getElementById('instructorSelected').innerHTML = '';
+  clearAcCourse();
+}
+
+function selectAcCourse(name, instructor) {
+  selectedCourse = { name, instructor };
+  document.getElementById('reviewCourse').value = '';
+  document.getElementById('reviewCourse').style.display = 'none';
+  document.getElementById('courseDropdown').classList.remove('open');
+  document.getElementById('courseSelected').innerHTML =
+    `<div class="ac-selected-tag">📚 ${name}<span class="ac-clear" onclick="clearAcCourse()">✕</span></div>`;
+}
+
+function selectAcCourseNew(name) {
+  selectedCourse = { name, instructor: selectedInstructor?.name || '' };
+  document.getElementById('reviewCourse').value = '';
+  document.getElementById('reviewCourse').style.display = 'none';
+  document.getElementById('courseDropdown').classList.remove('open');
+  document.getElementById('courseSelected').innerHTML =
+    `<div class="ac-selected-tag">🆕 ${name} (신규)<span class="ac-clear" onclick="clearAcCourse()">✕</span></div>`;
+}
+
+function clearAcCourse() {
+  selectedCourse = null;
+  document.getElementById('reviewCourse').style.display = '';
+  document.getElementById('reviewCourse').value = '';
+  document.getElementById('courseSelected').innerHTML = '';
+}
+
+// ═══ REVIEW INTERACTIONS ═══
+function filterReviews(filter, instId) {
+  const inst = instructors.find(i => i.id === instId) || worstInstructors.find(i => i.id === instId);
+  if (!inst) return;
+  const badgeHTML = { unverified: '<span class="badge badge-unverified">일반</span>', verified: '<span class="badge badge-verified">✓ 인증 수강생</span>', expert: '<span class="badge badge-expert">⭐ 핵심 리뷰어</span>' };
+  let reviews = [...inst.reviewList];
+  if (filter === 'helpful') reviews.sort((a, b) => b.helpful - a.helpful);
+  if (filter === 'verified') reviews = reviews.filter(r => r.badge !== 'unverified');
+  document.getElementById('reviewListContainer').innerHTML = reviews.length === 0
+    ? '<div style="text-align:center;padding:32px;color:var(--gray-400)">해당 조건의 리뷰가 없습니다.</div>'
+    : reviews.map(r => `
+    <div class="review-item ${r.badge === 'verified' ? 'review-verified' : r.badge === 'expert' ? 'review-expert' : ''}">
+      <div class="review-top">
+        <div class="review-author"><span class="review-author-name">${r.author}</span>${badgeHTML[r.badge]}</div>
+        <span class="review-date">${r.date}</span>
+      </div>
+      <div class="review-stars">${generateStars(r.stars, 14)}</div>
+      <div class="review-text">${r.text}</div>
+      ${r.rebuttal ? `<div class="rebuttal"><div class="rebuttal-label">💬 강사 답변</div><div class="rebuttal-text">${r.rebuttal}</div></div>` : ''}
+      <div class="review-helpful">
+        <button class="helpful-btn" onclick="event.stopPropagation(); helpfulClick(this, ${r.helpful})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
+        <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this)">🚩 신고</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function helpfulClick(btn, count) {
+  if (btn.classList.contains('voted-yes')) return;
+  btn.classList.add('voted-yes');
+  btn.style.background = 'var(--orange-light)';
+  btn.style.color = 'var(--orange)';
+  const span = btn.querySelector('span');
+  span.textContent = count + 1;
+}
+
+function reportReview(btn) {
+  if (btn.classList.contains('reported')) return;
+  btn.classList.add('reported');
+  btn.textContent = '✅ 신고 접수됨';
+  btn.style.color = 'var(--green)';
+  btn.style.cursor = 'default';
+}
+
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const area = input.previousElementSibling;
+  area.innerHTML = `
+    <div class="upload-icon">✅</div>
+    <div class="upload-text" style="color:var(--green);font-weight:700">${file.name}</div>
+    <div class="upload-sub">${(file.size / 1024 / 1024).toFixed(1)}MB · 클릭하여 변경</div>
+  `;
+  area.style.borderColor = 'var(--green)';
+  area.style.background = '#F0FDF4';
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#instructorAcWrapper')) document.getElementById('instructorDropdown').classList.remove('open');
+  if (!e.target.closest('#courseAcWrapper')) document.getElementById('courseDropdown').classList.remove('open');
+});
+
 function submitReview() {
-  const target = document.getElementById('reviewTarget').value;
+  const instName = selectedInstructor?.name || document.getElementById('reviewInstructor').value.trim();
+  const courseName = selectedCourse?.name || document.getElementById('reviewCourse').value.trim();
   const text = document.getElementById('reviewText').value;
-  if (!target || !text) { alert('강사/강의명과 리뷰 내용을 입력해주세요.'); return; }
+  if (!instName) { alert('강사를 선택하거나 입력해주세요.'); return; }
+  if (!courseName) { alert('강의명을 선택하거나 입력해주세요.'); return; }
   if (text.length < 30) { alert('리뷰는 최소 30자 이상 작성해주세요.'); return; }
-  alert('리뷰가 등록되었습니다! 인증 자료를 제출하셨다면 검토 후 인증 뱃지가 부여됩니다.');
+  if (!currentUser) {
+    document.getElementById('loginPopup').classList.add('open');
+    return;
+  }
   closeReviewModal();
+  document.getElementById('successUser').innerHTML =
+    `<img src="${currentUser.picture}" alt="">${currentUser.name} (${currentUser.email})`;
+  document.getElementById('successPopup').classList.add('open');
+}
+
+function googleLogin() {
+  closeLoginPopup();
+  if (typeof google !== 'undefined' && google.accounts) {
+    google.accounts.id.prompt();
+  } else {
+    // Fallback demo login
+    currentUser = { name: '사용자', email: 'user@gmail.com', picture: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%234285F4"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">U</text></svg>' };
+    submitReview();
+  }
+}
+
+function handleGoogleCredential(response) {
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  currentUser = { name: payload.name, email: payload.email, picture: payload.picture };
+  submitReview();
+}
+
+function closeLoginPopup() {
+  document.getElementById('loginPopup').classList.remove('open');
+}
+
+function closeSuccessPopup() {
+  document.getElementById('successPopup').classList.remove('open');
+  document.getElementById('reviewText').value = '';
+  clearAcInstructor();
+  clearAcCourse();
 }
 
 // ═══ SCROLL EFFECTS ═══
@@ -1559,6 +1992,16 @@ function closeMobileNav() {
   document.getElementById('mobileNavDrawer').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+// ═══ GOOGLE SIGN-IN INIT ═══
+window.addEventListener('load', () => {
+  if (typeof google !== 'undefined' && google.accounts) {
+    google.accounts.id.initialize({
+      client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+      callback: handleGoogleCredential
+    });
+  }
+});
 
 // ═══ INIT ═══
 renderInstructors();

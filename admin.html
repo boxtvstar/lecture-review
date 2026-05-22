@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>강의평가단 — 관리자 페이지</title>
+<title>팔이피플 — 관리자 페이지</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -50,7 +50,7 @@ body {
 .login-logo .logo-icon {
   width: 44px; height: 44px; background: var(--orange);
   border-radius: 12px; display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 20px; font-weight: 900;
+  color: white; font-size: 16px; font-weight: 900; letter-spacing: -1px;
 }
 .login-sub { font-size: 14px; color: var(--gray-400); margin-bottom: 32px; }
 .login-field { margin-bottom: 16px; text-align: left; }
@@ -88,7 +88,7 @@ body {
 .admin-topbar-logo .logo-icon {
   width: 32px; height: 32px; background: var(--orange); border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 900;
+  font-size: 13px; font-weight: 900; letter-spacing: -1px;
 }
 .admin-badge-tag {
   font-size: 11px; background: rgba(255,255,255,0.15);
@@ -166,6 +166,74 @@ body {
 .stat-card-change { font-size: 12px; font-weight: 700; margin-top: 8px; }
 .stat-card-change.up { color: var(--green); }
 .stat-card-change.down { color: var(--red); }
+
+/* ANALYTICS SECTION */
+.analytics-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 32px; }
+.analytics-card {
+  background: white; border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200); padding: 20px; overflow: hidden;
+}
+.analytics-card-title {
+  font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 4px;
+}
+.analytics-card-sub { font-size: 12px; color: var(--gray-400); margin-bottom: 16px; }
+.chart-bar-group { display: flex; flex-direction: column; gap: 10px; }
+.chart-bar-row { display: flex; align-items: center; gap: 10px; }
+.chart-bar-label { font-size: 12px; font-weight: 600; color: var(--gray-500); width: 32px; flex-shrink: 0; text-align: right; }
+.chart-bar-track { flex: 1; height: 24px; background: var(--gray-100); border-radius: 6px; position: relative; overflow: hidden; }
+.chart-bar-fill {
+  height: 100%; border-radius: 6px; transition: width 0.8s ease;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+  font-size: 11px; font-weight: 700; color: white; min-width: 36px;
+}
+.chart-bar-fill.blue { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+.chart-bar-fill.orange { background: linear-gradient(90deg, var(--orange), #FB923C); }
+.chart-bar-fill.green { background: linear-gradient(90deg, #10B981, #34D399); }
+.chart-bar-fill.purple { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+.stat-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-mini {
+  background: var(--gray-50); border-radius: 10px; padding: 14px;
+  text-align: center;
+}
+.stat-mini-value { font-size: 20px; font-weight: 900; color: var(--navy); }
+.stat-mini-label { font-size: 11px; color: var(--gray-400); font-weight: 600; margin-top: 2px; }
+.stat-mini-change { font-size: 10px; font-weight: 700; margin-top: 4px; }
+.stat-mini-change.up { color: var(--green); }
+.stat-mini-change.down { color: var(--red); }
+.traffic-source-list { display: flex; flex-direction: column; gap: 8px; }
+.traffic-source-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--gray-100);
+}
+.traffic-source-item:last-child { border-bottom: none; }
+.traffic-source-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.traffic-source-info { flex: 1; }
+.traffic-source-name { font-size: 13px; font-weight: 700; color: var(--navy); }
+.traffic-source-count { font-size: 11px; color: var(--gray-400); }
+.traffic-source-pct { font-size: 14px; font-weight: 800; color: var(--navy); }
+.realtime-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: #10B981; margin-right: 6px; animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.page-views-row { display: flex; gap: 8px; margin-top: 8px; }
+.page-view-item {
+  flex: 1; background: var(--gray-50); border-radius: 8px; padding: 10px;
+  text-align: center;
+}
+.page-view-name { font-size: 11px; color: var(--gray-400); font-weight: 600; }
+.page-view-count { font-size: 16px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+.page-view-pct { font-size: 10px; color: var(--gray-400); margin-top: 1px; }
+@media (max-width: 768px) {
+  .analytics-grid { grid-template-columns: 1fr; }
+  .stat-mini-grid { grid-template-columns: 1fr 1fr; }
+  .page-views-row { flex-wrap: wrap; }
+  .page-view-item { min-width: calc(50% - 4px); }
+}
 
 /* TABLE STYLES */
 .admin-table-wrapper {
@@ -337,7 +405,7 @@ body {
   align-items: center; justify-content: space-between;
 }
 .mobile-header .logo { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-.mobile-header .logo .logo-icon { width: 32px; height: 32px; background: var(--orange); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.mobile-header .logo .logo-icon { width: 32px; height: 32px; background: var(--orange); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; letter-spacing: -1px; }
 .hamburger { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 8px; }
 .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
 .mobile-overlay.open { display: block; }
@@ -438,8 +506,8 @@ body {
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
-      <div class="logo-icon">평</div>
-      강의평가단
+      <div class="logo-icon">82</div>
+      팔이피플
     </div>
     <div class="login-sub">관리자 전용 페이지입니다</div>
     <div class="login-field">
@@ -452,7 +520,6 @@ body {
     </div>
     <button class="login-btn" onclick="adminLogin()">관리자 로그인</button>
     <div class="login-error" id="loginError">아이디 또는 비밀번호가 올바르지 않습니다.</div>
-    <div style="margin-top:16px;font-size:12px;color:var(--gray-400)">테스트 계정: admin / admin1234</div>
   </div>
 </div>
 
@@ -460,7 +527,7 @@ body {
 <div class="admin-app" id="adminApp">
   <!-- MOBILE HEADER -->
   <div class="mobile-header" id="mobileHeader">
-    <div class="logo"><div class="logo-icon">평</div> 강의평가단 관리</div>
+    <div class="logo"><div class="logo-icon">82</div> 팔이피플 관리</div>
     <button class="hamburger" onclick="toggleMobileSidebar()">☰</button>
   </div>
   <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileSidebar()"></div>
@@ -469,8 +536,8 @@ body {
   <div class="admin-topbar">
     <div class="admin-topbar-left">
       <div class="admin-topbar-logo">
-        <div class="logo-icon">평</div>
-        강의평가단
+        <div class="logo-icon">82</div>
+        팔이피플
       </div>
       <span class="admin-badge-tag">ADMIN</span>
     </div>
@@ -530,7 +597,7 @@ body {
       <div class="admin-page active" id="page-dashboard">
         <div class="page-header">
           <div class="page-title">전체 현황</div>
-          <div class="page-subtitle">강의평가단 운영 대시보드</div>
+          <div class="page-subtitle">팔이피플 운영 대시보드</div>
         </div>
         <div class="stat-grid">
           <div class="stat-card">
@@ -562,6 +629,121 @@ body {
             <div class="stat-card-label">신고 접수</div>
             <div class="stat-card-value" style="color:var(--red)">3</div>
             <div class="stat-card-change down">확인 필요</div>
+          </div>
+        </div>
+
+        <!-- VISIT ANALYTICS -->
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <div class="analytics-card-title"><span class="realtime-dot"></span>주간 방문자 추이</div>
+            <div class="analytics-card-sub">최근 7일간 일별 방문자 수</div>
+            <div class="chart-bar-group" id="weeklyChart"></div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-card-title">실시간 현황</div>
+            <div class="analytics-card-sub">오늘 기준</div>
+            <div class="stat-mini-grid">
+              <div class="stat-mini">
+                <div class="stat-mini-value" id="todayVisitors">1,842</div>
+                <div class="stat-mini-label">오늘 방문</div>
+                <div class="stat-mini-change up">▲ 12.3%</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-value" id="todayPV">5,234</div>
+                <div class="stat-mini-label">페이지뷰</div>
+                <div class="stat-mini-change up">▲ 8.7%</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-value">2:34</div>
+                <div class="stat-mini-label">평균 체류</div>
+                <div class="stat-mini-change up">▲ 15s</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-value">38.2%</div>
+                <div class="stat-mini-label">이탈률</div>
+                <div class="stat-mini-change down">▼ 2.1%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <div class="analytics-card-title">인기 페이지</div>
+            <div class="analytics-card-sub">페이지별 조회수 TOP</div>
+            <div class="page-views-row">
+              <div class="page-view-item">
+                <div class="page-view-name">🏠 메인</div>
+                <div class="page-view-count">2,156</div>
+                <div class="page-view-pct">41.2%</div>
+              </div>
+              <div class="page-view-item">
+                <div class="page-view-name">🔍 검색</div>
+                <div class="page-view-count">1,087</div>
+                <div class="page-view-pct">20.8%</div>
+              </div>
+              <div class="page-view-item">
+                <div class="page-view-name">👤 강사 상세</div>
+                <div class="page-view-count">892</div>
+                <div class="page-view-pct">17.0%</div>
+              </div>
+              <div class="page-view-item">
+                <div class="page-view-name">🚨 감별기</div>
+                <div class="page-view-count">634</div>
+                <div class="page-view-pct">12.1%</div>
+              </div>
+              <div class="page-view-item">
+                <div class="page-view-name">✏️ 리뷰작성</div>
+                <div class="page-view-count">465</div>
+                <div class="page-view-pct">8.9%</div>
+              </div>
+            </div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-card-title">유입 경로</div>
+            <div class="analytics-card-sub">방문자 유입 소스</div>
+            <div class="traffic-source-list">
+              <div class="traffic-source-item">
+                <div class="traffic-source-icon" style="background:#FEF3C7">🔍</div>
+                <div class="traffic-source-info">
+                  <div class="traffic-source-name">네이버 검색</div>
+                  <div class="traffic-source-count">687명</div>
+                </div>
+                <div class="traffic-source-pct">37.3%</div>
+              </div>
+              <div class="traffic-source-item">
+                <div class="traffic-source-icon" style="background:#DBEAFE">🌐</div>
+                <div class="traffic-source-info">
+                  <div class="traffic-source-name">구글 검색</div>
+                  <div class="traffic-source-count">412명</div>
+                </div>
+                <div class="traffic-source-pct">22.4%</div>
+              </div>
+              <div class="traffic-source-item">
+                <div class="traffic-source-icon" style="background:#FCE7F3">💬</div>
+                <div class="traffic-source-info">
+                  <div class="traffic-source-name">커뮤니티 / SNS</div>
+                  <div class="traffic-source-count">324명</div>
+                </div>
+                <div class="traffic-source-pct">17.6%</div>
+              </div>
+              <div class="traffic-source-item">
+                <div class="traffic-source-icon" style="background:#D1FAE5">🔗</div>
+                <div class="traffic-source-info">
+                  <div class="traffic-source-name">직접 접속</div>
+                  <div class="traffic-source-count">289명</div>
+                </div>
+                <div class="traffic-source-pct">15.7%</div>
+              </div>
+              <div class="traffic-source-item">
+                <div class="traffic-source-icon" style="background:#EDE9FE">📱</div>
+                <div class="traffic-source-info">
+                  <div class="traffic-source-name">기타</div>
+                  <div class="traffic-source-count">130명</div>
+                </div>
+                <div class="traffic-source-pct">7.0%</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1050,18 +1232,20 @@ function renderUsersTable(filter = 'all') {
 }
 
 function renderReviewsTable() {
-  document.getElementById('reviewsTableBody').innerHTML = recentReviews.map(r => `
-    <tr>
+  document.getElementById('reviewsTableBody').innerHTML = recentReviews.map((r, idx) => `
+    <tr id="reviewRow${idx}" ${r.blinded ? 'style="opacity:0.4"' : ''}>
       <td><span class="user-name">${r.author}</span></td>
       <td>${r.instructor}</td>
       <td><span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score}.0 ★</span></td>
-      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.text}</td>
+      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.blinded ? '<span style="color:var(--gray-400)">🚫 블라인드 처리된 리뷰</span>' : r.text}</td>
       <td>${r.verified ? '<span class="status-badge status-approved">인증</span>' : '<span class="status-badge status-unverified">비인증</span>'}</td>
       <td>${r.date}</td>
       <td>
         <div class="action-btn-group">
-          <button class="action-btn action-btn-view">상세</button>
-          <button class="action-btn action-btn-delete" onclick="showToast('리뷰가 블라인드 처리되었습니다', 'info')">블라인드</button>
+          ${r.blinded
+            ? `<button class="action-btn action-btn-approve" onclick="unblindReview(${idx})">복구</button>`
+            : `<button class="action-btn action-btn-delete" onclick="blindReview(${idx})">블라인드</button>`
+          }
         </div>
       </td>
     </tr>
@@ -1069,18 +1253,19 @@ function renderReviewsTable() {
 }
 
 function renderReportsTable() {
-  document.getElementById('reportsTableBody').innerHTML = reportItems.map(r => `
-    <tr>
+  document.getElementById('reportsTableBody').innerHTML = reportItems.map((r, idx) => `
+    <tr id="reportRow${idx}" ${r.handled ? 'style="opacity:0.5"' : ''}>
       <td><strong>${r.target}</strong></td>
-      <td><span class="status-badge status-pending">${r.type}</span></td>
+      <td><span class="status-badge ${r.handled ? (r.result === 'done' ? 'status-approved' : 'status-rejected') : 'status-pending'}">${r.handled ? (r.result === 'done' ? '처리 완료' : '반려됨') : r.type}</span></td>
       <td style="max-width:200px">${r.reason}</td>
       <td>${r.reporter}</td>
       <td>${r.date}</td>
       <td>
         <div class="action-btn-group">
-          <button class="action-btn action-btn-view">검토</button>
-          <button class="action-btn action-btn-approve" onclick="showToast('처리 완료', 'success')">처리</button>
-          <button class="action-btn action-btn-delete" onclick="showToast('반려됨', 'error')">반려</button>
+          ${r.handled ? '<span style="font-size:12px;color:var(--gray-400)">처리됨</span>' : `
+            <button class="action-btn action-btn-approve" onclick="handleReport(${idx},'done')">처리</button>
+            <button class="action-btn action-btn-delete" onclick="handleReport(${idx},'reject')">반려</button>
+          `}
         </div>
       </td>
     </tr>
@@ -1097,7 +1282,7 @@ function renderInstructorsTable() {
       <td>${i.reviews}개</td>
       <td><span style="color:${i.hype > 70 ? 'var(--red)' : i.hype > 40 ? 'var(--gold)' : 'var(--green)'};font-weight:700">${i.hype}%</span></td>
       <td>
-        <button class="action-btn action-btn-view">관리</button>
+        <button class="action-btn action-btn-view" onclick="showInstructorDetail(${idx})">관리</button>
         <button class="action-btn action-btn-delete" onclick="deleteInstructor(${idx})">삭제</button>
       </td>
     </tr>
@@ -1251,6 +1436,21 @@ function showToast(msg, type = 'success') {
 }
 
 // ═══ RENDER ALL ═══
+function renderWeeklyChart() {
+  const days = ['월', '화', '수', '목', '금', '토', '일'];
+  const visitors = [1245, 1578, 1842, 2103, 1967, 1423, 1842];
+  const max = Math.max(...visitors);
+  const colors = ['blue', 'blue', 'orange', 'green', 'blue', 'purple', 'orange'];
+  document.getElementById('weeklyChart').innerHTML = days.map((d, i) => `
+    <div class="chart-bar-row">
+      <span class="chart-bar-label">${d}</span>
+      <div class="chart-bar-track">
+        <div class="chart-bar-fill ${colors[i]}" style="width:${(visitors[i]/max*100).toFixed(0)}%">${visitors[i].toLocaleString()}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
 function renderAll() {
   renderDashboardRecent();
   renderVerificationTable();
@@ -1259,6 +1459,7 @@ function renderAll() {
   renderReviewsTable();
   renderReportsTable();
   renderInstructorsTable();
+  renderWeeklyChart();
   updatePendingCount();
 }
 
@@ -1307,6 +1508,46 @@ function deleteInstructor(idx) {
   adminInstructors.splice(idx, 1);
   renderInstructorsTable();
   showToast(`"${name}" 강사가 삭제되었습니다.`, 'info');
+}
+
+function showInstructorDetail(idx) {
+  const i = adminInstructors[idx];
+  document.getElementById('vmTitle').textContent = `${i.name} 강사 상세`;
+  document.getElementById('vmSub').textContent = `${i.category} · ${i.platform}`;
+  document.getElementById('vmBody').innerHTML = `
+    <div class="verify-info-grid">
+      <div class="verify-info-item"><div class="verify-info-label">강사명</div><div class="verify-info-value">${i.name}</div></div>
+      <div class="verify-info-item"><div class="verify-info-label">분야</div><div class="verify-info-value">${i.category}</div></div>
+      <div class="verify-info-item"><div class="verify-info-label">플랫폼</div><div class="verify-info-value">${i.platform}</div></div>
+      <div class="verify-info-item"><div class="verify-info-label">평점</div><div class="verify-info-value" style="color:${i.score >= 4 ? 'var(--green)' : i.score >= 3 ? 'var(--gold)' : 'var(--red)'}">${i.score} ★</div></div>
+      <div class="verify-info-item"><div class="verify-info-label">리뷰 수</div><div class="verify-info-value">${i.reviews}개</div></div>
+      <div class="verify-info-item"><div class="verify-info-label">과대광고 지수</div><div class="verify-info-value" style="color:${i.hype > 70 ? 'var(--red)' : i.hype > 40 ? 'var(--gold)' : 'var(--green)'}">${i.hype}%</div></div>
+    </div>
+    <div class="verify-modal-actions" style="margin-top:16px">
+      <button class="verify-action-btn verify-action-cancel" onclick="closeVerifyModal()" style="flex:1">닫기</button>
+    </div>
+  `;
+  document.getElementById('verifyModal').classList.add('open');
+}
+
+function blindReview(idx) {
+  recentReviews[idx].blinded = true;
+  renderReviewsTable();
+  showToast('리뷰가 블라인드 처리되었습니다.', 'info');
+}
+
+function unblindReview(idx) {
+  recentReviews[idx].blinded = false;
+  renderReviewsTable();
+  showToast('리뷰 블라인드가 해제되었습니다.', 'success');
+}
+
+function handleReport(idx, result) {
+  reportItems[idx].handled = true;
+  reportItems[idx].result = result;
+  renderReportsTable();
+  if (result === 'done') showToast('신고가 처리 완료되었습니다.', 'success');
+  else showToast('신고가 반려되었습니다.', 'error');
 }
 </script>
 </body>
