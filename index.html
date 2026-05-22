@@ -286,6 +286,46 @@ body {
   color: var(--orange); font-weight: 700; cursor: pointer; text-decoration: none;
 }
 
+/* ═══ COMMUNITY PREVIEW ═══ */
+.community-preview {
+  max-width: 1200px; margin: 0 auto; padding: 48px 24px;
+}
+.community-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.community-card {
+  background: white; border-radius: var(--radius-md); padding: 20px;
+  border: 1px solid var(--gray-200); transition: all 0.25s; cursor: pointer;
+  text-decoration: none; display: block;
+}
+.community-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.community-card-top {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.community-cat {
+  padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+}
+.community-cat.free { background: var(--green-light); color: var(--green); }
+.community-cat.review { background: var(--orange-light); color: var(--orange); }
+.community-cat.question { background: #F59E0B; color: white; }
+.community-cat.tip { background: #F3E8FF; color: #7C3AED; }
+.community-hot {
+  padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 800;
+  background: var(--red); color: white;
+}
+.community-card-title {
+  font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px;
+  line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.community-card-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--gray-400); margin-top: 10px;
+}
+.community-card-author { font-weight: 600; color: var(--gray-500); }
+.community-card-stats { display: flex; gap: 8px; }
+
 /* ═══ DISCLAIMER BAR ═══ */
 .disclaimer-bar {
   background: var(--gray-100); border-top: 1px solid var(--gray-200);
@@ -1008,6 +1048,10 @@ body {
   .platform-reviews { font-size: 11px; }
   .platform-detail-row { font-size: 12px; }
   .disclaimer-bar { font-size: 11px; padding: 12px 16px; }
+  .community-preview { padding: 28px 16px; }
+  .community-grid { grid-template-columns: 1fr; gap: 10px; }
+  .community-card { padding: 16px; }
+  .community-card-title { font-size: 14px; }
   .categories { padding: 0 16px; gap: 6px; margin-top: -12px; }
   .cat-pill { padding: 7px 12px; font-size: 12px; border-width: 1.5px; }
   .cat-pill .cat-count { font-size: 10px; padding: 1px 6px; margin-left: 4px; }
@@ -1231,6 +1275,15 @@ body {
   </div>
   <div class="ranking-tabs" id="rankingTabs"></div>
   <div class="ranking-list" id="rankingList"></div>
+</section>
+
+<!-- ═══ COMMUNITY PREVIEW ═══ -->
+<section class="community-preview" id="community">
+  <div class="section-header">
+    <h2 class="section-title"><span class="icon">💬</span> 커뮤니티</h2>
+    <a href="community.html" class="section-link">전체 보기 →</a>
+  </div>
+  <div class="community-grid" id="communityGrid"></div>
 </section>
 
 <!-- ═══ FOOTER ═══ -->
@@ -2393,12 +2446,43 @@ function setPlatformStar(val) {
   });
 }
 
+// ═══ COMMUNITY PREVIEW ═══
+const communityPosts = [
+  { category: '수강후기', catClass: 'review', title: '인프런 김코딩 React 강의 솔직 후기', author: '개발자지망생', date: '05.22', views: 342, likes: 47, comments: 12, hot: false },
+  { category: '자유', catClass: 'free', title: '강의팔이 구별하는 제 나름의 기준 공유합니다', author: '호구탈출', date: '05.21', views: 1203, likes: 189, comments: 34, hot: true },
+  { category: '질문', catClass: 'question', title: '패스트캠퍼스 vs 인프런 어디가 더 좋나요?', author: '고민중', date: '05.21', views: 567, likes: 23, comments: 18, hot: false },
+  { category: '꿀팁', catClass: 'tip', title: '강의 환불받는 확실한 방법 (플랫폼별 정리)', author: '환불마스터', date: '05.20', views: 2341, likes: 312, comments: 56, hot: true },
+  { category: '수강후기', catClass: 'review', title: '콜로소 디자인 강의 들어본 후기 (실망)', author: '디자인학도', date: '05.20', views: 876, likes: 65, comments: 8, hot: false },
+  { category: '자유', catClass: 'free', title: '여기 사이트 괜찮네요 이런 거 필요했는데', author: '수강생A', date: '05.19', views: 432, likes: 78, comments: 5, hot: false },
+];
+
+function renderCommunityPreview() {
+  document.getElementById('communityGrid').innerHTML = communityPosts.slice(0, 6).map(p => `
+    <a class="community-card" href="community.html">
+      <div class="community-card-top">
+        <span class="community-cat ${p.catClass}">${p.category}</span>
+        ${p.hot ? '<span class="community-hot">HOT</span>' : ''}
+      </div>
+      <div class="community-card-title">${p.title}</div>
+      <div class="community-card-bottom">
+        <span class="community-card-author">${p.author}</span>
+        <div class="community-card-stats">
+          <span>👁 ${p.views}</span>
+          <span>❤️ ${p.likes}</span>
+          <span>💬 ${p.comments}</span>
+        </div>
+      </div>
+    </a>
+  `).join('');
+}
+
 // ═══ INIT ═══
 renderInstructors();
 renderWorst();
 renderDetector();
 renderRankings();
 renderPlatforms();
+renderCommunityPreview();
 </script>
 </body>
 </html>
