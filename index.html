@@ -237,6 +237,54 @@ body {
 }
 .platform-badge.verified-only { background: var(--green-light); color: var(--green); }
 
+/* ═══ COMMENTS ═══ */
+.comments-section { margin-top: 24px; }
+.comments-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.comments-title { font-size: 15px; font-weight: 800; color: var(--navy); }
+.comments-count { font-size: 12px; color: var(--gray-400); font-weight: 600; }
+.comment-input-area {
+  display: flex; gap: 8px; margin-bottom: 16px;
+}
+.comment-input {
+  flex: 1; padding: 10px 14px; border: 1.5px solid var(--gray-200);
+  border-radius: 10px; font-size: 14px; font-family: inherit;
+  outline: none; transition: border-color 0.2s;
+}
+.comment-input:focus { border-color: var(--orange); }
+.comment-submit-btn {
+  padding: 10px 18px; background: var(--navy); color: white;
+  border: none; border-radius: 10px; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background 0.2s;
+  white-space: nowrap;
+}
+.comment-submit-btn:hover { background: var(--navy-light); }
+.comment-item {
+  padding: 12px 0; border-bottom: 1px solid var(--gray-100);
+}
+.comment-item:last-child { border-bottom: none; }
+.comment-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.comment-author { font-size: 13px; font-weight: 700; color: var(--navy); }
+.comment-badge-unverified {
+  display: inline-block; padding: 2px 6px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; margin-left: 6px;
+  background: var(--gray-100); color: var(--gray-400);
+}
+.comment-date { font-size: 11px; color: var(--gray-400); }
+.comment-text { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
+.comment-login-msg {
+  text-align: center; padding: 16px; background: var(--gray-50);
+  border-radius: 10px; font-size: 13px; color: var(--gray-400);
+}
+.comment-login-msg a {
+  color: var(--orange); font-weight: 700; cursor: pointer; text-decoration: none;
+}
+
 /* ═══ DISCLAIMER BAR ═══ */
 .disclaimer-bar {
   background: var(--gray-100); border-top: 1px solid var(--gray-200);
@@ -1665,6 +1713,18 @@ const platformData = [
     satisfaction: 3.5, refund: 3.3, support: 3.6, content: 3.7 },
 ];
 
+// ═══ COMMENTS DATA ═══
+const commentsData = {};
+
+// 샘플 댓글
+commentsData[1] = [
+  { author: '비회원A', verified: false, date: '2026.05.20', text: '이 강사 강의 궁금한데 난이도가 어느 정도인가요?' },
+  { author: '수강고민중', verified: false, date: '2026.05.19', text: '할인 기간에 사면 괜찮을 것 같은데.. 정가는 좀 비싸요' },
+];
+commentsData[4] = [
+  { author: '구경꾼', verified: false, date: '2026.05.21', text: '리뷰 보니까 진짜 심각하네요;; 이런 곳이 아직도 운영되는 게 신기' },
+];
+
 let currentCategory = '전체';
 let currentSort = 'popular';
 let selectedInstructor = null;
@@ -1904,7 +1964,20 @@ function openDetail(id) {
         </div>
       `).join('')}
     </div>
+    <div class="modal-divider"></div>
+    <div class="comments-section">
+      <div class="comments-header">
+        <span class="comments-title">💬 의견 (미인증도 참여 가능)</span>
+        <span class="comments-count" id="commentCount"></span>
+      </div>
+      ${currentUser
+        ? '<div class="comment-input-area"><input class="comment-input" id="commentInput" placeholder="의견을 남겨주세요 (평가 미반영)"><button class="comment-submit-btn" onclick="submitComment('+inst.id+')">등록</button></div>'
+        : '<div class="comment-login-msg">의견을 남기려면 <a onclick="googleLogin()">로그인</a>이 필요합니다.</div>'
+      }
+      <div id="commentListContainer"></div>
+    </div>
   `;
+  renderComments(inst.id);
 
   const modal = document.getElementById('detailModal');
   modal.classList.add('open');
@@ -2118,6 +2191,47 @@ function handleFileUpload(input) {
   `;
   area.style.borderColor = 'var(--green)';
   area.style.background = '#F0FDF4';
+}
+
+// ═══ COMMENTS ═══
+function renderComments(instId) {
+  const comments = commentsData[instId] || [];
+  const container = document.getElementById('commentListContainer');
+  const countEl = document.getElementById('commentCount');
+  if (countEl) countEl.textContent = `${comments.length}개`;
+  if (!container) return;
+  container.innerHTML = comments.length === 0
+    ? '<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:13px">아직 의견이 없습니다.</div>'
+    : comments.map((c, i) => `
+      <div class="comment-item" id="comment-${instId}-${i}">
+        <div class="comment-top">
+          <div>
+            <span class="comment-author">${c.author}</span>
+            ${c.verified ? '' : '<span class="comment-badge-unverified">미인증</span>'}
+          </div>
+          <span class="comment-date">${c.date}</span>
+        </div>
+        <div class="comment-text">${c.text}</div>
+      </div>
+    `).join('');
+}
+
+function submitComment(instId) {
+  const input = document.getElementById('commentInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) { alert('의견을 입력해주세요.'); return; }
+  if (!currentUser) { googleLogin(); return; }
+  if (!commentsData[instId]) commentsData[instId] = [];
+  const today = new Date();
+  commentsData[instId].unshift({
+    author: currentUser.name,
+    verified: false,
+    date: `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`,
+    text: text
+  });
+  input.value = '';
+  renderComments(instId);
 }
 
 // Close dropdowns on outside click

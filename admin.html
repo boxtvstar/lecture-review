@@ -580,6 +580,9 @@ body {
         <div class="sidebar-item" onclick="showPage('reviews', this)">
           <span class="icon">📝</span> 리뷰 관리
         </div>
+        <div class="sidebar-item" onclick="showPage('comments', this)">
+          <span class="icon">💬</span> 댓글 관리
+        </div>
         <div class="sidebar-item" onclick="showPage('reports', this)">
           <span class="icon">🚨</span> 신고 접수
           <span class="sidebar-badge red">3</span>
@@ -879,6 +882,32 @@ body {
               </tr>
             </thead>
             <tbody id="reviewsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- COMMENTS MANAGEMENT (inside reviews page) -->
+      <div class="admin-page" id="page-comments">
+        <div class="page-header">
+          <div class="page-title">댓글 관리</div>
+          <div class="page-subtitle">미인증 사용자 의견 관리 및 삭제</div>
+        </div>
+        <div class="admin-table-wrapper">
+          <div class="admin-table-header">
+            <div class="admin-table-title">최근 댓글</div>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>작성자</th>
+                <th>대상 강사</th>
+                <th>인증</th>
+                <th>내용</th>
+                <th>작성일</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="commentsTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -1451,6 +1480,44 @@ function renderWeeklyChart() {
   `).join('');
 }
 
+// ═══ ADMIN COMMENTS DATA & RENDER ═══
+const adminComments = [
+  { author: '비회원A', instructor: '김코딩', verified: false, date: '2026.05.20', text: '이 강사 강의 궁금한데 난이도가 어느 정도인가요?', deleted: false },
+  { author: '수강고민중', instructor: '김코딩', verified: false, date: '2026.05.19', text: '할인 기간에 사면 괜찮을 것 같은데.. 정가는 좀 비싸요', deleted: false },
+  { author: '구경꾼', instructor: '최재테크', verified: false, date: '2026.05.21', text: '리뷰 보니까 진짜 심각하네요;; 이런 곳이 아직도 운영되는 게 신기', deleted: false },
+  { author: '지나가다', instructor: '속성코딩', verified: false, date: '2026.05.22', text: '유튜브에서 광고 엄청 나오던데 여기서 보니 평가가 안 좋네', deleted: false },
+];
+
+function renderCommentsTable() {
+  document.getElementById('commentsTableBody').innerHTML = adminComments.map((c, idx) => {
+    if (c.deleted) return `
+      <tr style="opacity:0.4">
+        <td>${c.author}</td>
+        <td>${c.instructor}</td>
+        <td><span style="color:var(--gray-400);font-size:12px">미인증</span></td>
+        <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:line-through">${c.text}</td>
+        <td>${c.date}</td>
+        <td><span style="color:var(--red);font-size:12px;font-weight:700">삭제됨</span></td>
+      </tr>`;
+    return `
+      <tr>
+        <td><strong>${c.author}</strong></td>
+        <td>${c.instructor}</td>
+        <td><span style="color:var(--gray-400);font-size:12px;font-weight:700">미인증</span></td>
+        <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.text}</td>
+        <td>${c.date}</td>
+        <td><button class="admin-btn admin-btn-danger" onclick="deleteComment(${idx})">삭제</button></td>
+      </tr>`;
+  }).join('');
+}
+
+function deleteComment(idx) {
+  if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+  adminComments[idx].deleted = true;
+  renderCommentsTable();
+  showToast('댓글이 삭제되었습니다.');
+}
+
 function renderAll() {
   renderDashboardRecent();
   renderVerificationTable();
@@ -1459,6 +1526,7 @@ function renderAll() {
   renderReviewsTable();
   renderReportsTable();
   renderInstructorsTable();
+  renderCommentsTable();
   renderWeeklyChart();
   updatePendingCount();
 }
