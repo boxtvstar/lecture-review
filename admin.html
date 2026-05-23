@@ -1085,10 +1085,30 @@ const allUsers = [
 ];
 
 const recentReviews = [
-  { author: 'ML엔지니어', instructor: '윤AI', score: 5, text: 'LLM 파인튜닝부터 프로덕션 배포까지 최고의 강의...', verified: true, date: '2026.05.20' },
-  { author: '호구탈출', instructor: '최재테크', score: 1, text: '3개월 만에 1억 광고 보고 들었는데 유튜브 수준...', verified: false, date: '2026.05.19' },
-  { author: '디자인학도', instructor: '꿀디자인', score: 2, text: '유튜브 무료 영상 짜깁기한 느낌...', verified: false, date: '2026.05.14' },
-  { author: '개발자지망생', instructor: '김코딩', score: 5, text: '실무에서 바로 쓸 수 있는 내용이 많아서 정말 만족...', verified: false, date: '2026.05.15' },
+  { author: 'ML엔지니어', instructor: '윤AI', score: 5, text: 'LLM 파인튜닝부터 프로덕션 배포까지 최고의 강의. 실무 코드 예제가 훌륭합니다.', verified: true, date: '2026.05.20' },
+  { author: 'ML엔지니어', instructor: '김코딩', score: 4, text: 'React 기초부터 심화까지 체계적. 다만 AI 연동 파트가 아쉬움.', verified: true, date: '2026.05.12' },
+  { author: 'ML엔지니어', instructor: '정파이썬', score: 5, text: '파이썬 데이터분석 입문으로 최고. 판다스/넘파이 실습이 알차요.', verified: true, date: '2026.04.28' },
+  { author: '호구탈출', instructor: '최재테크', score: 1, text: '3개월 만에 1억 광고 보고 들었는데 유튜브 수준... 환불도 안 됨.', verified: false, date: '2026.05.19' },
+  { author: '호구탈출', instructor: '돈벼락', score: 1, text: '코인으로 월 1000만원? 완전 사기. 기본적인 차트 보는 법만 알려줌.', verified: false, date: '2026.05.10' },
+  { author: '디자인학도', instructor: '꿀디자인', score: 2, text: '유튜브 무료 영상 짜깁기한 느낌... 가격 대비 내용이 너무 없음.', verified: false, date: '2026.05.14' },
+  { author: '디자인학도', instructor: '오UI', score: 4, text: 'Framer 실무 강의 퀄리티가 좋음. 포트폴리오 만들기에 유용했어요.', verified: false, date: '2026.05.08' },
+  { author: '디자인학도', instructor: '이디자이너', score: 5, text: '피그마 실무 꿀팁이 많아서 업무에 바로 적용 가능했습니다.', verified: false, date: '2026.04.20' },
+  { author: '개발자지망생', instructor: '김코딩', score: 5, text: '실무에서 바로 쓸 수 있는 내용이 많아서 정말 만족합니다.', verified: false, date: '2026.05.15' },
+  { author: '개발자지망생', instructor: '정파이썬', score: 4, text: '파이썬 기초 강의 잘 되어 있음. 초보자 추천.', verified: false, date: '2026.05.02' },
+  { author: '개발자지망생', instructor: '속성코딩', score: 1, text: '2주 완성이라더니 내용이 부실. 유튜브 무료 강의가 더 나음.', verified: false, date: '2026.04.25' },
+  { author: '문과출신개발자', instructor: '김코딩', score: 5, text: 'React 입문부터 실전 프로젝트까지 완벽. 문과생도 따라갈 수 있었어요.', verified: true, date: '2026.05.18' },
+  { author: '문과출신개발자', instructor: '정파이썬', score: 5, text: '파이썬 강의 중 최고. 비전공자 눈높이에 맞춰서 설명해줍니다.', verified: true, date: '2026.04.15' },
+  { author: '문과출신개발자', instructor: '속성코딩', score: 2, text: '속성이라 빠르긴 한데 이해 안 되는 부분을 넘어가버림.', verified: true, date: '2026.03.28' },
+  { author: '프리랜서디자이너', instructor: '오UI', score: 5, text: 'Framer 강의 퀄리티 최상급. 프리랜서 포트폴리오에 바로 활용 가능.', verified: true, date: '2026.05.16' },
+  { author: '프리랜서디자이너', instructor: '이디자이너', score: 4, text: '피그마 고급 기능 위주라 실무에 도움 많이 됐습니다.', verified: true, date: '2026.04.10' },
+  { author: '마케터3년차', instructor: '박마케터', score: 4, text: '퍼포먼스 마케팅 실전 노하우가 괜찮았어요. 가격이 좀 비쌈.', verified: false, date: '2026.05.11' },
+  { author: '마케터3년차', instructor: '매출폭발러', score: 1, text: '매출 10배? 인스타 릴스 만드는 법이 전부. 완전 낚임.', verified: false, date: '2026.04.30' },
+  { author: '1인사업자', instructor: '박마케터', score: 3, text: '마케팅 기초는 괜찮은데 심화 내용이 부족. 중급자한테는 애매함.', verified: true, date: '2026.05.13' },
+  { author: '1인사업자', instructor: '매출폭발러', score: 1, text: '사업자 대상이라 기대했는데 유튜브 광고 그 자체. 환불 요청함.', verified: true, date: '2026.04.22' },
+  { author: '부린이', instructor: '강부동산', score: 3, text: '부동산 기초 정보는 유용했으나 실전 투자 전략은 부족.', verified: false, date: '2026.05.09' },
+  { author: '부린이', instructor: '최재테크', score: 2, text: '재테크라기보단 자기 유튜브 홍보 강의. 실속 없음.', verified: false, date: '2026.04.28' },
+  { author: '코딩초보', instructor: '김코딩', score: 4, text: '코딩 처음인데 따라갈 만했어요. 속도가 좀 빠름.', verified: false, date: '2026.05.07' },
+  { author: '직장인A', instructor: '정파이썬', score: 4, text: '퇴근 후 공부하기 좋은 분량. 업무 자동화에 활용 중.', verified: false, date: '2026.05.06' },
   { author: '소상공인', instructor: '매출폭발러', score: 1, text: '매출 10배 보장이라고 해서 들었는데 인스타 릴스 만드는 법이 전부...', verified: false, date: '2026.05.17' },
 ];
 
@@ -1417,54 +1437,50 @@ function openUserDetail(userId) {
       ` : ''}
     </div>
 
-    ${userVerifyReqs.length > 0 ? `
-      <div style="margin-top:16px">
-        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">📋 인증 요청 이력 (${userVerifyReqs.length}건)</div>
-        ${userVerifyReqs.map(v => `
-          <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <span style="font-weight:700">${v.instructor}</span> · ${v.course}
-              <span style="color:var(--gray-400);margin-left:6px">(${v.type})</span>
-            </div>
-            <div>
-              ${v.status === 'pending' ? '<span class="status-badge status-pending">대기중</span>'
-                : v.status === 'approved' ? '<span class="status-badge status-approved">승인</span>'
-                : '<span class="status-badge status-rejected">거부</span>'}
-            </div>
+    <div style="margin-top:16px">
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">📋 인증 요청 이력 (${userVerifyReqs.length}건)</div>
+      ${userVerifyReqs.length > 0 ? userVerifyReqs.map(v => `
+        <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <span style="font-weight:700">${v.instructor}</span> · ${v.course}
+            <span style="color:var(--gray-400);margin-left:6px">(${v.type})</span>
           </div>
-        `).join('')}
-      </div>
-    ` : ''}
+          <div>
+            ${v.status === 'pending' ? '<span class="status-badge status-pending">대기중</span>'
+              : v.status === 'approved' ? '<span class="status-badge status-approved">승인</span>'
+              : '<span class="status-badge status-rejected">거부</span>'}
+          </div>
+        </div>
+      `).join('') : '<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:13px">인증 요청 이력 없음</div>'}
+    </div>
 
-    ${userReviews.length > 0 ? `
-      <div style="margin-top:16px">
-        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">📝 작성 리뷰 (${userReviews.length}건)</div>
-        ${userReviews.map(r => `
-          <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="font-weight:700">${r.instructor}</span>
-              <span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score}.0 ★</span>
-            </div>
-            <div style="color:var(--gray-500)">${r.text}</div>
+    <div style="margin-top:16px">
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">📝 작성 리뷰 (${userReviews.length}건)</div>
+      ${userReviews.length > 0 ? userReviews.map(r => `
+        <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-weight:700">${r.instructor}</span>
+            <span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score}.0 ★</span>
           </div>
-        `).join('')}
-      </div>
-    ` : ''}
+          <div style="color:var(--gray-500)">${r.text}</div>
+          <div style="margin-top:4px;font-size:11px;color:var(--gray-400)">${r.date} · ${r.verified ? '✅ 인증 리뷰' : '비인증'}${r.blinded ? ' · 🚫 블라인드' : ''}</div>
+        </div>
+      `).join('') : '<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:13px">작성한 리뷰 없음</div>'}
+    </div>
 
-    ${userComments.length > 0 ? `
-      <div style="margin-top:16px">
-        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">💬 작성 댓글 (${userComments.length}건)</div>
-        ${userComments.map(c => `
-          <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="font-weight:700">${c.instructor}</span>
-              <span style="color:var(--gray-400)">${c.date}</span>
-            </div>
-            <div style="color:var(--gray-500)${c.deleted ? ';text-decoration:line-through' : ''}">${c.text}</div>
+    <div style="margin-top:16px">
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">💬 작성 댓글 (${userComments.length}건)</div>
+      ${userComments.length > 0 ? userComments.map(c => `
+        <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-weight:700">${c.instructor}</span>
+            <span style="color:var(--gray-400)">${c.date}</span>
           </div>
-        `).join('')}
-      </div>
-    ` : ''}
+          <div style="color:var(--gray-500)${c.deleted ? ';text-decoration:line-through' : ''}">${c.text}</div>
+          ${c.deleted ? '<div style="margin-top:4px;font-size:11px;color:var(--red)">🚫 삭제됨</div>' : ''}
+        </div>
+      `).join('') : '<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:13px">작성한 댓글 없음</div>'}
+    </div>
 
     <div class="verify-modal-actions" style="margin-top:16px">
       ${user.verified
@@ -1596,6 +1612,14 @@ const adminComments = [
   { author: '수강고민중', instructor: '김코딩', verified: false, date: '2026.05.19', text: '할인 기간에 사면 괜찮을 것 같은데.. 정가는 좀 비싸요', deleted: false },
   { author: '구경꾼', instructor: '최재테크', verified: false, date: '2026.05.21', text: '리뷰 보니까 진짜 심각하네요;; 이런 곳이 아직도 운영되는 게 신기', deleted: false },
   { author: '지나가다', instructor: '속성코딩', verified: false, date: '2026.05.22', text: '유튜브에서 광고 엄청 나오던데 여기서 보니 평가가 안 좋네', deleted: false },
+  { author: '호구탈출', instructor: '돈벼락', verified: false, date: '2026.05.20', text: '이 강사 피해자 모임 카톡방 있나요? 저도 참여하고 싶어요', deleted: false },
+  { author: '호구탈출', instructor: '최재테크', verified: false, date: '2026.05.18', text: '환불 받으신 분 계신가요? 절차 좀 알려주세요', deleted: false },
+  { author: '개발자지망생', instructor: '속성코딩', verified: false, date: '2026.05.16', text: '이 강의 들을 바에 김코딩 강의 추천합니다', deleted: false },
+  { author: '디자인학도', instructor: '이디자이너', verified: false, date: '2026.05.15', text: '후속 강의 나올 예정 있나요? 피그마 심화 듣고 싶어요', deleted: false },
+  { author: '부린이', instructor: '강부동산', verified: false, date: '2026.05.14', text: '강의 업데이트가 안 되는 것 같은데 최신 정책 반영되나요?', deleted: false },
+  { author: '마케터3년차', instructor: '박마케터', verified: false, date: '2026.05.13', text: '구글 애즈 파트 추가되면 좋겠어요', deleted: false },
+  { author: '코딩초보', instructor: '김코딩', verified: false, date: '2026.05.12', text: 'JS 기초가 없어도 React 강의 따라갈 수 있을까요?', deleted: false },
+  { author: '직장인A', instructor: '정파이썬', verified: false, date: '2026.05.11', text: '엑셀 자동화 예제 더 추가해주시면 좋겠습니다', deleted: false },
 ];
 
 function renderCommentsTable() {
