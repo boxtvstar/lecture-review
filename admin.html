@@ -1223,7 +1223,7 @@ function renderVerifiedTable() {
       <td>${u.verifiedDate || '-'}</td>
       <td>
         <div class="action-btn-group">
-          <button class="action-btn action-btn-view" onclick="showToast('회원 상세 페이지 준비 중', 'info')">상세</button>
+          <button class="action-btn action-btn-view" onclick="openUserDetail('${u.id}')">상세</button>
           <button class="action-btn action-btn-reject" onclick="revokeVerify('${u.id}')">인증 해제</button>
         </div>
       </td>
@@ -1253,7 +1253,7 @@ function renderUsersTable(filter = 'all') {
       <td>${getTierBadge(u.tier)}</td>
       <td>
         <div class="action-btn-group">
-          <button class="action-btn action-btn-view" onclick="showToast('회원 상세 페이지 준비 중', 'info')">상세</button>
+          <button class="action-btn action-btn-view" onclick="openUserDetail('${u.id}')">상세</button>
           ${!u.verified ? `<button class="action-btn action-btn-approve" onclick="manualVerify('${u.id}')">수동 인증</button>` : ''}
         </div>
       </td>
@@ -1366,6 +1366,115 @@ function manualVerify(userId) {
   user.tier = user.reviews >= 3 ? 'expert' : 'verified';
   renderAll();
   showToast(`✅ ${user.name}님이 수동 인증되었습니다.`, 'success');
+}
+
+function openUserDetail(userId) {
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
+  const userReviews = recentReviews.filter(r => r.author === user.name);
+  const userVerifyReqs = verificationRequests.filter(v => v.userId === userId);
+  const userComments = adminComments.filter(c => c.author === user.name);
+
+  document.getElementById('vmTitle').textContent = `${user.name} 회원 상세`;
+  document.getElementById('vmSub').textContent = `${user.email} · 가입일 ${user.joined}`;
+  document.getElementById('vmBody').innerHTML = `
+    <div class="verify-info-grid">
+      <div class="verify-info-item">
+        <div class="verify-info-label">회원명</div>
+        <div class="verify-info-value">${user.name}</div>
+      </div>
+      <div class="verify-info-item">
+        <div class="verify-info-label">이메일</div>
+        <div class="verify-info-value">${user.email}</div>
+      </div>
+      <div class="verify-info-item">
+        <div class="verify-info-label">가입일</div>
+        <div class="verify-info-value">${user.joined}</div>
+      </div>
+      <div class="verify-info-item">
+        <div class="verify-info-label">인증 상태</div>
+        <div class="verify-info-value">${user.verified
+          ? '<span style="color:var(--green);font-weight:800">✅ 인증됨</span>'
+          : '<span style="color:var(--gray-400);font-weight:800">비인증</span>'}</div>
+      </div>
+      <div class="verify-info-item">
+        <div class="verify-info-label">등급</div>
+        <div class="verify-info-value">${getTierBadge(user.tier)}</div>
+      </div>
+      <div class="verify-info-item">
+        <div class="verify-info-label">작성 리뷰</div>
+        <div class="verify-info-value">${user.reviews}개</div>
+      </div>
+      ${user.verified ? `
+        <div class="verify-info-item">
+          <div class="verify-info-label">인증일</div>
+          <div class="verify-info-value">${user.verifiedDate || '-'}</div>
+        </div>
+        <div class="verify-info-item">
+          <div class="verify-info-label">인증 강의</div>
+          <div class="verify-info-value">${user.verifiedCourses.length > 0 ? user.verifiedCourses.join(', ') : '-'}</div>
+        </div>
+      ` : ''}
+    </div>
+
+    ${userVerifyReqs.length > 0 ? `
+      <div style="margin-top:16px">
+        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">📋 인증 요청 이력 (${userVerifyReqs.length}건)</div>
+        ${userVerifyReqs.map(v => `
+          <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <span style="font-weight:700">${v.instructor}</span> · ${v.course}
+              <span style="color:var(--gray-400);margin-left:6px">(${v.type})</span>
+            </div>
+            <div>
+              ${v.status === 'pending' ? '<span class="status-badge status-pending">대기중</span>'
+                : v.status === 'approved' ? '<span class="status-badge status-approved">승인</span>'
+                : '<span class="status-badge status-rejected">거부</span>'}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    ${userReviews.length > 0 ? `
+      <div style="margin-top:16px">
+        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">📝 작성 리뷰 (${userReviews.length}건)</div>
+        ${userReviews.map(r => `
+          <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-weight:700">${r.instructor}</span>
+              <span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score}.0 ★</span>
+            </div>
+            <div style="color:var(--gray-500)">${r.text}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    ${userComments.length > 0 ? `
+      <div style="margin-top:16px">
+        <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">💬 작성 댓글 (${userComments.length}건)</div>
+        ${userComments.map(c => `
+          <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-weight:700">${c.instructor}</span>
+              <span style="color:var(--gray-400)">${c.date}</span>
+            </div>
+            <div style="color:var(--gray-500)${c.deleted ? ';text-decoration:line-through' : ''}">${c.text}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <div class="verify-modal-actions" style="margin-top:16px">
+      ${user.verified
+        ? `<button class="verify-action-btn verify-action-reject" onclick="revokeVerify('${userId}'); closeVerifyModal(); renderAll();">🚫 인증 해제</button>`
+        : `<button class="verify-action-btn verify-action-approve" onclick="manualVerify('${userId}'); closeVerifyModal(); renderAll();">✅ 수동 인증</button>`
+      }
+      <button class="verify-action-btn verify-action-cancel" onclick="closeVerifyModal()">닫기</button>
+    </div>
+  `;
+  document.getElementById('verifyModal').classList.add('open');
 }
 
 function updatePendingCount() {
