@@ -753,7 +753,7 @@ body {
   position: absolute; left: 0; right: 0; top: 100%; z-index: 10;
   background: white; border: 2px solid var(--gray-200); border-top: none;
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  max-height: 200px; overflow-y: auto; display: none;
+  max-height: 320px; overflow-y: auto; display: none;
   box-shadow: 0 8px 24px rgba(0,0,0,0.1);
 }
 .ac-dropdown.open { display: block; }
@@ -1986,8 +1986,7 @@ function acSearch(type) {
     if (selectedInstructor) return;
     const allInst = [...new Map([...instructors, ...worstInstructors].map(i => [i.name, i])).values()];
     let matches = allInst;
-    if (query) matches = allInst.filter(i => i.name.toLowerCase().includes(query));
-    matches = matches.slice(0, 6);
+    if (query) matches = allInst.filter(i => i.name.toLowerCase().includes(query) || i.tags.some(t => t.toLowerCase().includes(query)) || i.platform.toLowerCase().includes(query));
     let html = matches.map(i => `
       <div class="ac-item" onclick="selectAcInstructor('${i.name}', '${i.avatar}', '${i.category} · ${i.platform}')">
         <div class="ac-item-avatar" style="background:${i.avatar}">${i.name[0]}</div>
@@ -2006,8 +2005,7 @@ function acSearch(type) {
     if (selectedCourse) return;
     let matches = courseList;
     if (selectedInstructor) matches = matches.filter(c => c.instructor === selectedInstructor.name);
-    if (query) matches = matches.filter(c => c.name.toLowerCase().includes(query));
-    matches = matches.slice(0, 6);
+    if (query) matches = matches.filter(c => c.name.toLowerCase().includes(query) || c.instructor.toLowerCase().includes(query));
     let html = matches.map(c => `
       <div class="ac-item" onclick="selectAcCourse('${c.name}', '${c.instructor}')">
         <div class="ac-item-info">
