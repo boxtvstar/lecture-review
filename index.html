@@ -1490,19 +1490,71 @@ body {
 <script>
 // ═══ DATA ═══
 const instructors = [
+  // ── 예시 테스트 강사 (데모용) ──
+  { id: 1, name: '[예시] 테스트 강사A', category: '개발', platform: '인프런', avatar: '#3B82F6',
+    score: 4.7, reviews: 5, hype: 15, hypeLv: 'low',
+    tags: ['React', '실무 중심', '친절한 답변'],
+    ratings: { quality: 4.8, value: 4.5, expertise: 4.9, hype: 1.5, growth: 4.6, support: 4.7 },
+    reviewList: [
+      { author: '수강생A', badge: 'verified', date: '2026.05.15', stars: 5, text: '실무에서 바로 쓸 수 있는 내용이 많아서 정말 만족합니다. 특히 에러 핸들링 파트가 좋았어요. 질문 답변도 빠릅니다.', helpful: 47, rebuttal: null },
+      { author: '수강생B', badge: 'verified', date: '2026.05.10', stars: 4, text: '전반적으로 좋은 강의입니다. 다만 후반부로 갈수록 난이도가 급상승해서 초보자에게는 조금 어려울 수 있어요.', helpful: 23, rebuttal: '소중한 피드백 감사합니다. 보충 자료를 준비 중입니다.' }
+    ]
+  },
+  { id: 2, name: '[예시] 테스트 강사B', category: '마케팅', platform: '클래스101', avatar: '#8B5CF6',
+    score: 4.3, reviews: 3, hype: 62, hypeLv: 'mid',
+    tags: ['퍼포먼스 마케팅', '사례 풍부'],
+    ratings: { quality: 4.2, value: 3.8, expertise: 4.5, hype: 3.8, growth: 4.0, support: 4.1 },
+    reviewList: [
+      { author: '마케터3년차', badge: 'verified', date: '2026.05.12', stars: 4, text: '실제 운영 사례가 많아서 좋았어요. 다만 썸네일 광고는 좀 과장된 느낌이 있습니다.', helpful: 31, rebuttal: null }
+    ]
+  },
+  { id: 3, name: '[예시] 테스트 강사C', category: '디자인', platform: '콜로소', avatar: '#EC4899',
+    score: 4.8, reviews: 2, hype: 8, hypeLv: 'low',
+    tags: ['Figma', 'UI/UX', '포트폴리오'],
+    ratings: { quality: 4.9, value: 4.7, expertise: 4.8, hype: 0.8, growth: 4.9, support: 4.8 },
+    reviewList: [
+      { author: '디자인전공생', badge: 'expert', date: '2026.05.18', stars: 5, text: '수강 후 포트폴리오 퀄리티가 확 올라갔어요. 실무 프로세스를 그대로 보여줘서 회사에서 바로 적용 가능합니다.', helpful: 56, rebuttal: null }
+    ]
+  },
+  { id: 4, name: '[예시] 테스트 강사D', category: '재테크', platform: '유데미', avatar: '#F59E0B',
+    score: 2.1, reviews: 4, hype: 89, hypeLv: 'high',
+    tags: ['주식', '논란 있음', '과대광고'],
+    ratings: { quality: 2.0, value: 1.5, expertise: 2.3, hype: 4.8, growth: 1.8, support: 1.2 },
+    reviewList: [
+      { author: '피해자모임', badge: 'verified', date: '2026.05.19', stars: 1, text: '"3개월 만에 1억" 광고 보고 들었는데, 내용은 유튜브 무료 영상 수준입니다. 환불 요청했는데 연락도 안 됨.', helpful: 203, rebuttal: '사실과 다른 내용이 포함되어 있어 법적 대응을 검토 중입니다.' },
+      { author: '호구탈출', badge: 'expert', date: '2026.05.17', stars: 1, text: '수강생 단톡방에서 추가 유료 코칭 압박이 심합니다. 강의 내용은 빈약하고, 계속 상위 과정을 결제하라고 유도해요.', helpful: 178, rebuttal: null }
+    ]
+  },
+  { id: 5, name: '[예시] 테스트 강사E', category: '자기계발', platform: '클래스101', avatar: '#6366F1',
+    score: 3.2, reviews: 2, hype: 71, hypeLv: 'high',
+    tags: ['습관', '시간관리', '과대광고 주의'],
+    ratings: { quality: 3.0, value: 2.5, expertise: 3.5, hype: 4.2, growth: 3.0, support: 2.8 },
+    reviewList: [
+      { author: '직장인A', badge: 'unverified', date: '2026.05.11', stars: 2, text: '"인생이 바뀐다"는 광고에 비해 내용은 자기계발서 요약 수준. 새로운 건 거의 없습니다.', helpful: 42, rebuttal: null }
+    ]
+  },
+  { id: 6, name: '[예시] 테스트 강사F', category: '개발', platform: '패스트캠퍼스', avatar: '#14B8A6',
+    score: 1.8, reviews: 3, hype: 93, hypeLv: 'high',
+    tags: ['노코드', '미완성 강의', '환불 불가'],
+    ratings: { quality: 1.5, value: 1.3, expertise: 2.0, hype: 4.8, growth: 1.2, support: 1.0 },
+    reviewList: [
+      { author: '시간낭비', badge: 'verified', date: '2026.05.18', stars: 1, text: '강의 중반부터 "준비 중" 표시로 비어있습니다. 완성도 안 된 강의를 파는 게 말이 되나요?', helpful: 156, rebuttal: '강의 리뉴얼 예정입니다. 불편을 드려 죄송합니다.' },
+      { author: '초보개발자', badge: 'verified', date: '2026.05.10', stars: 2, text: '기초 문법 설명은 괜찮은데, 광고에서 말한 앱 완성은 절대 불가능합니다. 과대광고가 심해요.', helpful: 89, rebuttal: null }
+    ]
+  },
   // ── 실제 강사: 인프런 ──
-  { id: 15, name: '김영한', category: '개발', platform: '인프런', avatar: '#059669', score: 4.9, reviews: 1847, hype: 3, hypeLv: 'low', tags: ['Spring', 'Java', '실무'], ratings: { quality: 4.9, value: 4.8, expertise: 5.0, hype: 0.3, growth: 4.9, support: 4.8 }, reviewList: [] },
-  { id: 16, name: '캡틴판교 (장기효)', category: '개발', platform: '인프런', avatar: '#2563EB', score: 4.8, reviews: 923, hype: 5, hypeLv: 'low', tags: ['Vue.js', 'TypeScript', '프론트엔드'], ratings: { quality: 4.8, value: 4.7, expertise: 4.9, hype: 0.5, growth: 4.8, support: 4.7 }, reviewList: [] },
-  { id: 17, name: '제로초 (조현영)', category: '개발', platform: '인프런', avatar: '#7C3AED', score: 4.7, reviews: 1102, hype: 7, hypeLv: 'low', tags: ['JavaScript', 'Node.js', '답변왕'], ratings: { quality: 4.7, value: 4.6, expertise: 4.8, hype: 0.7, growth: 4.7, support: 4.9 }, reviewList: [] },
-  { id: 18, name: '이정환 (Winterlood)', category: '개발', platform: '인프런', avatar: '#DC2626', score: 4.8, reviews: 634, hype: 4, hypeLv: 'low', tags: ['React', '한입크기', '입문자추천'], ratings: { quality: 4.8, value: 4.8, expertise: 4.7, hype: 0.4, growth: 4.8, support: 4.6 }, reviewList: [] },
+  { id: 15, name: '김영한', category: '개발', platform: '인프런', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['Spring', 'Java', '실무'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 16, name: '캡틴판교 (장기효)', category: '개발', platform: '인프런', avatar: '#2563EB', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['Vue.js', 'TypeScript', '프론트엔드'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 17, name: '제로초 (조현영)', category: '개발', platform: '인프런', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['JavaScript', 'Node.js', '답변왕'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 18, name: '이정환 (Winterlood)', category: '개발', platform: '인프런', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['React', '한입크기', '입문자추천'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
   // ── 실제 강사: 콜로소 ──
-  { id: 19, name: '김락희', category: '일러스트', platform: '콜로소', avatar: '#B91C1C', score: 4.9, reviews: 487, hype: 2, hypeLv: 'low', tags: ['인체드로잉', '해부학', '마스터클래스'], ratings: { quality: 4.9, value: 4.7, expertise: 5.0, hype: 0.2, growth: 4.9, support: 4.6 }, reviewList: [] },
-  { id: 20, name: '수줍', category: '일러스트', platform: '콜로소', avatar: '#DB2777', score: 4.7, reviews: 312, hype: 6, hypeLv: 'low', tags: ['빛연출', '레퍼런스', '컬러'], ratings: { quality: 4.7, value: 4.5, expertise: 4.8, hype: 0.6, growth: 4.6, support: 4.5 }, reviewList: [] },
-  { id: 21, name: '샤가무', category: '일러스트', platform: '콜로소', avatar: '#9333EA', score: 4.6, reviews: 198, hype: 8, hypeLv: 'low', tags: ['독학', '실전', '일러스트'], ratings: { quality: 4.6, value: 4.4, expertise: 4.7, hype: 0.8, growth: 4.5, support: 4.4 }, reviewList: [] },
-  { id: 22, name: '감자만세', category: '영상/애니메이션', platform: '콜로소', avatar: '#C2410C', score: 4.7, reviews: 267, hype: 5, hypeLv: 'low', tags: ['애니메이션', '100강', '감독'], ratings: { quality: 4.7, value: 4.6, expertise: 4.8, hype: 0.5, growth: 4.7, support: 4.5 }, reviewList: [] },
+  { id: 19, name: '김락희', category: '일러스트', platform: '콜로소', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['인체드로잉', '해부학', '마스터클래스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 20, name: '수줍', category: '일러스트', platform: '콜로소', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['빛연출', '레퍼런스', '컬러'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 21, name: '샤가무', category: '일러스트', platform: '콜로소', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['독학', '실전', '일러스트'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 22, name: '감자만세', category: '영상/애니메이션', platform: '콜로소', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['애니메이션', '100강', '감독'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
   // ── 실제 강사: 클래스101 ──
-  { id: 23, name: '시현하다', category: '사진', platform: '클래스101', avatar: '#0891B2', score: 4.6, reviews: 578, hype: 10, hypeLv: 'low', tags: ['감성사진', '촬영법', '보정'], ratings: { quality: 4.6, value: 4.4, expertise: 4.7, hype: 1.0, growth: 4.5, support: 4.3 }, reviewList: [] },
-  { id: 24, name: '리아킴', category: '댄스', platform: '클래스101', avatar: '#E11D48', score: 4.8, reviews: 445, hype: 8, hypeLv: 'low', tags: ['1MILLION', '댄스', 'K-POP'], ratings: { quality: 4.8, value: 4.6, expertise: 4.9, hype: 0.8, growth: 4.7, support: 4.5 }, reviewList: [] },
+  { id: 23, name: '시현하다', category: '사진', platform: '클래스101', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['감성사진', '촬영법', '보정'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 24, name: '리아킴', category: '댄스', platform: '클래스101', avatar: '#E11D48', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['1MILLION', '댄스', 'K-POP'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
   // ── 실제 강사: 타이탄클래스 ──
   { id: 25, name: '새벽인간', category: '이커머스/구매대행', platform: '타이탄클래스', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['구매대행', '부업', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
   { id: 26, name: '구타바리', category: '유튜브 수익화', platform: '타이탄클래스', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['유튜브', '영화드라마', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
@@ -1566,14 +1618,22 @@ const worstInstructors = [
 ];
 
 const detectorItems = [
-  { course: '"디지털노마드 하이클래스 종합"', instructor: '노마드림 (최주원) · 디하클',
+  { course: '[예시] "3개월 만에 월 1000만원 자동 수익 시스템"', instructor: '[예시] 테스트 강사D · 유데미',
+    verdict: 'sus', verdictText: '의심',
+    reason: '(예시) 수강생 제보 다수. 광고 대비 실제 내용 괴리가 크고, 상위 과정 결제 유도 패턴 확인됨.',
+    yes: 342, no: 28 },
+  { course: '[예시] "1주일 앱 개발 마스터"', instructor: '[예시] 테스트 강사F · 패스트캠퍼스',
+    verdict: 'sus', verdictText: '의심',
+    reason: '(예시) 1주일 만에 앱 개발이 가능하다는 광고. 실제 수강생 리뷰: "Hello World 수준에서 끝남"',
+    yes: 187, no: 45 },
+  { course: '[예시] "인생이 바뀌는 습관 혁명"', instructor: '[예시] 테스트 강사E · 클래스101',
     verdict: 'pending', verdictText: '검증 중',
-    reason: '수강생 후기 수집 중. 제보가 있으시면 리뷰를 남겨주세요.',
-    yes: 0, no: 0 },
-  { course: '"구매대행 실전 부업"', instructor: '새벽인간 · 타이탄클래스',
-    verdict: 'pending', verdictText: '검증 중',
-    reason: '수강생 후기 수집 중. 제보가 있으시면 리뷰를 남겨주세요.',
-    yes: 0, no: 0 },
+    reason: '(예시) 과장 광고 의심 제보 접수. 현재 수강생 의견 수집 중.',
+    yes: 89, no: 67 },
+  { course: '[예시] "실전 React 마스터클래스"', instructor: '[예시] 테스트 강사A · 인프런',
+    verdict: 'ok', verdictText: '적정',
+    reason: '(예시) 광고 내용과 실제 강의 내용 일치. 인증된 수강생 리뷰 92% 긍정 평가.',
+    yes: 12, no: 298 },
 ];
 
 // ═══ COURSE DATA ═══
