@@ -1385,6 +1385,7 @@ body {
           <option value="노마드코더">노마드코더</option>
           <option value="타이탄클래스">타이탄클래스</option>
           <option value="디하클">디하클</option>
+          <option value="핏크닉">핏크닉</option>
           <option value="__custom__">직접 입력</option>
         </select>
         <input class="form-input" id="customPlatform" placeholder="플랫폼 이름을 입력하세요" style="display:none;margin-top:8px">
@@ -1542,7 +1543,21 @@ const instructors = [
   { id: 60, name: '라옴', category: '유튜브/롱폼', platform: '디하클', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['금광롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
   { id: 61, name: '한다해', category: '유튜브/롱폼', platform: '디하클', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['이지롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
   { id: 62, name: '더퓨처', category: '이커머스/공구', platform: '디하클', avatar: '#0369A1', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['제로공구', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 63, name: '빠대', category: '이커머스/쿠팡', platform: '디하클', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['탑클래스쿠팡', '쿠팡'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] }
+  { id: 63, name: '빠대', category: '이커머스/쿠팡', platform: '디하클', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['탑클래스쿠팡', '쿠팡'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  // ── 실제 강사: 핏크닉 ──
+  { id: 64, name: '윙스', category: 'AI/수익화', platform: '핏크닉', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI시니어라디오', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 65, name: '디선제압', category: 'AI/이커머스', platform: '핏크닉', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI상세페이지', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 66, name: '머니테이커', category: '수익화/투자', platform: '핏크닉', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['파이널VIP', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 67, name: '셀팜', category: 'AI/유튜브', platform: '핏크닉', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI유튜브', '연금클래스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 68, name: '셀링남', category: '이커머스/쿠팡', platform: '핏크닉', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['로켓그로스', 'AI브랜드', '쿠팡'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 69, name: '정쌤', category: '이커머스/쿠팡', platform: '핏크닉', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['로켓그로스', '안전마진'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 70, name: '민대표', category: '이커머스', platform: '핏크닉', avatar: '#CA8A04', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['버티컬커머스', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 71, name: '온백', category: 'AI/브랜딩', platform: '핏크닉', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI브랜드', '커넥터'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 72, name: '부자꿈틀', category: 'AI/숏폼', platform: '핏크닉', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI숏폼', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 73, name: '김놀부', category: 'SNS/인스타', platform: '핏크닉', avatar: '#EA580C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['인스타', '푸드릴스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 74, name: '제이온리 & 렛츠윤', category: 'SNS/수익화', platform: '핏크닉', avatar: '#065F46', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['SNS수익화', '월급5배'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 75, name: '이지디자인', category: 'AI/디자인', platform: '핏크닉', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI상세페이지', '디자인'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 76, name: '온물주', category: 'AI/이커머스', platform: '핏크닉', avatar: '#0284C7', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI쿠팡', '끝판왕'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] }
 ];
 
 // ═══ WORST INSTRUCTORS DATA ═══
@@ -1617,6 +1632,21 @@ const courseList = [
   { instructor: '한다해', name: '퍼스널 브랜딩' },
   { instructor: '더퓨처', name: 'AI 콘텐츠 제작' },
   { instructor: '빠대', name: '유튜브 자동화 채널 운영' },
+  // ── 핏크닉 ──
+  { instructor: '윙스', name: 'AI 시니어 라디오 월 300 클래스' },
+  { instructor: '디선제압', name: '월 300 AI 상세페이지 프로젝트' },
+  { instructor: '머니테이커', name: '파이널 VIP' },
+  { instructor: '셀팜', name: 'AI 유튜브 연금 클래스' },
+  { instructor: '셀링남', name: '로켓그로스 AI 올인원 클래스' },
+  { instructor: '셀링남', name: 'AI 브랜드 파이프 시크릿 로드맵' },
+  { instructor: '정쌤', name: '로켓그로스 안전마진 로드맵' },
+  { instructor: '민대표', name: '버티컬 커머스 프로젝트' },
+  { instructor: '온백', name: 'AI 브랜드 커넥터 실전 클래스' },
+  { instructor: '부자꿈틀', name: 'AI숏폼 월급 3배 프로젝트' },
+  { instructor: '김놀부', name: '월 1000 왕초보 인스타 푸드릴스' },
+  { instructor: '제이온리 & 렛츠윤', name: '월급 5배 SNS 수익화' },
+  { instructor: '이지디자인', name: 'AI 상세페이지 클래스' },
+  { instructor: '온물주', name: 'AI 쿠팡 끝판왕 클래스' },
 ];
 
 const ratingLabels = {
@@ -1648,6 +1678,9 @@ const platformData = [
     score: 0, reviews: 0, verified: 0,
     satisfaction: 0, refund: 0, support: 0, content: 0 },
   { name: '디하클', icon: '🟡', color: '#EAB308',
+    score: 0, reviews: 0, verified: 0,
+    satisfaction: 0, refund: 0, support: 0, content: 0 },
+  { name: '핏크닉', icon: '🟢', color: '#16A34A',
     score: 0, reviews: 0, verified: 0,
     satisfaction: 0, refund: 0, support: 0, content: 0 },
 ];
