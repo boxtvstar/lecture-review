@@ -207,7 +207,9 @@ document.head.appendChild(navStyle);
 // ─── 페이지별 쓰기 버튼 설정 ───
 const writeBtn = isHome
   ? '<a href="#" onclick="openReviewModal(); return false;" class="btn-write-review">&#x270F;&#xFE0F; &#xB9AC;&#xBDF0; &#xC4F0;&#xAE30;</a>'
-  : '';
+  : isCommunity
+    ? '<a href="#" onclick="openWriteModal(); return false;" class="btn-write-review">&#x270F;&#xFE0F; &#xAE00;&#xC4F0;&#xAE30;</a>'
+    : '';
 const dropdownWriteLabel = isHome ? '리뷰 쓰기' : '글쓰기';
 const dropdownWriteAction = isHome
   ? 'openReviewModal(); closeProfileDropdown(); return false;'
