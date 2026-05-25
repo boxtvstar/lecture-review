@@ -1188,16 +1188,15 @@ const adminInstructors = [
 
 // ═══ AUTH ═══
 function adminLogin() {
-  const id = document.getElementById('adminId').value;
-  const pw = document.getElementById('adminPw').value;
-  if (id === 'admin' && pw === 'admin1234') {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminApp').style.display = 'block';
-    renderAll();
-  } else {
-    document.getElementById('loginError').style.display = 'block';
-  }
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  renderAll();
 }
+
+// 페이지 로드 시 자동 로그인
+document.addEventListener('DOMContentLoaded', function() {
+  adminLogin();
+});
 
 function adminLogout() {
   document.getElementById('loginScreen').style.display = 'flex';
