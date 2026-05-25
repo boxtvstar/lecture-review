@@ -532,9 +532,10 @@ body {
   font-size: 11px; font-weight: 800; padding: 4px 10px;
   border-radius: 6px; text-transform: uppercase;
 }
-.verdict-sus { background: rgba(239,68,68,0.2); color: #FCA5A5; }
+.verdict-sus, .verdict-danger { background: rgba(239,68,68,0.2); color: #FCA5A5; }
 .verdict-ok { background: rgba(16,185,129,0.2); color: #6EE7B7; }
-.verdict-pending { background: rgba(245,158,11,0.2); color: #FCD34D; }
+.verdict-pending, .verdict-warning { background: rgba(245,158,11,0.2); color: #FCD34D; }
+.verdict-caution { background: rgba(99,102,241,0.2); color: #A5B4FC; }
 .detector-instructor { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
 .detector-reason {
   font-size: 13px; color: rgba(255,255,255,0.7);
@@ -1877,25 +1878,58 @@ function renderInstructors(filter = '전체', search = '', sort = currentSort) {
   `).join('');
 }
 
-function renderDetector() {
-  document.getElementById('detectorGrid').innerHTML = detectorItems.map((d, i) => `
-    <div class="detector-card">
-      <div class="detector-top">
-        <div class="detector-course">${d.course}</div>
-        <span class="detector-verdict verdict-${d.verdict}">${d.verdictText}</span>
+async function renderDetector() {
+  const grid = document.getElementById('detectorGrid');
+  try {
+    const db = firebase.firestore();
+    let snap;
+    try {
+      snap = await db.collection('reviews').where('score', '<=', 3).where('score', '>', 0).orderBy('score', 'asc').limit(12).get();
+    } catch(indexErr) {
+      // 복합 인덱스 없을 때 fallback
+      const allSnap = await db.collection('reviews').get();
+      const filtered = [];
+      allSnap.forEach(doc => { const d = doc.data(); if (d.score > 0 && d.score <= 3) filtered.push({ id: doc.id, data: () => d }); });
+      filtered.sort((a,b) => a.data().score - b.data().score);
+      snap = { empty: filtered.length === 0, forEach: fn => filtered.slice(0,12).forEach(fn), size: Math.min(filtered.length, 12) };
+    }
+    if (snap.empty) {
+      grid.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.5);font-size:14px">아직 감별 대상이 없습니다.<br><span style="font-size:12px">별점 3점 이하 리뷰가 등록되면 여기에 표시됩니다.</span></div>';
+      return;
+    }
+    detectorItems.length = 0;
+    snap.forEach(doc => {
+      const d = doc.data();
+      const verdict = d.score <= 1.5 ? 'danger' : d.score <= 2.5 ? 'warning' : 'caution';
+      const verdictText = d.score <= 1.5 ? '🚨 위험' : d.score <= 2.5 ? '⚠️ 주의' : '🔍 관찰';
+      detectorItems.push({
+        id: doc.id, course: d.course || '미지정', instructor: d.instructor || '미지정',
+        verdict, verdictText, reason: d.text ? (d.text.length > 80 ? d.text.slice(0,80)+'…' : d.text) : '',
+        yes: d.voteYes || 0, no: d.voteNo || 0, score: d.score
+      });
+    });
+    grid.innerHTML = detectorItems.map((d, i) => `
+      <div class="detector-card">
+        <div class="detector-top">
+          <div class="detector-course">${d.course}</div>
+          <span class="detector-verdict verdict-${d.verdict}">${d.verdictText} (${d.score}점)</span>
+        </div>
+        <div class="detector-instructor">${d.instructor}</div>
+        <div class="detector-reason">${d.reason}</div>
+        <div class="detector-votes">
+          <button class="vote-btn" onclick="vote(${i},'yes')" id="voteYes${i}">
+            🚩 강의팔이 같아요 <span>${d.yes}</span>
+          </button>
+          <button class="vote-btn" onclick="vote(${i},'no')" id="voteNo${i}">
+            ✅ 괜찮은 것 같아요 <span>${d.no}</span>
+          </button>
+        </div>
       </div>
-      <div class="detector-instructor">${d.instructor}</div>
-      <div class="detector-reason">${d.reason}</div>
-      <div class="detector-votes">
-        <button class="vote-btn" onclick="vote(${i},'yes')" id="voteYes${i}">
-          🚩 강의팔이 같아요 <span>${d.yes}</span>
-        </button>
-        <button class="vote-btn" onclick="vote(${i},'no')" id="voteNo${i}">
-          ✅ 괜찮은 것 같아요 <span>${d.no}</span>
-        </button>
-      </div>
-    </div>
-  `).join('');
+    `).join('');
+  } catch(e) {
+    console.error('감별기 로드 실패:', e);
+    grid.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.5);font-size:14px">감별기 데이터를 불러오는 중...</div>';
+  }
 }
 
 function renderRankings(category = '전체') {
@@ -2110,19 +2144,27 @@ function toggleAnon() {
 }
 
 function vote(idx, type) {
+  if (!currentUser) { navGoogleLogin(); return; }
   const yesBtn = document.getElementById(`voteYes${idx}`);
   const noBtn = document.getElementById(`voteNo${idx}`);
+  const item = detectorItems[idx];
   if (type === 'yes') {
     yesBtn.classList.add('voted-yes');
     noBtn.classList.remove('voted-no');
-    detectorItems[idx].yes++;
+    item.yes++;
   } else {
     noBtn.classList.add('voted-no');
     yesBtn.classList.remove('voted-yes');
-    detectorItems[idx].no++;
+    item.no++;
   }
-  yesBtn.querySelector('span').textContent = detectorItems[idx].yes;
-  noBtn.querySelector('span').textContent = detectorItems[idx].no;
+  yesBtn.querySelector('span').textContent = item.yes;
+  noBtn.querySelector('span').textContent = item.no;
+  // Firestore에 투표 수 업데이트
+  if (item.id) {
+    firebase.firestore().collection('reviews').doc(item.id).update({
+      voteYes: item.yes, voteNo: item.no
+    }).catch(e => console.error('투표 저장 실패:', e));
+  }
 }
 
 // ═══ AUTH STATE ═══
