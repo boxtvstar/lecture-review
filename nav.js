@@ -101,8 +101,10 @@ navStyle.textContent = `
   overflow-y: auto; z-index: 1001;
 }
 .notif-dropdown.open { display: block; }
-.notif-dropdown-header { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); font-size: 14px; font-weight: 800; color: var(--navy); display: flex; justify-content: space-between; align-items: center; }
+.notif-dropdown-header { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); font-size: 14px; font-weight: 800; color: var(--navy); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 1; }
 .notif-dropdown-header button { background: none; border: none; font-size: 12px; color: var(--gray-400); cursor: pointer; font-family: inherit; }
+.notif-close-btn { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--gray-400); padding: 0 2px; margin-left: 8px; }
+.notif-close-btn:hover { color: var(--navy); }
 .notif-item { padding: 10px 16px; border-bottom: 1px solid var(--gray-50); cursor: pointer; transition: background 0.2s; }
 .notif-item:hover { background: var(--gray-50); }
 .notif-item.unread { background: #FFF7ED; }
@@ -268,7 +270,7 @@ const navHTML = `
           <button class="logout-btn" onclick="logoutUser()"><span class="dropdown-icon">🚪</span> 로그아웃</button>
         </div>
         <div class="notif-dropdown" id="notifDropdown">
-          <div class="notif-dropdown-header">알림 <button onclick="clearNotifs()">모두 읽음</button></div>
+          <div class="notif-dropdown-header"><span>알림</span> <div><button onclick="clearNotifs()">모두 읽음</button><button class="notif-close-btn" onclick="closeNotifDropdown()" title="닫기">✕</button></div></div>
           <div id="notifList"><div class="notif-empty">알림이 없습니다.</div></div>
         </div>
       </div>
@@ -503,10 +505,11 @@ window.closeMyPage = function() {
 // ─── 알림 시스템 ───
 window.notifications = JSON.parse(localStorage.getItem('notifs') || '[]');
 
-window.addNotif = function(text, targetId, type) {
+window.addNotif = function(text, targetId, type, page) {
   const now = new Date();
   const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-  notifications.unshift({ text, targetId, type: type || 'post', time: timeStr, read: false });
+  const notifPage = page || (isCommunity ? 'community' : 'main');
+  notifications.unshift({ text, targetId, type: type || 'post', page: notifPage, time: timeStr, read: false });
   if (notifications.length > 30) notifications.length = 30;
   localStorage.setItem('notifs', JSON.stringify(notifications));
   renderNotifs();
@@ -543,7 +546,16 @@ window.readNotif = function(i) {
   renderNotifs();
   closeNotifDropdown();
   const n = notifications[i];
-  // 페이지별 알림 클릭 콜백
+  // 페이지 간 이동: 알림의 page 정보에 따라 해당 페이지로 이동
+  if (n.page === 'community' && !isCommunity) {
+    location.href = '/community?notif=' + (n.targetId || '');
+    return;
+  }
+  if (n.page === 'main' && !isHome) {
+    location.href = '/?notif=' + (n.targetId || '');
+    return;
+  }
+  // 같은 페이지면 콜백
   if (typeof window.onNotifClick === 'function') window.onNotifClick(n);
 };
 

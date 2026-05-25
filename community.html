@@ -884,6 +884,16 @@ function closeLogin() {
 
 // ═══ INIT ═══
 renderPosts();
+
+// URL 파라미터로 알림에서 게시글 자동 열기
+(function() {
+  const params = new URLSearchParams(location.search);
+  const notifId = params.get('notif');
+  if (notifId) {
+    const pid = parseInt(notifId);
+    if (pid) setTimeout(() => openPost(pid), 300);
+  }
+})();
 </script>
 </body>
 </html>

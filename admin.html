@@ -1009,15 +1009,16 @@ body {
               <tr>
                 <th>신청자</th>
                 <th>강사명</th>
+                <th>전화번호</th>
                 <th>플랫폼</th>
                 <th>대표 강의</th>
-                <th>증명 내용</th>
+                <th>신분증</th>
                 <th>상태</th>
                 <th>관리</th>
               </tr>
             </thead>
             <tbody id="instVerifyTableBody">
-              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400)">로딩 중...</td></tr>
+              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray-400)">로딩 중...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1933,7 +1934,7 @@ async function loadInstVerifyRequests() {
 function renderInstVerifyTable() {
   const tbody = document.getElementById('instVerifyTableBody');
   if (instVerifyRequests.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400)">강사 인증 신청이 없습니다.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray-400)">강사 인증 신청이 없습니다.</td></tr>';
     return;
   }
   tbody.innerHTML = instVerifyRequests.map(r => {
@@ -1948,12 +1949,14 @@ function renderInstVerifyTable() {
     ` : `
       <button class="action-btn action-btn-delete" onclick="deleteInstVerify('${r.id}')">삭제</button>
     `;
+    const idImage = r.idImageUrl ? `<a href="${r.idImageUrl}" target="_blank" style="color:var(--orange);font-size:12px;font-weight:600">🖼 보기</a>` : '<span style="color:var(--gray-400);font-size:12px">없음</span>';
     return `<tr>
       <td><div class="user-cell"><div class="user-avatar-sm">${(r.userName||'?')[0]}</div><div><div class="user-name">${r.userName || '?'}</div><div class="user-email">${r.email || ''}</div></div></div></td>
       <td><strong>${r.instructorName || ''}</strong></td>
+      <td style="font-size:12px">${r.phone || '-'}</td>
       <td>${r.platform || ''}</td>
       <td style="font-size:12px">${r.course || ''}</td>
-      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(r.proof||'').replace(/"/g,'&quot;')}">${r.proof || ''}</td>
+      <td>${idImage}</td>
       <td>${statusBadge}</td>
       <td><div class="action-btn-group">${actions}</div></td>
     </tr>`;

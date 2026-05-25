@@ -10,6 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -272,11 +273,24 @@ body {
 }
 .iv-input:focus, .iv-textarea:focus { border-color: var(--orange); }
 .iv-textarea { min-height: 80px; resize: vertical; }
+.iv-sublabel { font-size: 11px; color: var(--gray-400); font-weight: 500; margin-top: 4px; line-height: 1.5; }
+.iv-upload-area {
+  border: 2px dashed var(--gray-200); border-radius: 10px; padding: 20px;
+  text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
+}
+.iv-upload-area:hover { border-color: var(--orange); background: var(--orange-light); }
+.iv-upload-area.has-file { border-color: var(--green); border-style: solid; background: #F0FDF4; }
+.iv-upload-icon { font-size: 28px; margin-bottom: 6px; }
+.iv-upload-text { font-size: 13px; color: var(--gray-500); }
+.iv-upload-text strong { color: var(--orange); }
+.iv-upload-preview { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 8px; }
+.iv-upload-remove { position: absolute; top: 8px; right: 8px; background: #EF4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .iv-submit {
   width: 100%; padding: 12px; background: var(--orange); color: white;
   border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
   font-family: inherit; cursor: pointer; transition: background 0.2s;
 }
+.iv-submit:disabled { background: var(--gray-300); cursor: not-allowed; }
 .iv-submit:hover { background: var(--orange-hover); }
 .iv-note { font-size: 12px; color: var(--gray-400); margin-top: 12px; line-height: 1.6; }
 .iv-status {
@@ -1471,8 +1485,12 @@ body {
     </div>
     <div class="iv-body" id="ivBody">
       <div class="iv-field">
-        <label class="iv-label">강사명 (활동명)</label>
+        <label class="iv-label">이름 (실명)</label>
         <input class="iv-input" id="ivName" placeholder="예: 홍길동">
+      </div>
+      <div class="iv-field">
+        <label class="iv-label">전화번호</label>
+        <input class="iv-input" id="ivPhone" placeholder="예: 010-1234-5678" type="tel">
       </div>
       <div class="iv-field">
         <label class="iv-label">소속 플랫폼</label>
@@ -1483,10 +1501,19 @@ body {
         <input class="iv-input" id="ivCourse" placeholder="예: 실전 React 완전정복">
       </div>
       <div class="iv-field">
-        <label class="iv-label">본인 증명 (설명)</label>
-        <textarea class="iv-textarea" id="ivProof" placeholder="강사 본인임을 증명할 수 있는 정보를 적어주세요.&#10;예: 플랫폼 프로필 URL, SNS 계정, 이메일 등"></textarea>
+        <label class="iv-label">신분증 사본 첨부</label>
+        <div class="iv-sublabel">⚠️ 뒷면의 주민번호 뒷자리는 반드시 가려주세요. <strong>성함, 사진, 생년월일</strong>만 노출되면 됩니다.</div>
+        <div class="iv-upload-area" id="ivUploadArea" onclick="document.getElementById('ivFileInput').click()">
+          <div class="iv-upload-icon">📎</div>
+          <div class="iv-upload-text"><strong>클릭</strong>하여 이미지를 첨부하세요<br>(JPG, PNG / 최대 5MB)</div>
+        </div>
+        <input type="file" id="ivFileInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleIvFileSelect(event)">
       </div>
-      <button class="iv-submit" onclick="submitInstructorVerify()">인증 신청하기</button>
+      <div class="iv-field">
+        <label class="iv-label">추가 증명 정보 (선택)</label>
+        <textarea class="iv-textarea" id="ivProof" placeholder="플랫폼 프로필 URL, SNS 계정, 이메일 등&#10;추가로 본인임을 증명할 수 있는 정보가 있으면 적어주세요."></textarea>
+      </div>
+      <button class="iv-submit" id="ivSubmitBtn" onclick="submitInstructorVerify()">인증 신청하기</button>
       <div class="iv-note">※ 관리자 승인 후 강사 배지가 부여됩니다. 승인 시 해당 강사의 리뷰에 댓글을 달 수 있습니다.</div>
     </div>
   </div>
@@ -2148,27 +2175,74 @@ window.closeInstructorVerifyModal = function() {
   document.body.style.overflow = '';
 };
 
+// 이미지 첨부 관련
+let ivSelectedFile = null;
+
+window.handleIvFileSelect = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('파일 크기는 5MB 이하만 가능합니다.'); return; }
+  if (!file.type.startsWith('image/')) { alert('이미지 파일만 첨부 가능합니다.'); return; }
+  ivSelectedFile = file;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const area = document.getElementById('ivUploadArea');
+    area.classList.add('has-file');
+    area.innerHTML = `<button class="iv-upload-remove" onclick="event.stopPropagation();removeIvFile()">✕</button><img class="iv-upload-preview" src="${ev.target.result}" alt="미리보기"><div class="iv-upload-text" style="margin-top:6px">${file.name}</div>`;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.removeIvFile = function() {
+  ivSelectedFile = null;
+  document.getElementById('ivFileInput').value = '';
+  const area = document.getElementById('ivUploadArea');
+  area.classList.remove('has-file');
+  area.innerHTML = `<div class="iv-upload-icon">📎</div><div class="iv-upload-text"><strong>클릭</strong>하여 이미지를 첨부하세요<br>(JPG, PNG / 최대 5MB)</div>`;
+};
+
 window.submitInstructorVerify = async function() {
   if (!currentUser) return;
   const name = document.getElementById('ivName').value.trim();
+  const phone = document.getElementById('ivPhone').value.trim();
   const platform = document.getElementById('ivPlatform').value.trim();
   const course = document.getElementById('ivCourse').value.trim();
   const proof = document.getElementById('ivProof').value.trim();
-  if (!name || !platform || !course || !proof) { alert('모든 항목을 입력해주세요.'); return; }
+  if (!name || !phone || !platform || !course) { alert('이름, 전화번호, 소속 플랫폼, 대표 강의명은 필수입니다.'); return; }
+  if (!ivSelectedFile) { alert('신분증 사본을 첨부해주세요.'); return; }
+
+  const btn = document.getElementById('ivSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '업로드 중...';
+
   try {
+    // Firebase Storage에 이미지 업로드
+    const storage = firebase.storage();
+    const ext = ivSelectedFile.name.split('.').pop();
+    const ref = storage.ref(`instructor-verify/${currentUser.uid}_${Date.now()}.${ext}`);
+    await ref.put(ivSelectedFile);
+    const imageUrl = await ref.getDownloadURL();
+
     await db.collection('instructorVerifications').add({
       uid: currentUser.uid,
       email: currentUser.email,
       userName: getDisplayName(),
       instructorName: name,
+      phone: phone,
       platform: platform,
       course: course,
       proof: proof,
+      idImageUrl: imageUrl,
       status: 'pending',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    ivSelectedFile = null;
     document.getElementById('ivBody').innerHTML = `<div class="iv-status pending">✅ 인증 신청이 완료되었습니다!<br>관리자 승인 후 강사 배지가 부여됩니다.</div>`;
-  } catch(e) { alert('신청 실패: ' + e.message); }
+  } catch(e) {
+    alert('신청 실패: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = '인증 신청하기';
+  }
 };
 
 window.resetInstructorVerify = async function(docId) {
@@ -2556,6 +2630,12 @@ window.addEventListener('load', () => {
       client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
       callback: handleGoogleCredential
     });
+  }
+  // URL 파라미터로 알림에서 강사 상세 자동 열기
+  const notifParam = new URLSearchParams(location.search).get('notif');
+  if (notifParam) {
+    const instId = parseInt(notifParam);
+    if (instId) setTimeout(() => openDetail(instId), 500);
   }
   // 커뮤니티에서 강사 인증 클릭 → 리다이렉트 시 자동 열기
   if (new URLSearchParams(location.search).has('instructor-verify')) {
