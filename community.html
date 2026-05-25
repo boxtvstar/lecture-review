@@ -428,6 +428,24 @@ body {
 .mobile-nav-links a:hover { background: var(--gray-100); color: var(--navy); }
 .mobile-nav-links a.active { background: var(--orange-light); color: var(--orange); }
 .nav-icon { font-size: 16px; width: 22px; text-align: center; }
+.post-manage-btns { display: flex; gap: 6px; margin-left: auto; }
+.post-manage-btn {
+  background: none; border: 1px solid var(--gray-200); border-radius: 6px;
+  padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: all 0.2s;
+}
+.post-manage-btn.edit { color: var(--orange); border-color: var(--orange); }
+.post-manage-btn.edit:hover { background: var(--orange); color: white; }
+.post-manage-btn.del { color: #EF4444; border-color: #EF4444; }
+.post-manage-btn.del:hover { background: #EF4444; color: white; }
+.post-manage-btn.admin-badge { color: #6366F1; border-color: #6366F1; font-size: 11px; cursor: default; }
+.dc-item-actions { display: flex; gap: 6px; margin-left: auto; }
+.dc-item-actions button {
+  background: none; border: none; font-size: 12px; color: var(--gray-400);
+  cursor: pointer; font-family: inherit; padding: 2px 4px;
+}
+.dc-item-actions button:hover { color: var(--navy); }
+.dc-item-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -606,6 +624,7 @@ firebase.initializeApp({
 const db = firebase.firestore();
 let currentUser = null;
 let pendingAction = null;
+let isAdmin = false;
 
 function getDisplayName() {
   if (!currentUser) return '';
@@ -617,8 +636,9 @@ firebase.auth().onAuthStateChanged(async user => {
     currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '' };
     try {
       const doc = await db.collection('users').doc(user.uid).get();
-      if (doc.exists && doc.data().nickname) {
-        currentUser.nickname = doc.data().nickname;
+      if (doc.exists) {
+        if (doc.data().nickname) currentUser.nickname = doc.data().nickname;
+        if (doc.data().role === 'admin') isAdmin = true;
       }
       await db.collection('users').doc(user.uid).set({
         displayName: user.displayName, email: user.email, photoURL: user.photoURL, lastLogin: new Date().toISOString()
@@ -626,8 +646,10 @@ firebase.auth().onAuthStateChanged(async user => {
     } catch(e) {}
     localStorage.setItem('cachedUser', JSON.stringify(currentUser));
     showNavProfile();
+    renderPosts();
   } else {
     currentUser = null;
+    isAdmin = false;
     localStorage.removeItem('cachedUser');
     hideNavProfile();
   }
@@ -839,10 +861,18 @@ function openPost(id) {
   document.getElementById('detailTitle').textContent = p.title;
   document.getElementById('detailMeta').innerHTML = `<strong>${p.author}</strong> · ${p.date} · 조회 ${p.views}`;
   document.getElementById('detailBody').textContent = p.content;
+  const isMyPost = currentUser && (p.author === getDisplayName() || p.author === currentUser.name);
+  const manageBtns = (isMyPost || isAdmin) ? `
+    <div class="post-manage-btns">
+      ${isAdmin && !isMyPost ? '<span class="post-manage-btn admin-badge">👑 관리자</span>' : ''}
+      <button class="post-manage-btn edit" onclick="editPost(${id})">✏️ 수정</button>
+      <button class="post-manage-btn del" onclick="deletePost(${id})">🗑️ 삭제</button>
+    </div>` : '';
   document.getElementById('detailActions').innerHTML = `
     <button class="action-btn" id="likeBtn" onclick="toggleLike(${id})">❤️ 좋아요 ${p.likes}</button>
     <button class="action-btn">🔗 공유</button>
     <button class="action-btn">🚩 신고</button>
+    ${manageBtns}
   `;
   renderDetailComments(p);
   document.getElementById('detailOverlay').classList.add('open');
@@ -858,12 +888,17 @@ function renderDetailComments(p) {
       ? `<div class="dc-input-area"><input class="dc-input" id="dcInput" placeholder="댓글을 입력하세요"><button class="dc-submit" onclick="submitDetailComment()">등록</button></div>`
       : `<div class="dc-login-msg">댓글을 작성하려면 <a onclick="pendingAction=null;document.getElementById('loginOverlay').classList.add('open')">로그인</a>이 필요합니다.</div>`
     }
-    ${allComments.map(c => `
-      <div class="dc-item">
-        <div class="dc-item-top"><span class="dc-item-author">${c.author}</span><span class="dc-item-date">${c.date}</span></div>
-        <div class="dc-item-text">${c.text}</div>
-      </div>
-    `).join('')}
+    ${allComments.map((c, i) => {
+      const isMyCmt = currentUser && (c.author === getDisplayName() || c.author === currentUser.name);
+      const cmtActions = (isMyCmt || isAdmin) ? `<div class="dc-item-actions">
+        <button onclick="editComment(${i})">수정</button>
+        <button onclick="deleteComment(${i})">삭제</button>
+      </div>` : '';
+      return `<div class="dc-item">
+        <div class="dc-item-top"><span class="dc-item-author">${c.author}</span><span class="dc-item-date">${c.date}</span>${cmtActions}</div>
+        <div class="dc-item-text" id="cmtText${i}">${c.text}</div>
+      </div>`;
+    }).join('')}
   `;
 }
 
@@ -899,6 +934,73 @@ function closeDetail() {
   document.body.style.overflow = '';
 }
 
+// ═══ 글 수정/삭제 ═══
+let editingPostId = null;
+
+function editPost(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  editingPostId = id;
+  closeDetail();
+  document.getElementById('writeCategory').value = p.category;
+  document.getElementById('writeTitle').value = p.title;
+  document.getElementById('writeContent').value = p.content;
+  document.querySelector('.write-title').textContent = '글 수정';
+  document.querySelector('.write-submit').textContent = '수정하기';
+  document.querySelector('.write-submit').onclick = submitEditPost;
+  document.getElementById('writeOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function submitEditPost() {
+  const p = posts.find(x => x.id === editingPostId);
+  if (!p) return;
+  const title = document.getElementById('writeTitle').value.trim();
+  const content = document.getElementById('writeContent').value.trim();
+  if (!title) { alert('제목을 입력해주세요.'); return; }
+  if (!content) { alert('내용을 입력해주세요.'); return; }
+  p.category = document.getElementById('writeCategory').value;
+  p.title = title;
+  p.content = content;
+  editingPostId = null;
+  document.getElementById('writeTitle').value = '';
+  document.getElementById('writeContent').value = '';
+  document.querySelector('.write-title').textContent = '글쓰기';
+  document.querySelector('.write-submit').textContent = '등록하기';
+  document.querySelector('.write-submit').onclick = submitPost;
+  closeWriteModal();
+  renderPosts();
+}
+
+function deletePost(id) {
+  if (!confirm('정말 삭제하시겠습니까?')) return;
+  const idx = posts.findIndex(x => x.id === id);
+  if (idx !== -1) posts.splice(idx, 1);
+  closeDetail();
+  renderPosts();
+}
+
+// ═══ 댓글 수정/삭제 ═══
+function editComment(i) {
+  const p = posts.find(x => x.id === currentPostId);
+  if (!p || !p.comments[i]) return;
+  const newText = prompt('댓글 수정:', p.comments[i].text);
+  if (newText !== null && newText.trim()) {
+    p.comments[i].text = newText.trim();
+    renderDetailComments(p);
+    renderPosts();
+  }
+}
+
+function deleteComment(i) {
+  if (!confirm('댓글을 삭제하시겠습니까?')) return;
+  const p = posts.find(x => x.id === currentPostId);
+  if (!p) return;
+  p.comments.splice(i, 1);
+  renderDetailComments(p);
+  renderPosts();
+}
+
 // ═══ WRITE ═══
 function openWriteModal() {
   if (!currentUser) {
@@ -906,6 +1008,13 @@ function openWriteModal() {
     document.getElementById('loginOverlay').classList.add('open');
     return;
   }
+  editingPostId = null;
+  document.querySelector('.write-title').textContent = '글쓰기';
+  document.querySelector('.write-submit').textContent = '등록하기';
+  document.querySelector('.write-submit').onclick = submitPost;
+  document.getElementById('writeTitle').value = '';
+  document.getElementById('writeContent').value = '';
+  document.getElementById('writeCategory').value = '자유';
   document.getElementById('writeOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
