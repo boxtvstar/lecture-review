@@ -2169,17 +2169,21 @@ firebase.initializeApp({
 const db = firebase.firestore();
 let currentUser = null;
 
+// localStorage 캐시로 즉시 프로필 표시
+try {
+  const cached = JSON.parse(localStorage.getItem('cachedUser'));
+  if (cached) { currentUser = cached; showNavProfile(); }
+} catch(e) {}
+
 // 로그인 상태 유지
 firebase.auth().onAuthStateChanged(async user => {
   if (user) {
     currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '' };
-    // Firestore에서 닉네임 불러오기
     try {
       const doc = await db.collection('users').doc(user.uid).get();
       if (doc.exists && doc.data().nickname) {
         currentUser.nickname = doc.data().nickname;
       }
-      // 유저 정보 저장/업데이트
       await db.collection('users').doc(user.uid).set({
         email: user.email,
         displayName: user.displayName,
@@ -2188,9 +2192,11 @@ firebase.auth().onAuthStateChanged(async user => {
         lastLogin: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     } catch(e) { console.log('Firestore:', e); }
+    localStorage.setItem('cachedUser', JSON.stringify(currentUser));
     showNavProfile();
   } else {
     currentUser = null;
+    localStorage.removeItem('cachedUser');
     hideNavProfile();
   }
 });

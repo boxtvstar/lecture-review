@@ -612,6 +612,12 @@ function getDisplayName() {
   return currentUser.nickname || currentUser.name;
 }
 
+// localStorage 캐시로 즉시 프로필 표시
+try {
+  const cached = JSON.parse(localStorage.getItem('cachedUser'));
+  if (cached) { currentUser = cached; showNavProfile(); }
+} catch(e) {}
+
 firebase.auth().onAuthStateChanged(async user => {
   if (user) {
     currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '' };
@@ -624,9 +630,11 @@ firebase.auth().onAuthStateChanged(async user => {
         displayName: user.displayName, email: user.email, photoURL: user.photoURL, lastLogin: new Date().toISOString()
       }, { merge: true });
     } catch(e) {}
+    localStorage.setItem('cachedUser', JSON.stringify(currentUser));
     showNavProfile();
   } else {
     currentUser = null;
+    localStorage.removeItem('cachedUser');
     hideNavProfile();
   }
 });
