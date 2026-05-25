@@ -63,6 +63,76 @@ body {
 }
 .nav-links a:hover { color: var(--navy); background: var(--gray-100); }
 .nav-links a.active { color: var(--orange); background: var(--orange-light); }
+.nav-profile {
+  position: relative; display: none; align-items: center; gap: 8px;
+  cursor: pointer; padding: 4px 10px 4px 4px; border-radius: 20px;
+  border: 1.5px solid var(--gray-200); background: white; transition: all 0.2s;
+}
+.nav-profile:hover { border-color: var(--orange); background: var(--orange-light); }
+.nav-profile.show { display: flex; }
+.nav-profile-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.nav-profile-name { font-size: 13px; font-weight: 700; color: var(--navy); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-profile-dropdown {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0;
+  background: white; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  border: 1px solid var(--gray-200); min-width: 220px; overflow: hidden; z-index: 1001;
+}
+.nav-profile-dropdown.open { display: block; }
+.nav-profile-dropdown-header {
+  padding: 16px; border-bottom: 1px solid var(--gray-100);
+  display: flex; align-items: center; gap: 12px;
+}
+.nav-profile-dropdown-header img { width: 40px; height: 40px; border-radius: 50%; }
+.nav-profile-dropdown-info { display: flex; flex-direction: column; }
+.nav-profile-dropdown-name { font-size: 14px; font-weight: 700; color: var(--navy); }
+.nav-profile-dropdown-email { font-size: 12px; color: var(--gray-400); }
+.nav-profile-dropdown a, .nav-profile-dropdown button {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 16px;
+  font-size: 14px; font-weight: 600; color: var(--gray-600); background: none;
+  border: none; text-decoration: none; cursor: pointer; font-family: inherit; transition: background 0.2s;
+}
+.nav-profile-dropdown a:hover, .nav-profile-dropdown button:hover { background: var(--gray-50); color: var(--navy); }
+.nav-profile-dropdown .dropdown-icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-profile-dropdown .logout-btn { color: #EF4444; border-top: 1px solid var(--gray-100); }
+.nav-profile-dropdown .logout-btn:hover { background: #FEF2F2; }
+.mypage-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.5); justify-content: center; align-items: flex-start;
+  padding-top: 80px;
+}
+.mypage-overlay.open { display: flex; }
+.mypage-modal {
+  background: white; border-radius: 16px; width: 100%; max-width: 600px;
+  max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.mypage-header {
+  padding: 24px; border-bottom: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.mypage-header h2 { font-size: 18px; font-weight: 800; color: var(--navy); }
+.mypage-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gray-400); }
+.mypage-user {
+  display: flex; align-items: center; gap: 16px; padding: 24px;
+  background: var(--gray-50); border-bottom: 1px solid var(--gray-100);
+}
+.mypage-user img { width: 56px; height: 56px; border-radius: 50%; }
+.mypage-user-name { font-size: 18px; font-weight: 800; color: var(--navy); }
+.mypage-user-email { font-size: 13px; color: var(--gray-400); margin-top: 2px; }
+.mypage-section { padding: 20px 24px; }
+.mypage-section-title { font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 12px; }
+.mypage-review-item {
+  padding: 14px; margin-bottom: 10px; border-radius: 10px;
+  border: 1px solid var(--gray-200); background: white;
+}
+.mypage-review-meta { font-size: 12px; color: var(--gray-400); margin-bottom: 6px; }
+.mypage-review-text { font-size: 14px; color: var(--gray-600); line-height: 1.5; }
+.mypage-empty { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 14px; }
+.mypage-nickname-tag { display: inline-block; background: var(--orange-light); color: var(--orange); font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
+@media (max-width: 768px) {
+  .nav-profile-name { display: none; }
+  .mypage-modal { margin: 16px; max-height: 85vh; }
+  .mypage-overlay { padding-top: 20px; align-items: center; }
+}
 
 /* CONTAINER */
 .container {
@@ -370,9 +440,27 @@ body {
       팔이피플
     </a>
     <div class="nav-links">
-      <a href="index.html">홈</a>
+      <a href="index.html#rankings">랭킹</a>
+      <a href="index.html#platforms">플랫폼</a>
+      <a href="index.html#detector">감별기</a>
       <a href="community.html" class="active">커뮤니티</a>
       <a href="admin.html" style="font-size:12px;color:var(--gray-400)">관리자</a>
+      <div class="nav-profile" id="navProfile" onclick="toggleProfileDropdown(event)">
+        <img class="nav-profile-img" id="navProfileImg" src="" alt="">
+        <span class="nav-profile-name" id="navProfileName"></span>
+        <div class="nav-profile-dropdown" id="profileDropdown">
+          <div class="nav-profile-dropdown-header">
+            <img id="dropdownProfileImg" src="" alt="">
+            <div class="nav-profile-dropdown-info">
+              <div class="nav-profile-dropdown-name" id="dropdownName"></div>
+              <div class="nav-profile-dropdown-email" id="dropdownEmail"></div>
+            </div>
+          </div>
+          <a href="#" onclick="openMyPage(); return false;"><span class="dropdown-icon">👤</span> 마이페이지</a>
+          <a href="#" onclick="openWriteModal(); closeProfileDropdown(); return false;"><span class="dropdown-icon">✏️</span> 글쓰기</a>
+          <button class="logout-btn" onclick="logoutUser()"><span class="dropdown-icon">🚪</span> 로그아웃</button>
+        </div>
+      </div>
       <button class="mobile-menu-btn" onclick="openMobileNav()">☰</button>
     </div>
   </div>
@@ -385,8 +473,38 @@ body {
   <div class="mobile-nav-logo"><div class="logo-icon" style="width:30px;height:30px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:900;letter-spacing:-1px">82</div> 팔이피플</div>
   <div class="mobile-nav-links">
     <a href="index.html"><span class="nav-icon">🏠</span> 홈</a>
+    <a href="index.html#rankings"><span class="nav-icon">🏆</span> 랭킹</a>
+    <a href="index.html#platforms"><span class="nav-icon">📦</span> 플랫폼</a>
+    <a href="index.html#detector"><span class="nav-icon">🔍</span> 감별기</a>
     <a href="community.html" class="active"><span class="nav-icon">💬</span> 커뮤니티</a>
     <a href="admin.html"><span class="nav-icon">⚙️</span> 관리자</a>
+  </div>
+</div>
+
+<!-- ═══ 마이페이지 모달 ═══ -->
+<div class="mypage-overlay" id="mypageOverlay" onclick="if(event.target===this)closeMyPage()">
+  <div class="mypage-modal">
+    <div class="mypage-header">
+      <h2>마이페이지</h2>
+      <button class="mypage-close" onclick="closeMyPage()">&times;</button>
+    </div>
+    <div class="mypage-user" id="mypageUser"></div>
+    <div class="mypage-section">
+      <div class="mypage-section-title">✏️ 닉네임 설정</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="nicknameInput" placeholder="닉네임을 입력하세요" style="flex:1;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border 0.2s" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--gray-200)'">
+        <button onclick="saveNickname()" style="padding:10px 20px;border-radius:10px;background:var(--orange);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">저장</button>
+      </div>
+      <div id="nicknameSaved" style="display:none;margin-top:8px;font-size:13px;color:var(--green);font-weight:600">닉네임이 저장되었습니다!</div>
+    </div>
+    <div class="mypage-section">
+      <div class="mypage-section-title">💬 내가 쓴 글</div>
+      <div id="mypagePosts"></div>
+    </div>
+    <div class="mypage-section">
+      <div class="mypage-section-title">💬 내가 쓴 댓글</div>
+      <div id="mypageComments"></div>
+    </div>
   </div>
 </div>
 
@@ -502,11 +620,98 @@ firebase.auth().onAuthStateChanged(async user => {
       if (doc.exists && doc.data().nickname) {
         currentUser.nickname = doc.data().nickname;
       }
+      await db.collection('users').doc(user.uid).set({
+        displayName: user.displayName, email: user.email, photoURL: user.photoURL, lastLogin: new Date().toISOString()
+      }, { merge: true });
     } catch(e) {}
+    showNavProfile();
   } else {
     currentUser = null;
+    hideNavProfile();
   }
 });
+
+function showNavProfile() {
+  if (!currentUser) return;
+  const el = document.getElementById('navProfile');
+  document.getElementById('navProfileImg').src = currentUser.picture;
+  document.getElementById('navProfileName').textContent = getDisplayName();
+  document.getElementById('dropdownProfileImg').src = currentUser.picture;
+  document.getElementById('dropdownName').textContent = getDisplayName();
+  document.getElementById('dropdownEmail').textContent = currentUser.email;
+  el.classList.add('show');
+}
+function hideNavProfile() {
+  document.getElementById('navProfile').classList.remove('show');
+  closeProfileDropdown();
+}
+function toggleProfileDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('profileDropdown').classList.toggle('open');
+}
+function closeProfileDropdown() {
+  document.getElementById('profileDropdown').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('navProfile').contains(e.target)) closeProfileDropdown();
+});
+function logoutUser() {
+  firebase.auth().signOut();
+  closeProfileDropdown();
+}
+async function saveNickname() {
+  if (!currentUser) return;
+  const nick = document.getElementById('nicknameInput').value.trim();
+  if (!nick) { alert('닉네임을 입력해주세요.'); return; }
+  if (nick.length > 20) { alert('닉네임은 20자 이내로 입력해주세요.'); return; }
+  try {
+    await db.collection('users').doc(currentUser.uid).update({ nickname: nick });
+    currentUser.nickname = nick;
+    showNavProfile();
+    document.getElementById('nicknameSaved').style.display = 'block';
+    setTimeout(() => document.getElementById('nicknameSaved').style.display = 'none', 2000);
+    document.querySelector('.mypage-user-name').textContent = getDisplayName();
+  } catch(e) { alert('저장 실패: ' + e.message); }
+}
+function openMyPage() {
+  closeProfileDropdown();
+  if (!currentUser) return;
+  document.getElementById('mypageUser').innerHTML = `
+    <img src="${currentUser.picture}" alt="">
+    <div>
+      <div class="mypage-user-name">${getDisplayName()}</div>
+      <div class="mypage-user-email">${currentUser.email}${currentUser.nickname ? ' · 구글: ' + currentUser.name : ''}</div>
+    </div>`;
+  document.getElementById('nicknameInput').value = currentUser.nickname || '';
+  // 내가 쓴 글
+  let postHTML = '';
+  posts.forEach(p => {
+    if (p.author === getDisplayName() || p.author === currentUser.name) {
+      postHTML += `<div class="mypage-review-item">
+        <div class="mypage-review-meta">${p.date} · ${p.category}</div>
+        <div class="mypage-review-text">${p.title}</div>
+      </div>`;
+    }
+  });
+  document.getElementById('mypagePosts').innerHTML = postHTML || '<div class="mypage-empty">아직 작성한 글이 없습니다.</div>';
+  // 내가 쓴 댓글
+  let commentHTML = '';
+  posts.forEach(p => {
+    p.comments.forEach(c => {
+      if (c.author === getDisplayName() || c.author === currentUser.name) {
+        commentHTML += `<div class="mypage-review-item">
+          <div class="mypage-review-meta">${c.date} · ${p.title}</div>
+          <div class="mypage-review-text">${c.text}</div>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('mypageComments').innerHTML = commentHTML || '<div class="mypage-empty">아직 작성한 댓글이 없습니다.</div>';
+  document.getElementById('mypageOverlay').classList.add('open');
+}
+function closeMyPage() {
+  document.getElementById('mypageOverlay').classList.remove('open');
+}
 
 function googleLogin() {
   closeLogin();
