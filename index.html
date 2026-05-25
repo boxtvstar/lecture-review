@@ -999,6 +999,13 @@ body {
 }
 .sort-tab.active { background: var(--navy); color: white; border-color: var(--navy); }
 .sort-tab:hover:not(.active) { border-color: var(--gray-300); color: var(--navy); }
+.plat-tab {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  border: 1.5px solid var(--gray-200); background: white; color: var(--gray-500);
+  cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.plat-tab.active { background: var(--orange); color: white; border-color: var(--orange); }
+.plat-tab:hover:not(.active) { border-color: var(--orange); color: var(--orange); }
 
 /* ═══ FOOTER ═══ */
 .footer {
@@ -1278,12 +1285,13 @@ body {
   <div class="section-header">
     <h2 class="section-title"><span class="icon">🔥</span> 강사 목록</h2>
     <div class="sort-tabs" id="sortTabs">
-      <button class="sort-tab active" onclick="sortInstructors('popular', this)">인기순</button>
+      <button class="sort-tab" onclick="sortInstructors('popular', this)">인기순</button>
       <button class="sort-tab" onclick="sortInstructors('latest', this)">최신순</button>
       <button class="sort-tab" onclick="sortInstructors('rating', this)">평점순</button>
-      <button class="sort-tab" onclick="sortInstructors('reviews', this)">리뷰많은순</button>
+      <button class="sort-tab active" onclick="sortInstructors('reviews', this)">리뷰많은순</button>
     </div>
   </div>
+  <div class="platform-filter-tabs" id="platformFilterTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px"></div>
   <div class="instructor-grid" id="instructorGrid"></div>
 </section>
 
@@ -1768,7 +1776,8 @@ const commentsData = {};
 // 댓글 데이터 (실제 사용자 댓글이 쌓이면 여기에 반영됩니다)
 
 let currentCategory = '전체';
-let currentSort = 'popular';
+let currentSort = 'reviews';
+let currentPlatformFilter = '전체';
 let selectedInstructor = null;
 let selectedCourse = null;
 
@@ -1784,16 +1793,32 @@ function generateStars(score, size = 16) {
   return html;
 }
 
+function renderPlatformTabs() {
+  const platforms = ['전체', ...new Set(instructors.map(i => i.platform))];
+  document.getElementById('platformFilterTabs').innerHTML = platforms.map(p =>
+    `<button class="plat-tab${p === currentPlatformFilter ? ' active' : ''}" onclick="filterByPlatform('${p}', this)">${p}</button>`
+  ).join('');
+}
+
+function filterByPlatform(platform, btn) {
+  currentPlatformFilter = platform;
+  document.querySelectorAll('.plat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderInstructors(currentCategory, document.getElementById('searchInput').value, currentSort);
+}
+
 function renderInstructors(filter = '전체', search = '', sort = currentSort) {
   const grid = document.getElementById('instructorGrid');
   let filtered = [...instructors];
   if (filter !== '전체') filtered = filtered.filter(i => i.category === filter);
+  if (currentPlatformFilter !== '전체') filtered = filtered.filter(i => i.platform === currentPlatformFilter);
   if (search) {
     const s = search.toLowerCase();
     filtered = filtered.filter(i =>
       i.name.toLowerCase().includes(s) ||
       i.tags.some(t => t.toLowerCase().includes(s)) ||
-      i.category.toLowerCase().includes(s)
+      i.category.toLowerCase().includes(s) ||
+      i.platform.toLowerCase().includes(s)
     );
   }
   if (sort === 'popular') filtered.sort((a, b) => b.reviews - a.reviews || b.score - a.score);
@@ -2847,6 +2872,7 @@ function renderCommunityPreview() {
 // 알림 시스템은 nav.js에서 관리
 
 // ═══ INIT ═══
+renderPlatformTabs();
 renderInstructors();
 renderWorst();
 renderDetector();
