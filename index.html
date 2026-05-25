@@ -857,10 +857,24 @@ body {
   padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s;
   background: var(--gray-50);
 }
-.upload-area:hover { border-color: var(--orange); background: var(--orange-light); }
+.upload-area:hover, .upload-area.dragover { border-color: var(--orange); background: var(--orange-light); }
+.upload-area.has-files { border-style: solid; border-color: var(--green); background: #F0FDF4; }
 .upload-icon { font-size: 32px; margin-bottom: 8px; }
 .upload-text { font-size: 14px; color: var(--gray-500); font-weight: 600; }
 .upload-sub { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+.upload-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 10px;
+}
+.upload-thumb-wrap {
+  position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+.upload-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.upload-thumb-remove {
+  position: absolute; top: 2px; right: 2px; width: 20px; height: 20px;
+  border-radius: 50%; background: rgba(0,0,0,0.6); color: white; border: none;
+  font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
 .toggle-row { display: flex; align-items: center; gap: 12px; }
 .toggle {
   width: 44px; height: 24px; border-radius: 12px;
@@ -1454,14 +1468,17 @@ body {
         <textarea class="form-textarea" placeholder="강의에 대한 솔직한 의견을 남겨주세요. 구체적인 내용일수록 다른 수강생에게 도움이 됩니다." id="reviewText"></textarea>
       </div>
       <div class="form-section">
-        <label class="form-label">수강 인증 <span class="form-sublabel">선택 (인증 시 뱃지 부여)</span></label>
-        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-          <div class="upload-icon">📎</div>
-          <div class="upload-text">결제 영수증 또는 수료증을 업로드하세요</div>
-          <div class="upload-sub">JPG, PNG, PDF (최대 10MB) · 개인정보는 자동 마스킹됩니다</div>
-          <div class="upload-sub" style="margin-top:6px;color:var(--gray-500);font-weight:600">🔒 등록하신 인증 파일은 관리자만 확인할 수 있으며, 외부에 공개되지 않습니다.</div>
+        <label class="form-label">수강 인증 <span class="form-sublabel">선택 (인증 시 뱃지 부여, 여러 장 가능)</span></label>
+        <div class="upload-area" id="reviewUploadArea" onclick="document.getElementById('fileInput').click()">
+          <div id="reviewUploadPlaceholder">
+            <div class="upload-icon">📎</div>
+            <div class="upload-text">클릭 또는 드래그하여 파일을 업로드하세요</div>
+            <div class="upload-sub">JPG, PNG, PDF (각 10MB, 최대 10장) · 개인정보는 자동 마스킹됩니다</div>
+            <div class="upload-sub" style="margin-top:6px;color:var(--gray-500);font-weight:600">🔒 등록하신 인증 파일은 관리자만 확인할 수 있으며, 외부에 공개되지 않습니다.</div>
+          </div>
+          <div class="upload-grid" id="reviewUploadGrid"></div>
         </div>
-        <input type="file" id="fileInput" style="display:none" accept=".jpg,.jpeg,.png,.pdf" onchange="handleFileUpload(this)">
+        <input type="file" id="fileInput" style="display:none" accept=".jpg,.jpeg,.png,.pdf" multiple onchange="handleFileUpload(this)">
       </div>
       <div class="form-section">
         <div class="toggle-row">
@@ -1556,34 +1573,7 @@ body {
 <script>
 // ═══ DATA ═══
 const instructors = [
-  // ── 예시 테스트 강사 (데모용) ──
-  { id: 1, name: '[예시] 테스트 강사A', category: '개발', platform: '인프런', avatar: '#3B82F6',
-    score: 4.7, reviews: 5, hype: 15, hypeLv: 'low',
-    tags: ['React', '실무 중심', '친절한 답변'],
-    ratings: { quality: 4.8, value: 4.5, expertise: 4.9, hype: 1.5, growth: 4.6, support: 4.7 },
-    reviewList: [
-      { author: '수강생A', badge: 'verified', date: '2026.05.15', stars: 5, text: '실무에서 바로 쓸 수 있는 내용이 많아서 정말 만족합니다. 특히 에러 핸들링 파트가 좋았어요. 질문 답변도 빠릅니다.', helpful: 47, rebuttal: null },
-      { author: '수강생B', badge: 'verified', date: '2026.05.10', stars: 4, text: '전반적으로 좋은 강의입니다. 다만 후반부로 갈수록 난이도가 급상승해서 초보자에게는 조금 어려울 수 있어요.', helpful: 23, rebuttal: '소중한 피드백 감사합니다. 보충 자료를 준비 중입니다.' }
-    ]
-  },
-  { id: 4, name: '[예시] 테스트 강사D', category: '재테크', platform: '유데미', avatar: '#F59E0B',
-    score: 2.1, reviews: 4, hype: 89, hypeLv: 'high',
-    tags: ['주식', '논란 있음', '과대광고'],
-    ratings: { quality: 2.0, value: 1.5, expertise: 2.3, hype: 4.8, growth: 1.8, support: 1.2 },
-    reviewList: [
-      { author: '피해자모임', badge: 'verified', date: '2026.05.19', stars: 1, text: '"3개월 만에 1억" 광고 보고 들었는데, 내용은 유튜브 무료 영상 수준입니다. 환불 요청했는데 연락도 안 됨.', helpful: 203, rebuttal: '사실과 다른 내용이 포함되어 있어 법적 대응을 검토 중입니다.' },
-      { author: '호구탈출', badge: 'expert', date: '2026.05.17', stars: 1, text: '수강생 단톡방에서 추가 유료 코칭 압박이 심합니다. 강의 내용은 빈약하고, 계속 상위 과정을 결제하라고 유도해요.', helpful: 178, rebuttal: null }
-    ]
-  },
-  { id: 6, name: '[예시] 테스트 강사F', category: '개발', platform: '패스트캠퍼스', avatar: '#14B8A6',
-    score: 1.8, reviews: 3, hype: 93, hypeLv: 'high',
-    tags: ['노코드', '미완성 강의', '환불 불가'],
-    ratings: { quality: 1.5, value: 1.3, expertise: 2.0, hype: 4.8, growth: 1.2, support: 1.0 },
-    reviewList: [
-      { author: '시간낭비', badge: 'verified', date: '2026.05.18', stars: 1, text: '강의 중반부터 "준비 중" 표시로 비어있습니다. 완성도 안 된 강의를 파는 게 말이 되나요?', helpful: 156, rebuttal: '강의 리뉴얼 예정입니다. 불편을 드려 죄송합니다.' },
-      { author: '초보개발자', badge: 'verified', date: '2026.05.10', stars: 2, text: '기초 문법 설명은 괜찮은데, 광고에서 말한 앱 완성은 절대 불가능합니다. 과대광고가 심해요.', helpful: 89, rebuttal: null }
-    ]
-  },
+  // 실제 사용자 리뷰가 쌓이면 여기에 반영됩니다
   // ── 실제 강사: 인프런 ──
   { id: 15, name: '김영한', category: '개발', platform: '인프런', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['Spring', 'Java', '실무'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
   { id: 16, name: '캡틴판교 (장기효)', category: '개발', platform: '인프런', avatar: '#2563EB', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['Vue.js', 'TypeScript', '프론트엔드'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
@@ -1660,18 +1650,7 @@ const worstInstructors = [
 ];
 
 const detectorItems = [
-  { course: '[예시] "3개월 만에 월 1000만원 자동 수익 시스템"', instructor: '[예시] 테스트 강사D · 유데미',
-    verdict: 'sus', verdictText: '의심',
-    reason: '(예시) 수강생 제보 다수. 광고 대비 실제 내용 괴리가 크고, 상위 과정 결제 유도 패턴 확인됨.',
-    yes: 342, no: 28 },
-  { course: '[예시] "1주일 앱 개발 마스터"', instructor: '[예시] 테스트 강사F · 패스트캠퍼스',
-    verdict: 'sus', verdictText: '의심',
-    reason: '(예시) 1주일 만에 앱 개발이 가능하다는 광고. 실제 수강생 리뷰: "Hello World 수준에서 끝남"',
-    yes: 187, no: 45 },
-  { course: '[예시] "실전 React 마스터클래스"', instructor: '[예시] 테스트 강사A · 인프런',
-    verdict: 'ok', verdictText: '적정',
-    reason: '(예시) 광고 내용과 실제 강의 내용 일치. 인증된 수강생 리뷰 92% 긍정 평가.',
-    yes: 12, no: 298 },
+  // 실제 사용자 제보가 쌓이면 여기에 반영됩니다
 ];
 
 // ═══ COURSE DATA ═══
@@ -1755,23 +1734,23 @@ const ratingLabels = {
 // ═══ PLATFORM DATA ═══
 const platformData = [
   { name: '인프런', icon: '🟩', color: '#00C471',
-    score: 4.5, reviews: 1021, verified: 687,
-    satisfaction: 4.3, refund: 4.1, support: 4.6, content: 4.5 },
+    score: 0, reviews: 0, verified: 0,
+    satisfaction: 0, refund: 0, support: 0, content: 0 },
   { name: '클래스101', icon: '🟦', color: '#1A6DFF',
-    score: 3.4, reviews: 723, verified: 389,
-    satisfaction: 3.2, refund: 2.8, support: 3.5, content: 3.6 },
+    score: 0, reviews: 0, verified: 0,
+    satisfaction: 0, refund: 0, support: 0, content: 0 },
   { name: '패스트캠퍼스', icon: '🟥', color: '#E4002B',
-    score: 3.9, reviews: 572, verified: 421,
-    satisfaction: 3.8, refund: 3.2, support: 3.7, content: 4.2 },
+    score: 0, reviews: 0, verified: 0,
+    satisfaction: 0, refund: 0, support: 0, content: 0 },
   { name: '유데미', icon: '🟪', color: '#A435F0',
-    score: 3.1, reviews: 1213, verified: 534,
-    satisfaction: 3.0, refund: 3.8, support: 2.5, content: 3.2 },
+    score: 0, reviews: 0, verified: 0,
+    satisfaction: 0, refund: 0, support: 0, content: 0 },
   { name: '콜로소', icon: '⬛', color: '#222222',
-    score: 4.1, reviews: 298, verified: 201,
-    satisfaction: 4.0, refund: 3.5, support: 3.8, content: 4.4 },
+    score: 0, reviews: 0, verified: 0,
+    satisfaction: 0, refund: 0, support: 0, content: 0 },
   { name: '탈잉', icon: '🟧', color: '#FF6F00',
-    score: 3.6, reviews: 187, verified: 98,
-    satisfaction: 3.5, refund: 3.3, support: 3.6, content: 3.7 },
+    score: 0, reviews: 0, verified: 0,
+    satisfaction: 0, refund: 0, support: 0, content: 0 },
   { name: '타이탄클래스', icon: '🔷', color: '#2563EB',
     score: 0, reviews: 0, verified: 0,
     satisfaction: 0, refund: 0, support: 0, content: 0 },
@@ -1786,14 +1765,7 @@ const platformData = [
 // ═══ COMMENTS DATA ═══
 const commentsData = {};
 
-// 샘플 댓글
-commentsData[1] = [
-  { author: '비회원A', verified: false, date: '2026.05.20', text: '이 강사 강의 궁금한데 난이도가 어느 정도인가요?', likes: 3, replies: [] },
-  { author: '수강고민중', verified: false, date: '2026.05.19', text: '할인 기간에 사면 괜찮을 것 같은데.. 정가는 좀 비싸요', likes: 1, replies: [] },
-];
-commentsData[4] = [
-  { author: '구경꾼', verified: false, date: '2026.05.21', text: '리뷰 보니까 진짜 심각하네요;; 이런 곳이 아직도 운영되는 게 신기', likes: 7, replies: [] },
-];
+// 댓글 데이터 (실제 사용자 댓글이 쌓이면 여기에 반영됩니다)
 
 let currentCategory = '전체';
 let currentSort = 'popular';
@@ -2079,6 +2051,7 @@ function openReviewModal() {
 function closeReviewModal() {
   document.getElementById('reviewModal').classList.remove('open');
   document.body.style.overflow = '';
+  resetReviewUploadUI();
 }
 
 function setFormStar(group, val) {
@@ -2410,18 +2383,77 @@ function reportReview(btn) {
   btn.style.cursor = 'default';
 }
 
-function handleFileUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const area = input.previousElementSibling;
-  area.innerHTML = `
-    <div class="upload-icon">✅</div>
-    <div class="upload-text" style="color:var(--green);font-weight:700">${file.name}</div>
-    <div class="upload-sub">${(file.size / 1024 / 1024).toFixed(1)}MB · 클릭하여 변경</div>
-  `;
-  area.style.borderColor = 'var(--green)';
-  area.style.background = '#F0FDF4';
+// ═══ 리뷰 다중 파일 업로드 + 드래그앤드랍 ═══
+let reviewUploadFiles = []; // [{dataUrl, name, isPdf}]
+
+function addReviewFiles(files) {
+  for (const file of files) {
+    if (reviewUploadFiles.length >= 10) { alert('최대 10개까지 첨부 가능합니다.'); break; }
+    if (file.size > 10 * 1024 * 1024) { alert(`${file.name}: 10MB 이하만 가능합니다.`); continue; }
+    const isPdf = file.type === 'application/pdf';
+    if (!file.type.startsWith('image/') && !isPdf) { alert(`${file.name}: 이미지 또는 PDF만 가능합니다.`); continue; }
+    if (isPdf) {
+      reviewUploadFiles.push({ dataUrl: null, name: file.name, isPdf: true });
+      renderReviewUploadGrid();
+    } else {
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        reviewUploadFiles.push({ dataUrl: ev.target.result, name: file.name, isPdf: false });
+        renderReviewUploadGrid();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 }
+
+function handleFileUpload(input) {
+  addReviewFiles(input.files);
+  input.value = '';
+}
+
+function removeReviewFileAt(idx) {
+  reviewUploadFiles.splice(idx, 1);
+  renderReviewUploadGrid();
+}
+
+function renderReviewUploadGrid() {
+  const grid = document.getElementById('reviewUploadGrid');
+  const ph = document.getElementById('reviewUploadPlaceholder');
+  const area = document.getElementById('reviewUploadArea');
+  if (reviewUploadFiles.length > 0) {
+    ph.style.display = 'none';
+    area.classList.add('has-files');
+    grid.innerHTML = reviewUploadFiles.map((f, i) => {
+      const thumb = f.isPdf
+        ? `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:var(--gray-100);font-size:24px">📄</div>`
+        : `<img src="${f.dataUrl}" alt="${f.name}">`;
+      return `<div class="upload-thumb-wrap" title="${f.name}">${thumb}<button class="upload-thumb-remove" onclick="event.stopPropagation();removeReviewFileAt(${i})">✕</button></div>`;
+    }).join('');
+  } else {
+    ph.style.display = 'block';
+    area.classList.remove('has-files');
+    grid.innerHTML = '';
+  }
+}
+
+function resetReviewUploadUI() {
+  reviewUploadFiles = [];
+  const input = document.getElementById('fileInput');
+  if (input) input.value = '';
+  renderReviewUploadGrid();
+}
+
+// 드래그앤드랍
+(function() {
+  const area = document.getElementById('reviewUploadArea');
+  if (!area) return;
+  area.addEventListener('dragover', function(e) { e.preventDefault(); area.classList.add('dragover'); });
+  area.addEventListener('dragleave', function() { area.classList.remove('dragover'); });
+  area.addEventListener('drop', function(e) {
+    e.preventDefault(); area.classList.remove('dragover');
+    if (e.dataTransfer.files.length) addReviewFiles(e.dataTransfer.files);
+  });
+})();
 
 // ═══ COMMENTS ═══
 let currentInstId = null;

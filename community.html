@@ -263,16 +263,24 @@ body {
   border: 2px dashed var(--gray-200); border-radius: 10px; padding: 16px;
   text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
 }
-.write-img-area:hover { border-color: var(--orange); background: var(--orange-light); }
-.write-img-area.has-image { border-style: solid; border-color: var(--green); }
+.write-img-area:hover, .write-img-area.dragover { border-color: var(--orange); background: var(--orange-light); }
+.write-img-area.has-image { border-style: solid; border-color: var(--green); background: #F0FDF4; }
 .write-img-area input[type="file"] { display: none; }
-.write-img-preview {
-  max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 8px;
+.write-img-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; margin-top: 10px;
 }
-.write-img-remove {
-  position: absolute; top: 8px; right: 8px; width: 24px; height: 24px;
-  border-radius: 50%; background: var(--red); color: white; border: none;
-  font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+.write-img-thumb-wrap {
+  position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+.write-img-thumb-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.write-img-thumb-remove {
+  position: absolute; top: 2px; right: 2px; width: 20px; height: 20px;
+  border-radius: 50%; background: rgba(0,0,0,0.6); color: white; border: none;
+  font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  line-height: 1;
 }
 .post-image {
   width: 100%; max-height: 400px; object-fit: cover; border-radius: 10px;
@@ -475,14 +483,11 @@ body {
         <textarea class="write-textarea" id="writeContent" placeholder="내용을 입력하세요"></textarea>
       </div>
       <div class="write-field">
-        <label class="write-label">이미지 첨부 (선택)</label>
+        <label class="write-label">이미지 첨부 (선택, 여러 장 가능)</label>
         <div class="write-img-area" id="writeImgArea" onclick="document.getElementById('writeImgInput').click()">
-          <input type="file" id="writeImgInput" accept="image/*" onchange="handleWriteImgSelect(event)">
-          <div id="writeImgPlaceholder">📷 클릭하여 이미지를 첨부하세요 (최대 5MB)</div>
-          <div id="writeImgPreviewWrap" style="display:none">
-            <img id="writeImgPreview" class="write-img-preview">
-            <button class="write-img-remove" onclick="event.stopPropagation();removeWriteImg()">✕</button>
-          </div>
+          <input type="file" id="writeImgInput" accept="image/*" multiple onchange="handleWriteImgSelect(event)">
+          <div id="writeImgPlaceholder">📷 클릭 또는 드래그하여 이미지를 첨부하세요<br><span style="font-size:11px;color:var(--gray-400)">최대 10장, 각 5MB 이하</span></div>
+          <div class="write-img-grid" id="writeImgGrid"></div>
         </div>
       </div>
     </div>
@@ -722,7 +727,9 @@ function openPost(id) {
   document.getElementById('detailCategory').innerHTML = (p.isNotice ? '<span class="notice-badge">📌 공지</span> ' : '') + p.category;
   document.getElementById('detailTitle').textContent = p.title;
   document.getElementById('detailMeta').innerHTML = `<strong>${p.author}</strong> · ${p.date} · 조회 ${p.views}`;
-  document.getElementById('detailBody').innerHTML = p.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + (p.imageUrl ? `<img src="${p.imageUrl}" class="post-image" alt="첨부 이미지">` : '');
+  const imgs = p.images || (p.imageUrl ? [p.imageUrl] : []);
+  const imgHTML = imgs.map(url => `<img src="${url}" class="post-image" alt="첨부 이미지" style="margin-top:12px">`).join('');
+  document.getElementById('detailBody').innerHTML = p.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + imgHTML;
   const isMyPost = currentUser && (p.author === getDisplayName() || p.author === currentUser.name);
   const manageBtns = (isMyPost || isAdmin) ? `
     <div class="post-manage-btns">
@@ -1019,44 +1026,68 @@ document.addEventListener('change', function(e) {
   }
 });
 
-// ═══ 이미지 첨부 ═══
-let writeSelectedImage = null;
+// ═══ 이미지 첨부 (다중 + 드래그앤드랍) ═══
+let writeImages = []; // [{dataUrl, name}]
 
-function handleWriteImgSelect(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { alert('파일 크기는 5MB 이하만 가능합니다.'); return; }
-  if (!file.type.startsWith('image/')) { alert('이미지 파일만 첨부 가능합니다.'); return; }
-  writeSelectedImage = file;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    document.getElementById('writeImgPreview').src = ev.target.result;
-    document.getElementById('writeImgPreviewWrap').style.display = 'block';
-    document.getElementById('writeImgPlaceholder').style.display = 'none';
-    document.getElementById('writeImgArea').classList.add('has-image');
-  };
-  reader.readAsDataURL(file);
+function addWriteImages(files) {
+  for (const file of files) {
+    if (writeImages.length >= 10) { alert('최대 10장까지 첨부 가능합니다.'); break; }
+    if (file.size > 5 * 1024 * 1024) { alert(`${file.name}: 5MB 이하만 가능합니다.`); continue; }
+    if (!file.type.startsWith('image/')) { alert(`${file.name}: 이미지 파일만 가능합니다.`); continue; }
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      writeImages.push({ dataUrl: ev.target.result, name: file.name });
+      renderWriteImgGrid();
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
-function removeWriteImg() {
-  writeSelectedImage = null;
-  document.getElementById('writeImgInput').value = '';
-  document.getElementById('writeImgPreviewWrap').style.display = 'none';
-  document.getElementById('writeImgPlaceholder').style.display = 'block';
-  document.getElementById('writeImgArea').classList.remove('has-image');
+function handleWriteImgSelect(e) {
+  addWriteImages(e.target.files);
+  e.target.value = '';
+}
+
+function removeWriteImgAt(idx) {
+  writeImages.splice(idx, 1);
+  renderWriteImgGrid();
+}
+
+function renderWriteImgGrid() {
+  const grid = document.getElementById('writeImgGrid');
+  const ph = document.getElementById('writeImgPlaceholder');
+  const area = document.getElementById('writeImgArea');
+  if (writeImages.length > 0) {
+    ph.style.display = 'none';
+    area.classList.add('has-image');
+    grid.innerHTML = writeImages.map((img, i) =>
+      `<div class="write-img-thumb-wrap"><img src="${img.dataUrl}" alt="${img.name}"><button class="write-img-thumb-remove" onclick="event.stopPropagation();removeWriteImgAt(${i})">✕</button></div>`
+    ).join('');
+  } else {
+    ph.style.display = 'block';
+    area.classList.remove('has-image');
+    grid.innerHTML = '';
+  }
 }
 
 function resetWriteImgUI() {
-  writeSelectedImage = null;
+  writeImages = [];
   const imgInput = document.getElementById('writeImgInput');
   if (imgInput) imgInput.value = '';
-  const wrap = document.getElementById('writeImgPreviewWrap');
-  if (wrap) wrap.style.display = 'none';
-  const ph = document.getElementById('writeImgPlaceholder');
-  if (ph) ph.style.display = 'block';
-  const area = document.getElementById('writeImgArea');
-  if (area) area.classList.remove('has-image');
+  renderWriteImgGrid();
 }
+
+// 드래그앤드랍
+document.addEventListener('DOMContentLoaded', function() {
+  const area = document.getElementById('writeImgArea');
+  if (!area) return;
+  area.addEventListener('dragover', function(e) { e.preventDefault(); area.classList.add('dragover'); });
+  area.addEventListener('dragleave', function() { area.classList.remove('dragover'); });
+  area.addEventListener('drop', function(e) {
+    e.preventDefault(); area.classList.remove('dragover');
+    if (e.dataTransfer.files.length) addWriteImages(e.dataTransfer.files);
+  });
+});
 
 function closeWriteModal() {
   document.getElementById('writeOverlay').classList.remove('open');
@@ -1081,9 +1112,10 @@ function submitPost() {
     content, comments: []
   };
 
-  // 이미지 첨부 (미리보기용 Data URL 사용)
-  if (writeSelectedImage && document.getElementById('writeImgPreview').src) {
-    newPost.imageUrl = document.getElementById('writeImgPreview').src;
+  // 이미지 첨부 (다중)
+  if (writeImages.length > 0) {
+    newPost.images = writeImages.map(img => img.dataUrl);
+    newPost.imageUrl = newPost.images[0]; // 썸네일용 첫 번째 이미지
   }
 
   // 공지 설정 (관리자만)
