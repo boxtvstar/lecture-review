@@ -461,12 +461,11 @@ body {
 .dc-reply-input-area { display: flex; gap: 6px; margin: 8px 0 4px 24px; }
 .dc-reply-input-area input { flex: 1; padding: 6px 10px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; }
 .dc-reply-input-area button { padding: 6px 12px; border-radius: 6px; background: var(--orange); color: white; border: none; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
-.nav-bell { position: relative; background: none; border: none; cursor: pointer; padding: 6px; font-size: 18px; line-height: 1; }
-.nav-bell-badge {
-  position: absolute; top: 0; right: 0; min-width: 16px; height: 16px;
-  background: #EF4444; color: white; font-size: 10px; font-weight: 700;
+.nav-notif-badge {
+  position: absolute; top: -2px; right: -4px; min-width: 16px; height: 16px;
+  background: #EF4444; color: white; font-size: 9px; font-weight: 700;
   border-radius: 8px; display: flex; align-items: center; justify-content: center;
-  padding: 0 4px;
+  padding: 0 3px; pointer-events: none;
 }
 .notif-dropdown {
   display: none; position: absolute; top: calc(100% + 8px); right: 0;
@@ -474,6 +473,11 @@ body {
   border: 1px solid var(--gray-200); min-width: 280px; max-height: 350px;
   overflow-y: auto; z-index: 1001;
 }
+.dc-like-btn { background: none; border: none; font-size: 12px; color: var(--gray-400); cursor: pointer; font-family: inherit; padding: 2px 6px; margin-top: 4px; transition: color 0.2s; }
+.dc-like-btn:hover, .dc-like-btn.liked { color: #EF4444; }
+.sort-tabs { display: flex; gap: 6px; margin-left: auto; }
+.sort-tab { background: none; border: 1px solid var(--gray-200); border-radius: 16px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; color: var(--gray-400); transition: all 0.2s; }
+.sort-tab.active { background: var(--navy); color: white; border-color: var(--navy); }
 .notif-dropdown.open { display: block; }
 .notif-dropdown-header { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); font-size: 14px; font-weight: 800; color: var(--navy); display: flex; justify-content: space-between; align-items: center; }
 .notif-dropdown-header button { background: none; border: none; font-size: 12px; color: var(--gray-400); cursor: pointer; font-family: inherit; }
@@ -503,15 +507,9 @@ body {
       <a href="/community" class="active">커뮤니티</a>
       <a href="/admin" id="navAdminLink" style="font-size:12px;color:var(--gray-400);display:none">관리자</a>
       <button class="nav-login-btn" id="navLoginBtn" onclick="navGoogleLogin()"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> 로그인</button>
-      <div style="position:relative;display:none" id="navBellWrap">
-        <button class="nav-bell" id="navBell" onclick="toggleNotifDropdown(event)">🔔<span class="nav-bell-badge" id="bellBadge" style="display:none">0</span></button>
-        <div class="notif-dropdown" id="notifDropdown">
-          <div class="notif-dropdown-header">알림 <button onclick="clearNotifs()">모두 읽음</button></div>
-          <div id="notifList"><div class="notif-empty">알림이 없습니다.</div></div>
-        </div>
-      </div>
-      <div class="nav-profile" id="navProfile" onclick="toggleProfileDropdown(event)">
+      <div class="nav-profile" id="navProfile" onclick="toggleProfileDropdown(event)" style="position:relative">
         <img class="nav-profile-img" id="navProfileImg" src="" alt="">
+        <span class="nav-notif-badge" id="bellBadge" style="display:none">0</span>
         <span class="nav-profile-name" id="navProfileName"></span>
         <div class="nav-profile-dropdown" id="profileDropdown">
           <div class="nav-profile-dropdown-header">
@@ -522,8 +520,13 @@ body {
             </div>
           </div>
           <a href="#" onclick="openMyPage(); return false;"><span class="dropdown-icon">👤</span> 마이페이지</a>
+          <a href="#" onclick="toggleNotifPanel(); return false;"><span class="dropdown-icon">🔔</span> 알림 <span id="notifCountInline" style="color:#EF4444;font-weight:700;font-size:12px"></span></a>
           <a href="#" onclick="openWriteModal(); closeProfileDropdown(); return false;"><span class="dropdown-icon">✏️</span> 글쓰기</a>
           <button class="logout-btn" onclick="logoutUser()"><span class="dropdown-icon">🚪</span> 로그아웃</button>
+        </div>
+        <div class="notif-dropdown" id="notifDropdown">
+          <div class="notif-dropdown-header">알림 <button onclick="clearNotifs()">모두 읽음</button></div>
+          <div id="notifList"><div class="notif-empty">알림이 없습니다.</div></div>
         </div>
       </div>
       <button class="mobile-menu-btn" onclick="openMobileNav()">☰</button>
@@ -580,12 +583,16 @@ body {
     <button class="btn-write" onclick="openWriteModal()">✏️ 글쓰기</button>
   </div>
 
-  <div class="category-tabs" id="categoryTabs">
+  <div class="category-tabs" id="categoryTabs" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px">
     <button class="cat-tab active" onclick="filterPosts('전체', this)">전체</button>
     <button class="cat-tab" onclick="filterPosts('자유', this)">자유</button>
     <button class="cat-tab" onclick="filterPosts('수강후기', this)">수강후기</button>
     <button class="cat-tab" onclick="filterPosts('질문', this)">질문</button>
     <button class="cat-tab" onclick="filterPosts('꿀팁', this)">꿀팁</button>
+    <div class="sort-tabs">
+      <button class="sort-tab active" onclick="sortPosts('popular', this)">인기순</button>
+      <button class="sort-tab" onclick="sortPosts('latest', this)">최신순</button>
+    </div>
   </div>
 
   <div class="post-list" id="postList"></div>
@@ -718,12 +725,10 @@ function showNavProfile() {
   document.getElementById('dropdownEmail').textContent = currentUser.email;
   el.classList.add('show');
   document.getElementById('navLoginBtn').style.display = 'none';
-  document.getElementById('navBellWrap').style.display = 'flex';
 }
 function hideNavProfile() {
   document.getElementById('navProfile').classList.remove('show');
   document.getElementById('navLoginBtn').style.display = 'flex';
-  document.getElementById('navBellWrap').style.display = 'none';
   closeProfileDropdown();
 }
 function navGoogleLogin() {
@@ -826,23 +831,23 @@ const posts = [
     date: '2026.05.22', views: 342, likes: 47, commentCount: 12,
     content: '3개월 동안 수강했는데, 확실히 실무에서 바로 쓸 수 있는 내용이 많습니다.\n\n특히 에러 핸들링 파트가 다른 강의에서는 잘 안 다루는 심화 내용이라 좋았어요.\n\n질문 올리면 보통 하루 안에 답변이 옵니다. 이 부분은 진짜 다른 강사들도 배웠으면 좋겠어요.\n\n다만 후반부로 갈수록 난이도가 급격히 올라가서 초보자는 중간에 다른 강의로 보충이 필요할 수도 있습니다.\n\n총평: 4.7/5 추천합니다.',
     comments: [
-      { author: '주니어개발자', date: '2026.05.22', text: '저도 이 강의 듣고 있는데 에러 핸들링 파트 진짜 좋죠!', replies: [] },
-      { author: '취준생A', date: '2026.05.22', text: '난이도 급상승 부분 공감.. 중간에 포기할 뻔했어요', replies: [] },
+      { author: '주니어개발자', date: '2026.05.22', text: '저도 이 강의 듣고 있는데 에러 핸들링 파트 진짜 좋죠!', replies: [], likes: 8 },
+      { author: '취준생A', date: '2026.05.22', text: '난이도 급상승 부분 공감.. 중간에 포기할 뻔했어요', replies: [], likes: 3 },
     ]
   },
   { id: 2, category: '자유', title: '강의팔이 구별하는 제 나름의 기준 공유합니다', author: '호구탈출',
     date: '2026.05.21', views: 1203, likes: 189, commentCount: 34,
     content: '여러 강의에 수백만원 쏟아본 경험자로서 강의팔이 구별법을 공유합니다.\n\n1. "~만에 ~억" 류 제목 → 99% 과장\n2. 무료 콘텐츠가 거의 없는 강사 → 실력 검증 불가\n3. 수강 후 "상위 코스" 결제 유도 → 다단계 구조 의심\n4. 환불 정책이 불명확 → 자신감 없는 증거\n5. 수강생 후기가 전부 극찬 → 조작 가능성\n\n반대로 좋은 강사 특징:\n- 유튜브나 블로그에 무료 콘텐츠가 풍부\n- 환불 정책이 명확\n- 실제 현업 경력이 검증 가능\n- 커리큘럼이 구체적\n\n참고하시고 현명한 수강 결정하세요!',
     comments: [
-      { author: '마케팅3년차', date: '2026.05.21', text: '6번 추가요: 수료증이 아닌 포트폴리오를 강조하는 강사가 진짜입니다', replies: [] },
-      { author: '피해자모임', date: '2026.05.21', text: '3번에 완전 당한 사람입니다.. 추가결제만 300만원 넘게 했어요', replies: [] },
+      { author: '마케팅3년차', date: '2026.05.21', text: '6번 추가요: 수료증이 아닌 포트폴리오를 강조하는 강사가 진짜입니다', replies: [], likes: 15 },
+      { author: '피해자모임', date: '2026.05.21', text: '3번에 완전 당한 사람입니다.. 추가결제만 300만원 넘게 했어요', replies: [], likes: 22 },
     ]
   },
   { id: 3, category: '질문', title: '패스트캠퍼스 vs 인프런 어디가 더 좋나요?', author: '고민중',
     date: '2026.05.21', views: 567, likes: 23, commentCount: 18,
     content: '프론트엔드 개발 공부 시작하려고 하는데\n패스트캠퍼스랑 인프런 중에 고민 중입니다.\n\n패캠은 올인원 패키지가 가성비 좋아 보이고\n인프런은 강의 단위로 살 수 있어서 선택 폭이 넓은 것 같은데..\n\n혹시 둘 다 써보신 분 있으면 장단점 알려주세요!',
     comments: [
-      { author: '풀스택개발자', date: '2026.05.21', text: '인프런 추천합니다. 단과로 좋은 강사만 골라 들을 수 있어요', replies: [] },
+      { author: '풀스택개발자', date: '2026.05.21', text: '인프런 추천합니다. 단과로 좋은 강사만 골라 들을 수 있어요', replies: [], likes: 5 },
     ]
   },
   { id: 4, category: '꿀팁', title: '강의 환불받는 확실한 방법 (플랫폼별 정리)', author: '환불마스터',
@@ -854,7 +859,7 @@ const posts = [
     date: '2026.05.20', views: 876, likes: 65, commentCount: 8,
     content: '기대하고 들었는데 솔직히 실망했습니다.\n\n장점:\n- 영상 퀄리티는 좋음\n- 현업 디자이너가 강사\n\n단점:\n- 가격이 너무 비쌈 (40만원대)\n- 실습 파일 제공이 부실\n- 질문 답변이 거의 안 됨\n- 커리큘럼 업데이트가 느림\n\n같은 돈이면 인프런에서 3~4개 강의 들을 수 있어요.\n영상 퀄리티만으로는 가격 정당화가 안 됩니다.',
     comments: [
-      { author: '프리랜서', date: '2026.05.20', text: '콜로소 영상미는 좋은데 가성비가 안 좋은 건 맞아요', replies: [] },
+      { author: '프리랜서', date: '2026.05.20', text: '콜로소 영상미는 좋은데 가성비가 안 좋은 건 맞아요', replies: [], likes: 4 },
     ]
   },
   { id: 6, category: '자유', title: '여기 사이트 괜찮네요 이런 거 필요했는데', author: '수강생A',
@@ -865,6 +870,7 @@ const posts = [
 ];
 
 let currentFilter = '전체';
+let currentSort = 'popular';
 let nextId = posts.length + 1;
 
 // ═══ RENDER ═══
@@ -872,9 +878,21 @@ const categoryStyles = {
   '자유': 'free', '수강후기': 'review', '질문': 'question', '꿀팁': 'tip'
 };
 
+function getTotalCommentLikes(p) {
+  let total = 0;
+  (p.comments || []).forEach(c => { total += (c.likes || 0); (c.replies || []).forEach(r => { total += (r.likes || 0); }); });
+  return total;
+}
+
 function renderPosts() {
   const list = document.getElementById('postList');
-  let filtered = currentFilter === '전체' ? posts : posts.filter(p => p.category === currentFilter);
+  let filtered = currentFilter === '전체' ? [...posts] : posts.filter(p => p.category === currentFilter);
+
+  if (currentSort === 'popular') {
+    filtered.sort((a, b) => (b.likes + getTotalCommentLikes(b)) - (a.likes + getTotalCommentLikes(a)));
+  } else {
+    filtered.sort((a, b) => b.id - a.id);
+  }
 
   if (filtered.length === 0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">아직 작성된 글이 없습니다.</div></div>';
@@ -905,6 +923,13 @@ function renderPosts() {
 function filterPosts(cat, btn) {
   currentFilter = cat;
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderPosts();
+}
+
+function sortPosts(sort, btn) {
+  currentSort = sort;
+  document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   renderPosts();
 }
@@ -965,19 +990,25 @@ function renderDetailComments(p) {
         <button onclick="deleteComment(${i})">삭제</button>
       </div>` : '';
       const replyBtn = currentUser ? `<button class="dc-reply-btn" onclick="showReplyInput(${i})">↩ 답글</button>` : '';
+      const cmtLikes = c.likes || 0;
+      const cmtLikeBtn = `<button class="dc-like-btn" onclick="likeComment(${i})" id="cmtLike${i}">❤️ ${cmtLikes}</button>`;
       const replies = (c.replies || []).map((r, ri) => {
         const isMyReply = currentUser && (r.author === getDisplayName() || r.author === currentUser.name);
         const replyActions = (isMyReply || isAdmin) ? `<div class="dc-item-actions">
           <button onclick="deleteReply(${i},${ri})">삭제</button>
         </div>` : '';
+        const rLikes = r.likes || 0;
+        const rLikeBtn = `<button class="dc-like-btn" onclick="likeReply(${i},${ri})">❤️ ${rLikes}</button>`;
         return `<div class="dc-item">
           <div class="dc-item-top"><span class="dc-item-author">${r.author}</span><span class="dc-item-date">${r.date}</span>${replyActions}</div>
           <div class="dc-item-text">${r.text}</div>
+          ${rLikeBtn}
         </div>`;
       }).join('');
       return `<div class="dc-item" id="cmtWrap${i}">
         <div class="dc-item-top"><span class="dc-item-author">${c.author}</span><span class="dc-item-date">${c.date}</span>${replyBtn}${cmtActions}</div>
         <div class="dc-item-text" id="cmtText${i}">${c.text}</div>
+        ${cmtLikeBtn}
         ${replies ? `<div class="dc-replies">${replies}</div>` : ''}
         <div id="replyArea${i}"></div>
       </div>`;
@@ -992,7 +1023,7 @@ function submitDetailComment() {
   if (!p) return;
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
-  p.comments.push({ author: getDisplayName(), date: dateStr, text: input.value.trim(), replies: [] });
+  p.comments.push({ author: getDisplayName(), date: dateStr, text: input.value.trim(), replies: [], likes: 0 });
   // 글 작성자에게 알림
   if (p.author !== getDisplayName()) {
     addNotif(`💬 "${p.title}" 글에 ${getDisplayName()}님이 댓글을 남겼습니다.`, p.id);
@@ -1017,7 +1048,7 @@ function submitReply(i) {
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
   if (!p.comments[i].replies) p.comments[i].replies = [];
-  p.comments[i].replies.push({ author: getDisplayName(), date: dateStr, text: input.value.trim() });
+  p.comments[i].replies.push({ author: getDisplayName(), date: dateStr, text: input.value.trim(), likes: 0 });
   // 댓글 작성자에게 알림
   if (p.comments[i].author !== getDisplayName()) {
     addNotif(`↩ ${getDisplayName()}님이 회원님의 댓글에 답글을 남겼습니다.`, p.id);
@@ -1031,6 +1062,30 @@ function deleteReply(ci, ri) {
   const p = posts.find(x => x.id === currentPostId);
   if (!p || !p.comments[ci] || !p.comments[ci].replies) return;
   p.comments[ci].replies.splice(ri, 1);
+  renderDetailComments(p);
+  renderPosts();
+}
+
+function likeComment(i) {
+  const p = posts.find(x => x.id === currentPostId);
+  if (!p || !p.comments[i]) return;
+  if (!p.comments[i].likes) p.comments[i].likes = 0;
+  p.comments[i].likes++;
+  if (currentUser && p.comments[i].author !== getDisplayName()) {
+    addNotif(`❤️ ${getDisplayName()}님이 회원님의 댓글을 좋아합니다.`, p.id);
+  }
+  renderDetailComments(p);
+  renderPosts();
+}
+
+function likeReply(ci, ri) {
+  const p = posts.find(x => x.id === currentPostId);
+  if (!p || !p.comments[ci] || !p.comments[ci].replies[ri]) return;
+  if (!p.comments[ci].replies[ri].likes) p.comments[ci].replies[ri].likes = 0;
+  p.comments[ci].replies[ri].likes++;
+  if (currentUser && p.comments[ci].replies[ri].author !== getDisplayName()) {
+    addNotif(`❤️ ${getDisplayName()}님이 회원님의 답글을 좋아합니다.`, p.id);
+  }
   renderDetailComments(p);
   renderPosts();
 }
@@ -1204,13 +1259,17 @@ function addNotif(text, postId) {
 function renderNotifs() {
   const unread = notifications.filter(n => !n.read).length;
   const badge = document.getElementById('bellBadge');
+  const inlineCount = document.getElementById('notifCountInline');
   if (unread > 0) {
     badge.textContent = unread;
     badge.style.display = 'flex';
+    if (inlineCount) inlineCount.textContent = `(${unread})`;
   } else {
     badge.style.display = 'none';
+    if (inlineCount) inlineCount.textContent = '';
   }
   const list = document.getElementById('notifList');
+  if (!list) return;
   if (notifications.length === 0) {
     list.innerHTML = '<div class="notif-empty">알림이 없습니다.</div>';
     return;
@@ -1237,18 +1296,18 @@ function clearNotifs() {
   renderNotifs();
 }
 
-function toggleNotifDropdown(e) {
-  e.stopPropagation();
-  document.getElementById('notifDropdown').classList.toggle('open');
+function toggleNotifPanel() {
   closeProfileDropdown();
+  document.getElementById('notifDropdown').classList.toggle('open');
 }
 
 function closeNotifDropdown() {
-  document.getElementById('notifDropdown').classList.remove('open');
+  const dd = document.getElementById('notifDropdown');
+  if (dd) dd.classList.remove('open');
 }
 
 document.addEventListener('click', e => {
-  if (!document.getElementById('navBellWrap').contains(e.target)) closeNotifDropdown();
+  if (!e.target.closest('#navProfile')) closeNotifDropdown();
 });
 
 // ═══ INIT ═══
