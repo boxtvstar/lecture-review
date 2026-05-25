@@ -97,6 +97,76 @@ body {
   text-decoration: none;
 }
 .btn-write-review:hover { background: var(--orange-hover) !important; transform: translateY(-1px); }
+.nav-profile {
+  position: relative; display: none; align-items: center; gap: 8px;
+  cursor: pointer; padding: 4px 10px 4px 4px; border-radius: 20px;
+  border: 1.5px solid var(--gray-200); background: white; transition: all 0.2s;
+}
+.nav-profile:hover { border-color: var(--orange); background: var(--orange-light); }
+.nav-profile.show { display: flex; }
+.nav-profile-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.nav-profile-name { font-size: 13px; font-weight: 700; color: var(--navy); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-profile-dropdown {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0;
+  background: white; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  border: 1px solid var(--gray-200); min-width: 220px; overflow: hidden; z-index: 1001;
+}
+.nav-profile-dropdown.open { display: block; }
+.nav-profile-dropdown-header {
+  padding: 16px; border-bottom: 1px solid var(--gray-100);
+  display: flex; align-items: center; gap: 12px;
+}
+.nav-profile-dropdown-header img { width: 40px; height: 40px; border-radius: 50%; }
+.nav-profile-dropdown-info { display: flex; flex-direction: column; }
+.nav-profile-dropdown-name { font-size: 14px; font-weight: 700; color: var(--navy); }
+.nav-profile-dropdown-email { font-size: 12px; color: var(--gray-400); }
+.nav-profile-dropdown a, .nav-profile-dropdown button {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 16px;
+  font-size: 14px; font-weight: 600; color: var(--gray-600); background: none;
+  border: none; text-decoration: none; cursor: pointer; font-family: inherit; transition: background 0.2s;
+}
+.nav-profile-dropdown a:hover, .nav-profile-dropdown button:hover { background: var(--gray-50); color: var(--navy); }
+.nav-profile-dropdown .dropdown-icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-profile-dropdown .logout-btn { color: #EF4444; border-top: 1px solid var(--gray-100); }
+.nav-profile-dropdown .logout-btn:hover { background: #FEF2F2; }
+/* 마이페이지 모달 */
+.mypage-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.5); justify-content: center; align-items: flex-start;
+  padding-top: 80px;
+}
+.mypage-overlay.open { display: flex; }
+.mypage-modal {
+  background: white; border-radius: 16px; width: 100%; max-width: 600px;
+  max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.mypage-header {
+  padding: 24px; border-bottom: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.mypage-header h2 { font-size: 18px; font-weight: 800; color: var(--navy); }
+.mypage-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gray-400); }
+.mypage-user {
+  display: flex; align-items: center; gap: 16px; padding: 24px;
+  background: var(--gray-50); border-bottom: 1px solid var(--gray-100);
+}
+.mypage-user img { width: 56px; height: 56px; border-radius: 50%; }
+.mypage-user-name { font-size: 18px; font-weight: 800; color: var(--navy); }
+.mypage-user-email { font-size: 13px; color: var(--gray-400); margin-top: 2px; }
+.mypage-section { padding: 20px 24px; }
+.mypage-section-title { font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 12px; }
+.mypage-review-item {
+  padding: 14px; margin-bottom: 10px; border-radius: 10px;
+  border: 1px solid var(--gray-200); background: white;
+}
+.mypage-review-meta { font-size: 12px; color: var(--gray-400); margin-bottom: 6px; }
+.mypage-review-text { font-size: 14px; color: var(--gray-600); line-height: 1.5; }
+.mypage-empty { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 14px; }
+@media (max-width: 768px) {
+  .nav-profile-name { display: none; }
+  .mypage-modal { margin: 16px; max-height: 85vh; }
+  .mypage-overlay { padding-top: 20px; align-items: center; }
+}
 
 /* ═══ HERO SLIDER ═══ */
 .hero {
@@ -1142,6 +1212,22 @@ body {
       <a href="community.html">커뮤니티</a>
       <a href="admin.html" style="font-size:12px;color:var(--gray-400)">관리자</a>
       <a href="#" onclick="openReviewModal(); return false;" class="btn-write-review">✏️ 리뷰 쓰기</a>
+      <div class="nav-profile" id="navProfile" onclick="toggleProfileDropdown(event)">
+        <img class="nav-profile-img" id="navProfileImg" src="" alt="">
+        <span class="nav-profile-name" id="navProfileName"></span>
+        <div class="nav-profile-dropdown" id="profileDropdown">
+          <div class="nav-profile-dropdown-header">
+            <img id="dropdownProfileImg" src="" alt="">
+            <div class="nav-profile-dropdown-info">
+              <div class="nav-profile-dropdown-name" id="dropdownName"></div>
+              <div class="nav-profile-dropdown-email" id="dropdownEmail"></div>
+            </div>
+          </div>
+          <a href="#" onclick="openMyPage(); return false;"><span class="dropdown-icon">👤</span> 마이페이지</a>
+          <a href="#" onclick="openReviewModal(); closeProfileDropdown(); return false;"><span class="dropdown-icon">✏️</span> 리뷰 쓰기</a>
+          <button class="logout-btn" onclick="logoutUser()"><span class="dropdown-icon">🚪</span> 로그아웃</button>
+        </div>
+      </div>
       <button class="mobile-menu-btn" onclick="openMobileNav()">☰</button>
     </div>
   </div>
@@ -1436,6 +1522,25 @@ body {
 </div>
 
 <!-- ═══ LOGIN POPUP ═══ -->
+<!-- ═══ 마이페이지 모달 ═══ -->
+<div class="mypage-overlay" id="mypageOverlay" onclick="if(event.target===this)closeMyPage()">
+  <div class="mypage-modal">
+    <div class="mypage-header">
+      <h2>마이페이지</h2>
+      <button class="mypage-close" onclick="closeMyPage()">&times;</button>
+    </div>
+    <div class="mypage-user" id="mypageUser"></div>
+    <div class="mypage-section">
+      <div class="mypage-section-title">📝 내가 쓴 리뷰</div>
+      <div id="mypageReviews"></div>
+    </div>
+    <div class="mypage-section">
+      <div class="mypage-section-title">💬 내가 쓴 댓글</div>
+      <div id="mypageComments"></div>
+    </div>
+  </div>
+</div>
+
 <div class="popup-overlay" id="loginPopup" onclick="if(event.target===this)closeLoginPopup()">
   <div class="login-popup">
     <div class="login-popup-header">
@@ -2085,10 +2190,83 @@ let currentUser = null;
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     currentUser = { name: user.displayName, email: user.email, picture: user.photoURL };
+    showNavProfile();
   } else {
     currentUser = null;
+    hideNavProfile();
   }
 });
+
+function showNavProfile() {
+  if (!currentUser) return;
+  const el = document.getElementById('navProfile');
+  document.getElementById('navProfileImg').src = currentUser.picture;
+  document.getElementById('navProfileName').textContent = currentUser.name;
+  document.getElementById('dropdownProfileImg').src = currentUser.picture;
+  document.getElementById('dropdownName').textContent = currentUser.name;
+  document.getElementById('dropdownEmail').textContent = currentUser.email;
+  el.classList.add('show');
+}
+function hideNavProfile() {
+  document.getElementById('navProfile').classList.remove('show');
+  closeProfileDropdown();
+}
+function toggleProfileDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('profileDropdown').classList.toggle('open');
+}
+function closeProfileDropdown() {
+  document.getElementById('profileDropdown').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('navProfile').contains(e.target)) closeProfileDropdown();
+});
+function logoutUser() {
+  firebase.auth().signOut();
+  closeProfileDropdown();
+}
+function openMyPage() {
+  closeProfileDropdown();
+  if (!currentUser) return;
+  document.getElementById('mypageUser').innerHTML = `
+    <img src="${currentUser.picture}" alt="">
+    <div>
+      <div class="mypage-user-name">${currentUser.name}</div>
+      <div class="mypage-user-email">${currentUser.email}</div>
+    </div>`;
+  // 내가 쓴 리뷰 (현재 세션에서 작성한 것)
+  const myReviews = document.querySelectorAll('.review-card');
+  let reviewHTML = '';
+  myReviews.forEach(card => {
+    const name = card.querySelector('.review-author-name');
+    if (name && name.textContent === currentUser.name) {
+      const text = card.querySelector('.review-text');
+      const meta = card.querySelector('.review-date');
+      reviewHTML += `<div class="mypage-review-item">
+        <div class="mypage-review-meta">${meta ? meta.textContent : ''}</div>
+        <div class="mypage-review-text">${text ? text.textContent : ''}</div>
+      </div>`;
+    }
+  });
+  document.getElementById('mypageReviews').innerHTML = reviewHTML || '<div class="mypage-empty">아직 작성한 리뷰가 없습니다.</div>';
+  // 내가 쓴 댓글
+  const myComments = document.querySelectorAll('.comment-item');
+  let commentHTML = '';
+  myComments.forEach(item => {
+    const author = item.querySelector('.comment-author');
+    if (author && author.textContent === currentUser.name) {
+      const text = item.querySelector('.comment-text');
+      commentHTML += `<div class="mypage-review-item">
+        <div class="mypage-review-text">${text ? text.textContent : ''}</div>
+      </div>`;
+    }
+  });
+  document.getElementById('mypageComments').innerHTML = commentHTML || '<div class="mypage-empty">아직 작성한 댓글이 없습니다.</div>';
+  document.getElementById('mypageOverlay').classList.add('open');
+}
+function closeMyPage() {
+  document.getElementById('mypageOverlay').classList.remove('open');
+}
 
 // ═══ AUTOCOMPLETE ═══
 function acSearch(type) {
