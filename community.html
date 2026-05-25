@@ -410,8 +410,8 @@ body {
     <button class="cat-tab" onclick="filterPosts('질문', this)">질문</button>
     <button class="cat-tab" onclick="filterPosts('꿀팁', this)">꿀팁</button>
     <div class="sort-tabs">
-      <button class="sort-tab active" onclick="sortPosts('popular', this)">인기순</button>
-      <button class="sort-tab" onclick="sortPosts('latest', this)">최신순</button>
+      <button class="sort-tab" onclick="sortPosts('popular', this)">인기순</button>
+      <button class="sort-tab active" onclick="sortPosts('latest', this)">최신순</button>
     </div>
   </div>
 
@@ -628,7 +628,7 @@ const posts = [
 ];
 
 let currentFilter = '전체';
-let currentSort = 'popular';
+let currentSort = 'latest';
 let nextId = Math.max(...posts.map(p => p.id)) + 1;
 
 // ═══ RENDER ═══
