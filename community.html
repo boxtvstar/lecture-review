@@ -10,6 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -258,6 +259,29 @@ body {
   border-radius: 10px; font-size: 14px; font-family: inherit;
   outline: none; transition: border-color 0.2s; background: white;
 }
+.write-img-area {
+  border: 2px dashed var(--gray-200); border-radius: 10px; padding: 16px;
+  text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
+}
+.write-img-area:hover { border-color: var(--orange); background: var(--orange-light); }
+.write-img-area.has-image { border-style: solid; border-color: var(--green); }
+.write-img-area input[type="file"] { display: none; }
+.write-img-preview {
+  max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 8px;
+}
+.write-img-remove {
+  position: absolute; top: 8px; right: 8px; width: 24px; height: 24px;
+  border-radius: 50%; background: var(--red); color: white; border: none;
+  font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.post-image {
+  width: 100%; max-height: 400px; object-fit: cover; border-radius: 10px;
+  margin-top: 12px;
+}
+.post-thumb {
+  width: 60px; height: 60px; border-radius: 8px; object-fit: cover;
+  flex-shrink: 0;
+}
 .write-select:focus, .write-input:focus, .write-textarea:focus {
   border-color: var(--orange);
 }
@@ -450,6 +474,17 @@ body {
         <label class="write-label">내용</label>
         <textarea class="write-textarea" id="writeContent" placeholder="내용을 입력하세요"></textarea>
       </div>
+      <div class="write-field">
+        <label class="write-label">이미지 첨부 (선택)</label>
+        <div class="write-img-area" id="writeImgArea" onclick="document.getElementById('writeImgInput').click()">
+          <input type="file" id="writeImgInput" accept="image/*" onchange="handleWriteImgSelect(event)">
+          <div id="writeImgPlaceholder">📷 클릭하여 이미지를 첨부하세요 (최대 5MB)</div>
+          <div id="writeImgPreviewWrap" style="display:none">
+            <img id="writeImgPreview" class="write-img-preview">
+            <button class="write-img-remove" onclick="event.stopPropagation();removeWriteImg()">✕</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="write-footer">
       <button class="write-cancel" onclick="closeWriteModal()">취소</button>
@@ -606,14 +641,12 @@ function renderPosts() {
   const list = document.getElementById('postList');
   let filtered = currentFilter === '전체' ? [...posts] : posts.filter(p => p.category === currentFilter);
 
-  // 공지 분리: 전체공지 + 해당 카테고리 공지를 최상단에
+  // 공지 분리: 전체탭에서는 전체공지만, 카테고리탭에서는 전체공지+해당카테고리공지
   const notices = filtered.filter(p => {
     if (!p.isNotice) return false;
-    if (p.noticeScope === 'all') return true; // 전체 공지는 항상 표시
-    if (p.noticeScope === 'category') {
-      return currentFilter === '전체' || p.noticeCategory === currentFilter;
-    }
-    return false;
+    if (currentFilter === '전체') return p.noticeScope === 'all'; // 전체탭: 전체공지만
+    if (p.noticeScope === 'all') return true; // 개별탭: 전체공지 항상 표시
+    return p.noticeScope === 'category' && p.noticeCategory === currentFilter;
   });
   const normalPosts = filtered.filter(p => !p.isNotice);
 
@@ -641,8 +674,13 @@ function renderPosts() {
         ${isNotice ? '<span class="notice-scope">' + scopeLabel + '</span>' : ''}
         ${!isNotice && p.likes >= 100 ? '<span class="post-hot">HOT</span>' : ''}
       </div>
-      <div class="post-title">${p.title}</div>
-      <div class="post-preview">${p.content.replace(/\n/g, ' ').substring(0, 80)}...</div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div class="post-title">${p.title}</div>
+          <div class="post-preview">${p.content.replace(/\n/g, ' ').substring(0, 80)}...</div>
+        </div>
+        ${p.imageUrl ? `<img src="${p.imageUrl}" class="post-thumb" alt="">` : ''}
+      </div>
       <div class="post-bottom">
         <span class="post-author">${p.author}</span>
         <div class="post-stats">
@@ -684,7 +722,7 @@ function openPost(id) {
   document.getElementById('detailCategory').innerHTML = (p.isNotice ? '<span class="notice-badge">📌 공지</span> ' : '') + p.category;
   document.getElementById('detailTitle').textContent = p.title;
   document.getElementById('detailMeta').innerHTML = `<strong>${p.author}</strong> · ${p.date} · 조회 ${p.views}`;
-  document.getElementById('detailBody').textContent = p.content;
+  document.getElementById('detailBody').innerHTML = p.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + (p.imageUrl ? `<img src="${p.imageUrl}" class="post-image" alt="첨부 이미지">` : '');
   const isMyPost = currentUser && (p.author === getDisplayName() || p.author === currentUser.name);
   const manageBtns = (isMyPost || isAdmin) ? `
     <div class="post-manage-btns">
@@ -956,6 +994,7 @@ function openWriteModal() {
   document.getElementById('writeTitle').value = '';
   document.getElementById('writeContent').value = '';
   document.getElementById('writeCategory').value = '자유';
+  resetWriteImgUI();
   // 관리자만 공지 옵션 표시
   const noticeField = document.getElementById('noticeField');
   if (noticeField) noticeField.style.display = isAdmin ? 'block' : 'none';
@@ -980,12 +1019,52 @@ document.addEventListener('change', function(e) {
   }
 });
 
+// ═══ 이미지 첨부 ═══
+let writeSelectedImage = null;
+
+function handleWriteImgSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('파일 크기는 5MB 이하만 가능합니다.'); return; }
+  if (!file.type.startsWith('image/')) { alert('이미지 파일만 첨부 가능합니다.'); return; }
+  writeSelectedImage = file;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('writeImgPreview').src = ev.target.result;
+    document.getElementById('writeImgPreviewWrap').style.display = 'block';
+    document.getElementById('writeImgPlaceholder').style.display = 'none';
+    document.getElementById('writeImgArea').classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeWriteImg() {
+  writeSelectedImage = null;
+  document.getElementById('writeImgInput').value = '';
+  document.getElementById('writeImgPreviewWrap').style.display = 'none';
+  document.getElementById('writeImgPlaceholder').style.display = 'block';
+  document.getElementById('writeImgArea').classList.remove('has-image');
+}
+
+function resetWriteImgUI() {
+  writeSelectedImage = null;
+  const imgInput = document.getElementById('writeImgInput');
+  if (imgInput) imgInput.value = '';
+  const wrap = document.getElementById('writeImgPreviewWrap');
+  if (wrap) wrap.style.display = 'none';
+  const ph = document.getElementById('writeImgPlaceholder');
+  if (ph) ph.style.display = 'block';
+  const area = document.getElementById('writeImgArea');
+  if (area) area.classList.remove('has-image');
+}
+
 function closeWriteModal() {
   document.getElementById('writeOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  resetWriteImgUI();
 }
 
-function submitPost() {
+async function submitPost() {
   const category = document.getElementById('writeCategory').value;
   const title = document.getElementById('writeTitle').value.trim();
   const content = document.getElementById('writeContent').value.trim();
@@ -1001,6 +1080,28 @@ function submitPost() {
     date: dateStr, views: 0, likes: 0, commentCount: 0,
     content, comments: []
   };
+
+  // 이미지 업로드
+  if (writeSelectedImage) {
+    try {
+      const submitBtn = document.querySelector('.write-submit');
+      submitBtn.textContent = '업로드 중...';
+      submitBtn.disabled = true;
+      const storage = firebase.storage();
+      const fileName = `community/${Date.now()}_${writeSelectedImage.name}`;
+      const ref = storage.ref(fileName);
+      await ref.put(writeSelectedImage);
+      newPost.imageUrl = await ref.getDownloadURL();
+      submitBtn.textContent = '등록하기';
+      submitBtn.disabled = false;
+    } catch(e) {
+      alert('이미지 업로드 실패: ' + e.message);
+      const submitBtn = document.querySelector('.write-submit');
+      submitBtn.textContent = '등록하기';
+      submitBtn.disabled = false;
+      return;
+    }
+  }
 
   // 공지 설정 (관리자만)
   const isNoticeEl = document.getElementById('isNotice');

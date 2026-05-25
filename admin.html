@@ -613,33 +613,33 @@ body {
         <div class="stat-grid">
           <div class="stat-card">
             <div class="stat-card-label">총 가입자</div>
-            <div class="stat-card-value">1,247</div>
-            <div class="stat-card-change up">+23 이번 주</div>
+            <div class="stat-card-value" id="statUsers">-</div>
+            <div class="stat-card-change" id="statUsersChange">로딩 중...</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-label">인증 수강생</div>
-            <div class="stat-card-value">312</div>
-            <div class="stat-card-change up">+8 이번 주</div>
+            <div class="stat-card-value" id="statVerified">-</div>
+            <div class="stat-card-change" id="statVerifiedChange">로딩 중...</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-label">인증 대기</div>
-            <div class="stat-card-value" style="color:var(--orange)">5</div>
-            <div class="stat-card-change" style="color:var(--orange)">처리 필요</div>
+            <div class="stat-card-value" style="color:var(--orange)" id="statPending">-</div>
+            <div class="stat-card-change" style="color:var(--orange)" id="statPendingChange">로딩 중...</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-label">등록된 리뷰</div>
-            <div class="stat-card-value">2,847</div>
-            <div class="stat-card-change up">+56 이번 주</div>
+            <div class="stat-card-value" id="statReviews">-</div>
+            <div class="stat-card-change" id="statReviewsChange">로딩 중...</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-label">등록된 강사</div>
-            <div class="stat-card-value">438</div>
-            <div class="stat-card-change up">+5 이번 주</div>
+            <div class="stat-card-value" id="statInstructors">-</div>
+            <div class="stat-card-change" id="statInstructorsChange">-</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-label">신고 접수</div>
-            <div class="stat-card-value" style="color:var(--red)">3</div>
-            <div class="stat-card-change down">확인 필요</div>
+            <div class="stat-card-label">강사 인증 신청</div>
+            <div class="stat-card-value" style="color:var(--blue)" id="statInstVerify">-</div>
+            <div class="stat-card-change" id="statInstVerifyChange">로딩 중...</div>
           </div>
         </div>
 
@@ -655,24 +655,24 @@ body {
             <div class="analytics-card-sub">오늘 기준</div>
             <div class="stat-mini-grid">
               <div class="stat-mini">
-                <div class="stat-mini-value" id="todayVisitors">1,842</div>
-                <div class="stat-mini-label">오늘 방문</div>
-                <div class="stat-mini-change up">▲ 12.3%</div>
+                <div class="stat-mini-value" id="todayVisitors">-</div>
+                <div class="stat-mini-label">총 회원</div>
+                <div class="stat-mini-change" id="todayVisitorsChange">-</div>
               </div>
               <div class="stat-mini">
-                <div class="stat-mini-value" id="todayPV">5,234</div>
-                <div class="stat-mini-label">페이지뷰</div>
-                <div class="stat-mini-change up">▲ 8.7%</div>
+                <div class="stat-mini-value" id="todayPV">-</div>
+                <div class="stat-mini-label">총 리뷰</div>
+                <div class="stat-mini-change" id="todayPVChange">-</div>
               </div>
               <div class="stat-mini">
-                <div class="stat-mini-value">2:34</div>
-                <div class="stat-mini-label">평균 체류</div>
-                <div class="stat-mini-change up">▲ 15s</div>
+                <div class="stat-mini-value" id="todayAvg">-</div>
+                <div class="stat-mini-label">인증 완료</div>
+                <div class="stat-mini-change" id="todayAvgChange">-</div>
               </div>
               <div class="stat-mini">
-                <div class="stat-mini-value">38.2%</div>
-                <div class="stat-mini-label">이탈률</div>
-                <div class="stat-mini-change down">▼ 2.1%</div>
+                <div class="stat-mini-value" id="todayBounce">-</div>
+                <div class="stat-mini-label">인증 강사</div>
+                <div class="stat-mini-change" id="todayBounceChange">-</div>
               </div>
             </div>
           </div>
@@ -1103,57 +1103,19 @@ body {
 
 <script>
 // ═══ DATA ═══
-const verificationRequests = [
-  { id: 1, userId: 'user_37', userName: '[예시] 사용자A', email: 'test_a@example.com',
-    instructor: '[예시] 테스트 강사A', course: '실전 React 개발', platform: '인프런',
-    type: '결제 영수증', fileName: 'receipt_sample_01.jpg',
-    status: 'pending', date: '2026.05.20', note: '' },
-  { id: 4, userId: 'user_08', userName: '[예시] 사용자D', email: 'test_d@example.com',
-    instructor: '[예시] 테스트 강사D', course: '3개월 만에 월 1000만원', platform: '유데미',
-    type: '수강 화면 캡처', fileName: 'screen_capture_sample.jpg',
-    status: 'pending', date: '2026.05.19', note: '' },
-  { id: 5, userId: 'user_22', userName: '[예시] 사용자E', email: 'test_e@example.com',
-    instructor: '[예시] 테스트 강사A', course: '실전 React 개발', platform: '인프런',
-    type: '수료증', fileName: 'cert_sample.jpg',
-    status: 'approved', date: '2026.05.15', note: '인프런 수료증 확인 완료' },
-  { id: 7, userId: 'user_55', userName: '[예시] 가짜리뷰어', email: 'fake_test@example.com',
-    instructor: '[예시] 테스트 강사F', course: '1주일 앱 개발 마스터', platform: '패스트캠퍼스',
-    type: '수강 화면 캡처', fileName: 'fake_capture_sample.jpg',
-    status: 'rejected', date: '2026.05.13', note: '캡처 이미지 조작 흔적 발견. 포토샵 메타데이터 확인됨.' },
-];
+const verificationRequests = [];
+// 실제 인증 요청은 Firestore에서 로드됩니다.
 
-const allUsers = [
-  { id: 'user_01', name: '[예시] 수강생1', email: 'test1@example.com', joined: '2026.03.12', verified: true, verifiedDate: '2026.03.15', reviews: 5, tier: 'expert', verifiedCourses: ['실전 React 개발'] },
-  { id: 'user_08', name: '[예시] 수강생2', email: 'test2@example.com', joined: '2026.04.02', verified: false, reviews: 3, tier: 'unverified', verifiedCourses: [] },
-  { id: 'user_15', name: '[예시] 수강생3', email: 'test3@example.com', joined: '2026.02.20', verified: false, reviews: 2, tier: 'unverified', verifiedCourses: [] },
-  { id: 'user_22', name: '[예시] 수강생4', email: 'test4@example.com', joined: '2026.01.15', verified: true, verifiedDate: '2026.05.15', reviews: 4, tier: 'verified', verifiedCourses: ['Figma UI/UX 실전'] },
-  { id: 'user_33', name: '[예시] 수강생5', email: 'test5@example.com', joined: '2026.02.10', verified: true, verifiedDate: '2026.05.14', reviews: 3, tier: 'verified', verifiedCourses: ['퍼포먼스 마케팅 실전'] },
-  { id: 'user_37', name: '[예시] 수강생6', email: 'test6@example.com', joined: '2026.04.18', verified: false, reviews: 2, tier: 'unverified', verifiedCourses: [] },
-  { id: 'user_42', name: '[예시] 수강생7', email: 'test7@example.com', joined: '2026.03.25', verified: false, reviews: 1, tier: 'unverified', verifiedCourses: [] },
-  { id: 'user_55', name: '[예시] 가짜리뷰어', email: 'fake_test@example.com', joined: '2026.05.10', verified: false, reviews: 0, tier: 'unverified', verifiedCourses: [] },
-];
+const allUsers = [];
+// 실제 회원 목록은 Firestore에서 로드됩니다.
 
-const recentReviews = [
-  { author: '[예시] 수강생1', instructor: '[예시] 테스트 강사A', score: 5, text: '실무에서 바로 쓸 수 있는 내용이 많아서 정말 만족합니다. 체계적인 커리큘럼이 좋았어요.', verified: true, date: '2026.05.20' },
-  { author: '[예시] 수강생2', instructor: '[예시] 테스트 강사A', score: 4, text: '기초부터 심화까지 체계적. 다만 후반부 속도가 조금 빠른 감이 있습니다.', verified: false, date: '2026.05.18' },
-  { author: '[예시] 수강생5', instructor: '[예시] 테스트 강사D', score: 1, text: '3개월 만에 월 1000만원? 유튜브 수준... 환불도 안 됨.', verified: false, date: '2026.05.14' },
-  { author: '[예시] 수강생6', instructor: '[예시] 테스트 강사D', score: 1, text: '과대광고 심함. 기본적인 내용만 알려주고 끝.', verified: false, date: '2026.05.12' },
-  { author: '[예시] 수강생1', instructor: '[예시] 테스트 강사F', score: 2, text: '1주일 완성이라더니 내용이 부실. 무료 강의가 더 나음.', verified: true, date: '2026.05.10' },
-  { author: '[예시] 수강생4', instructor: '[예시] 테스트 강사F', score: 1, text: '앱 개발 마스터라더니 Hello World 수준... 완전 낚임.', verified: true, date: '2026.05.06' },
-];
+const recentReviews = [];
+// 실제 리뷰는 Firestore에서 로드됩니다.
 
-const reportItems = [
-  { target: '"[예시] 테스트 강사D" 강사 리뷰', type: '허위 리뷰', reason: '강사 측에서 허위 긍정 리뷰 조작 의심', reporter: '[예시] 피해자모임', date: '2026.05.20' },
-  { target: '"[예시] 수강생5" 리뷰', type: '명예훼손', reason: '강사 측 이의제기 — 사실과 다른 내용 포함', reporter: '[예시] 테스트 강사D (강사)', date: '2026.05.19' },
-  { target: '"[예시] 테스트 강사F" 강사 페이지', type: '사기 의심', reason: '수강생 다수 불만 제보, 과대광고 의심', reporter: '[예시] 수강생모임', date: '2026.05.18' },
-];
+const reportItems = [];
+// 실제 신고는 Firestore에서 로드됩니다.
 
 const adminInstructors = [
-  // ── 인프런 ──
-  // ── [예시] 테스트 강사 ──
-  { name: '[예시] 테스트 강사A', category: '개발', platform: '인프런', course: '실전 React 개발', score: 4.7, reviews: 5, hype: 3 },
-  { name: '[예시] 테스트 강사D', category: '재테크', platform: '유데미', course: '3개월 만에 월 1000만원', score: 2.1, reviews: 6, hype: 45 },
-  { name: '[예시] 테스트 강사F', category: '개발', platform: '패스트캠퍼스', course: '1주일 앱 개발 마스터', score: 1.8, reviews: 5, hype: 50 },
   // ── 인프런 ──
   { name: '김영한', category: '개발', platform: '인프런', course: '스프링 완전 정복 로드맵', score: 0, reviews: 0, hype: 0 },
   { name: '캡틴판교 (장기효)', category: '개발', platform: '인프런', course: 'Vue.js + TypeScript 완벽 가이드', score: 0, reviews: 0, hype: 0 },
@@ -1701,14 +1663,8 @@ function renderWeeklyChart() {
 }
 
 // ═══ ADMIN COMMENTS DATA & RENDER ═══
-const adminComments = [
-  { author: '[예시] 비회원A', instructor: '[예시] 테스트 강사A', verified: false, date: '2026.05.20', text: '이 강사 강의 궁금한데 난이도가 어느 정도인가요?', deleted: false },
-  { author: '[예시] 수강고민중', instructor: '[예시] 테스트 강사A', verified: false, date: '2026.05.19', text: '할인 기간에 사면 괜찮을 것 같은데.. 정가는 좀 비싸요', deleted: false },
-  { author: '[예시] 구경꾼', instructor: '[예시] 테스트 강사D', verified: false, date: '2026.05.21', text: '리뷰 보니까 진짜 심각하네요;; 과대광고가 너무 심한 것 같아요', deleted: false },
-  { author: '[예시] 지나가다', instructor: '[예시] 테스트 강사F', verified: false, date: '2026.05.22', text: '유튜브에서 광고 엄청 나오던데 여기서 보니 평가가 안 좋네', deleted: false },
-  { author: '[예시] 수강생6', instructor: '[예시] 테스트 강사D', verified: false, date: '2026.05.18', text: '환불 받으신 분 계신가요? 절차 좀 알려주세요', deleted: false },
-  { author: '[예시] 수강생2', instructor: '[예시] 테스트 강사A', verified: false, date: '2026.05.12', text: 'JS 기초가 없어도 React 강의 따라갈 수 있을까요?', deleted: false },
-];
+const adminComments = [];
+// 실제 댓글은 Firestore에서 로드됩니다.
 
 function renderCommentsTable() {
   document.getElementById('commentsTableBody').innerHTML = adminComments.map((c, idx) => {
@@ -1740,6 +1696,66 @@ function deleteComment(idx) {
   showToast('댓글이 삭제되었습니다.');
 }
 
+// ═══ Firestore 대시보드 실시간 통계 ═══
+async function loadDashboardStats() {
+  try {
+    // 총 가입자 수
+    const usersSnap = await db.collection('users').get();
+    const totalUsers = usersSnap.size;
+    document.getElementById('statUsers').textContent = totalUsers.toLocaleString();
+    document.getElementById('statUsersChange').textContent = `Firestore 기준`;
+    document.getElementById('statUsersChange').className = 'stat-card-change';
+    document.getElementById('todayVisitors').textContent = totalUsers.toLocaleString();
+    document.getElementById('todayVisitorsChange').textContent = 'Firestore';
+    document.getElementById('todayVisitorsChange').className = 'stat-card-change';
+
+    // 인증 수강생 (verified=true)
+    const verifiedSnap = await db.collection('users').where('verified', '==', true).get();
+    const verifiedCount = verifiedSnap.size;
+    document.getElementById('statVerified').textContent = verifiedCount.toLocaleString();
+    document.getElementById('statVerifiedChange').textContent = `전체의 ${totalUsers ? Math.round(verifiedCount/totalUsers*100) : 0}%`;
+    document.getElementById('statVerifiedChange').className = 'stat-card-change up';
+    document.getElementById('todayAvg').textContent = verifiedCount.toLocaleString();
+    document.getElementById('todayAvgChange').textContent = `${totalUsers ? Math.round(verifiedCount/totalUsers*100) : 0}%`;
+    document.getElementById('todayAvgChange').className = 'stat-card-change up';
+
+    // 인증 대기
+    const pendingSnap = await db.collection('verifications').where('status', '==', 'pending').get();
+    const pendingCount = pendingSnap.size;
+    document.getElementById('statPending').textContent = pendingCount.toLocaleString();
+    document.getElementById('statPendingChange').textContent = pendingCount > 0 ? '처리 필요' : '없음';
+
+    // 리뷰 수
+    const reviewsSnap = await db.collection('reviews').get();
+    const reviewCount = reviewsSnap.size;
+    document.getElementById('statReviews').textContent = reviewCount.toLocaleString();
+    document.getElementById('statReviewsChange').textContent = 'Firestore 기준';
+    document.getElementById('statReviewsChange').className = 'stat-card-change';
+    document.getElementById('todayPV').textContent = reviewCount.toLocaleString();
+    document.getElementById('todayPVChange').textContent = 'Firestore';
+    document.getElementById('todayPVChange').className = 'stat-card-change';
+
+    // 등록 강사 수 (로컬 데이터)
+    document.getElementById('statInstructors').textContent = adminInstructors.length.toLocaleString();
+    document.getElementById('statInstructorsChange').textContent = `${adminInstructors.length}명 등록`;
+
+    // 강사 인증 신청
+    const instVerifySnap = await db.collection('instructorVerifications').get();
+    const instVerifyPending = instVerifySnap.docs.filter(d => d.data().status === 'pending').length;
+    document.getElementById('statInstVerify').textContent = instVerifySnap.size.toLocaleString();
+    document.getElementById('statInstVerifyChange').textContent = instVerifyPending > 0 ? `${instVerifyPending}건 대기 중` : '없음';
+    document.getElementById('statInstVerifyChange').style.color = instVerifyPending > 0 ? 'var(--orange)' : '';
+
+    // 인증 강사 수
+    const instVerifiedSnap = await db.collection('users').where('isInstructor', '==', true).get();
+    document.getElementById('todayBounce').textContent = instVerifiedSnap.size.toLocaleString();
+    document.getElementById('todayBounceChange').textContent = '인증 완료';
+    document.getElementById('todayBounceChange').className = 'stat-card-change up';
+  } catch(e) {
+    console.error('대시보드 통계 로드 실패:', e);
+  }
+}
+
 function renderAll() {
   renderDashboardRecent();
   renderVerificationTable();
@@ -1752,6 +1768,7 @@ function renderAll() {
   renderWeeklyChart();
   updatePendingCount();
   loadInstVerifyRequests();
+  loadDashboardStats();
 }
 
 // ═══ MOBILE SIDEBAR ═══
@@ -1823,23 +1840,54 @@ function deleteInstructor(idx) {
 
 function showInstructorDetail(idx) {
   const i = adminInstructors[idx];
-  document.getElementById('vmTitle').textContent = `${i.name} 강사 상세`;
+  document.getElementById('vmTitle').textContent = `${i.name} 강사 편집`;
   document.getElementById('vmSub').textContent = `${i.category} · ${i.platform}`;
   document.getElementById('vmBody').innerHTML = `
-    <div class="verify-info-grid">
-      <div class="verify-info-item"><div class="verify-info-label">강사명</div><div class="verify-info-value">${i.name}</div></div>
-      <div class="verify-info-item"><div class="verify-info-label">분야</div><div class="verify-info-value">${i.category}</div></div>
-      <div class="verify-info-item"><div class="verify-info-label">플랫폼</div><div class="verify-info-value">${i.platform}</div></div>
-      <div class="verify-info-item"><div class="verify-info-label">대표 강의</div><div class="verify-info-value">${i.course || '-'}</div></div>
-      <div class="verify-info-item"><div class="verify-info-label">평점</div><div class="verify-info-value" style="color:${i.score >= 4 ? 'var(--green)' : i.score >= 3 ? 'var(--gold)' : 'var(--red)'}">${i.score} ★</div></div>
-      <div class="verify-info-item"><div class="verify-info-label">리뷰 수</div><div class="verify-info-value">${i.reviews}개</div></div>
-      <div class="verify-info-item"><div class="verify-info-label">과대광고 지수</div><div class="verify-info-value" style="color:${i.hype > 70 ? 'var(--red)' : i.hype > 40 ? 'var(--gold)' : 'var(--green)'}">${i.hype}%</div></div>
+    <div class="verify-info-grid" style="gap:12px">
+      <div class="verify-info-item" style="flex-direction:column;align-items:stretch">
+        <div class="verify-info-label" style="margin-bottom:4px">강사명</div>
+        <input id="editInstName" value="${i.name}" style="padding:8px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit">
+      </div>
+      <div class="verify-info-item" style="flex-direction:column;align-items:stretch">
+        <div class="verify-info-label" style="margin-bottom:4px">분야</div>
+        <input id="editInstCategory" value="${i.category}" style="padding:8px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit">
+      </div>
+      <div class="verify-info-item" style="flex-direction:column;align-items:stretch">
+        <div class="verify-info-label" style="margin-bottom:4px">플랫폼</div>
+        <input id="editInstPlatform" value="${i.platform}" style="padding:8px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit">
+      </div>
+      <div class="verify-info-item" style="flex-direction:column;align-items:stretch">
+        <div class="verify-info-label" style="margin-bottom:4px">대표 강의</div>
+        <input id="editInstCourse" value="${i.course || ''}" style="padding:8px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit">
+      </div>
+      <div class="verify-info-item" style="flex-direction:column;align-items:stretch">
+        <div class="verify-info-label" style="margin-bottom:4px">평점 (0~5)</div>
+        <input id="editInstScore" type="number" min="0" max="5" step="0.1" value="${i.score}" style="padding:8px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit">
+      </div>
+      <div class="verify-info-item" style="flex-direction:column;align-items:stretch">
+        <div class="verify-info-label" style="margin-bottom:4px">과대광고 지수 (%)</div>
+        <input id="editInstHype" type="number" min="0" max="100" value="${i.hype}" style="padding:8px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit">
+      </div>
     </div>
-    <div class="verify-modal-actions" style="margin-top:16px">
-      <button class="verify-action-btn verify-action-cancel" onclick="closeVerifyModal()" style="flex:1">닫기</button>
+    <div class="verify-modal-actions" style="margin-top:16px;display:flex;gap:8px">
+      <button class="verify-action-btn verify-action-cancel" onclick="closeVerifyModal()" style="flex:1">취소</button>
+      <button class="verify-action-btn verify-action-approve" onclick="saveInstructorEdit(${idx})" style="flex:1">💾 저장</button>
     </div>
   `;
   document.getElementById('verifyModal').classList.add('open');
+}
+
+function saveInstructorEdit(idx) {
+  const i = adminInstructors[idx];
+  i.name = document.getElementById('editInstName').value.trim() || i.name;
+  i.category = document.getElementById('editInstCategory').value.trim() || i.category;
+  i.platform = document.getElementById('editInstPlatform').value.trim() || i.platform;
+  i.course = document.getElementById('editInstCourse').value.trim();
+  i.score = parseFloat(document.getElementById('editInstScore').value) || 0;
+  i.hype = parseInt(document.getElementById('editInstHype').value) || 0;
+  renderInstructorsTable();
+  closeVerifyModal();
+  showToast(`✅ "${i.name}" 강사 정보가 수정되었습니다.`, 'success');
 }
 
 function blindReview(idx) {
