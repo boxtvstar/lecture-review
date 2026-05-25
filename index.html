@@ -2010,7 +2010,10 @@ function openDetail(id) {
       </select>
     </div>
     <div class="review-list" id="reviewListContainer">
-      ${inst.reviewList.map(r => `
+      ${inst.reviewList.map((r, ri) => {
+        const hKey = `${inst.id}-${ri}`;
+        const hVoted = helpfulVotes[hKey];
+        return `
         <div class="review-item ${r.badge === 'verified' ? 'review-verified' : r.badge === 'expert' ? 'review-expert' : ''}">
           <div class="review-top">
             <div class="review-author">
@@ -2028,11 +2031,11 @@ function openDetail(id) {
             </div>
           ` : ''}
           <div class="review-helpful">
-            <button class="helpful-btn" onclick="event.stopPropagation(); helpfulClick(this, ${r.helpful})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
+            <button class="helpful-btn${hVoted ? ' voted-yes' : ''}" ${hVoted ? 'style="background:var(--orange-light);color:var(--orange)"' : ''} onclick="event.stopPropagation(); helpfulClick(${inst.id},${ri})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
             <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this)">🚩 신고</button>
           </div>
-        </div>
-      `).join('')}
+        </div>`;
+      }).join('')}
     </div>
     <div class="modal-divider"></div>
     <div class="comments-section">
@@ -2358,7 +2361,11 @@ function filterReviews(filter, instId) {
   if (filter === 'verified') reviews = reviews.filter(r => r.badge !== 'unverified');
   document.getElementById('reviewListContainer').innerHTML = reviews.length === 0
     ? '<div style="text-align:center;padding:32px;color:var(--gray-400)">해당 조건의 리뷰가 없습니다.</div>'
-    : reviews.map(r => `
+    : reviews.map(r => {
+      const origIdx = inst.reviewList.indexOf(r);
+      const hKey2 = `${instId}-${origIdx}`;
+      const hVoted2 = helpfulVotes[hKey2];
+      return `
     <div class="review-item ${r.badge === 'verified' ? 'review-verified' : r.badge === 'expert' ? 'review-expert' : ''}">
       <div class="review-top">
         <div class="review-author"><span class="review-author-name">${r.author}</span>${badgeHTML[r.badge]}</div>
@@ -2368,20 +2375,31 @@ function filterReviews(filter, instId) {
       <div class="review-text">${r.text}</div>
       ${r.rebuttal ? `<div class="rebuttal"><div class="rebuttal-label">💬 강사 답변</div><div class="rebuttal-text">${r.rebuttal}</div></div>` : ''}
       <div class="review-helpful">
-        <button class="helpful-btn" onclick="event.stopPropagation(); helpfulClick(this, ${r.helpful})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
+        <button class="helpful-btn${hVoted2 ? ' voted-yes' : ''}" ${hVoted2 ? 'style="background:var(--orange-light);color:var(--orange)"' : ''} onclick="event.stopPropagation(); helpfulClick(${instId},${origIdx})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
         <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this)">🚩 신고</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+    }).join('');
 }
 
-function helpfulClick(btn, count) {
-  if (btn.classList.contains('voted-yes')) return;
-  btn.classList.add('voted-yes');
-  btn.style.background = 'var(--orange-light)';
-  btn.style.color = 'var(--orange)';
-  const span = btn.querySelector('span');
-  span.textContent = count + 1;
+const helpfulVotes = JSON.parse(localStorage.getItem('helpfulVotes') || '{}');
+
+function helpfulClick(instId, reviewIdx) {
+  if (!currentUser) { navGoogleLogin(); return; }
+  const key = `${instId}-${reviewIdx}`;
+  const inst = [...instructors, ...worstInstructors].find(x => x.id === instId);
+  if (!inst) return;
+  const review = inst.reviewList[reviewIdx];
+  if (!review) return;
+  if (helpfulVotes[key]) {
+    delete helpfulVotes[key];
+    review.helpful = Math.max(0, review.helpful - 1);
+  } else {
+    helpfulVotes[key] = true;
+    review.helpful++;
+  }
+  localStorage.setItem('helpfulVotes', JSON.stringify(helpfulVotes));
+  openDetail(instId);
 }
 
 function reportReview(btn) {
@@ -2433,11 +2451,13 @@ function renderComments(instId) {
       <button onclick="event.stopPropagation();deleteInstComment(${instId},${i})">삭제</button>
     </div>` : '';
     const replyBtn = currentUser ? `<button class="comment-reply-btn" onclick="event.stopPropagation();showInstReplyInput(${instId},${i})">↩ 답글</button>` : '';
-    const likeBtn = `<button class="comment-like-btn" onclick="event.stopPropagation();likeInstComment(${instId},${i})">❤️ ${c.likes || 0}</button>`;
+    const cLiked = currentUser && (c.likedBy || []).includes(currentUser.uid);
+    const likeBtn = `<button class="comment-like-btn${cLiked ? ' liked' : ''}" onclick="event.stopPropagation();likeInstComment(${instId},${i})">❤️ ${c.likes || 0}</button>`;
     const replies = (c.replies || []).map((r, ri) => {
       const isMyReply = currentUser && (r.author === getDisplayName() || r.author === currentUser.name);
       const replyActions = (isMyReply || isAdmin) ? `<div class="comment-actions"><button onclick="event.stopPropagation();deleteInstReply(${instId},${i},${ri})">삭제</button></div>` : '';
-      const rLikeBtn = `<button class="comment-like-btn" onclick="event.stopPropagation();likeInstReply(${instId},${i},${ri})">❤️ ${r.likes || 0}</button>`;
+      const rLiked = currentUser && (r.likedBy || []).includes(currentUser.uid);
+      const rLikeBtn = `<button class="comment-like-btn${rLiked ? ' liked' : ''}" onclick="event.stopPropagation();likeInstReply(${instId},${i},${ri})">❤️ ${r.likes || 0}</button>`;
       return `<div class="comment-item">
         <div class="comment-top"><div><span class="comment-author">${r.author}</span>${r.isInstructor ? '<span class="comment-badge-instructor">🎓 강사</span>' : ''}</div><span class="comment-date">${r.date}</span>${replyActions}</div>
         <div class="comment-text">${r.text}</div>${rLikeBtn}
@@ -2505,21 +2525,40 @@ function submitInstReply(instId, i) {
 }
 
 function likeInstComment(instId, i) {
+  if (!currentUser) { navGoogleLogin(); return; }
   const comments = commentsData[instId];
   if (!comments || !comments[i]) return;
+  if (!comments[i].likedBy) comments[i].likedBy = [];
   if (!comments[i].likes) comments[i].likes = 0;
-  comments[i].likes++;
-  if (currentUser && comments[i].author !== getDisplayName()) {
-    addNotif(`❤️ ${getDisplayName()}님이 회원님의 의견을 좋아합니다.`, instId, 'inst');
+  const idx = comments[i].likedBy.indexOf(currentUser.uid);
+  if (idx !== -1) {
+    comments[i].likedBy.splice(idx, 1);
+    comments[i].likes = Math.max(0, comments[i].likes - 1);
+  } else {
+    comments[i].likedBy.push(currentUser.uid);
+    comments[i].likes++;
+    if (comments[i].author !== getDisplayName()) {
+      addNotif(`❤️ ${getDisplayName()}님이 회원님의 의견을 좋아합니다.`, instId, 'inst');
+    }
   }
   renderComments(instId);
 }
 
 function likeInstReply(instId, ci, ri) {
+  if (!currentUser) { navGoogleLogin(); return; }
   const comments = commentsData[instId];
   if (!comments || !comments[ci] || !comments[ci].replies[ri]) return;
-  if (!comments[ci].replies[ri].likes) comments[ci].replies[ri].likes = 0;
-  comments[ci].replies[ri].likes++;
+  const r = comments[ci].replies[ri];
+  if (!r.likedBy) r.likedBy = [];
+  if (!r.likes) r.likes = 0;
+  const idx = r.likedBy.indexOf(currentUser.uid);
+  if (idx !== -1) {
+    r.likedBy.splice(idx, 1);
+    r.likes = Math.max(0, r.likes - 1);
+  } else {
+    r.likedBy.push(currentUser.uid);
+    r.likes++;
+  }
   renderComments(instId);
 }
 

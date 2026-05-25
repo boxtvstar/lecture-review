@@ -604,7 +604,7 @@ function openPost(id) {
       <button class="post-manage-btn del" onclick="deletePost(${id})">🗑️ 삭제</button>
     </div>` : '';
   document.getElementById('detailActions').innerHTML = `
-    <button class="action-btn" id="likeBtn" onclick="toggleLike(${id})">❤️ 좋아요 ${p.likes}</button>
+    <button class="action-btn${currentUser && (p.likedBy || []).includes(currentUser.uid) ? ' liked' : ''}" id="likeBtn" onclick="toggleLike(${id})">❤️ 좋아요 ${p.likes}</button>
     <button class="action-btn">🔗 공유</button>
     <button class="action-btn">🚩 신고</button>
     ${manageBtns}
@@ -638,14 +638,16 @@ function renderDetailComments(p) {
       </div>` : '';
       const replyBtn = currentUser ? `<button class="dc-reply-btn" onclick="showReplyInput(${i})">↩ 답글</button>` : '';
       const cmtLikes = c.likes || 0;
-      const cmtLikeBtn = `<button class="dc-like-btn" onclick="likeComment(${i})" id="cmtLike${i}">❤️ ${cmtLikes}</button>`;
+      const cmtLiked = currentUser && (c.likedBy || []).includes(currentUser.uid);
+      const cmtLikeBtn = `<button class="dc-like-btn${cmtLiked ? ' liked' : ''}" onclick="likeComment(${i})" id="cmtLike${i}">❤️ ${cmtLikes}</button>`;
       const replies = (c.replies || []).map((r, ri) => {
         const isMyReply = currentUser && (r.author === getDisplayName() || r.author === currentUser.name);
         const replyActions = (isMyReply || isAdmin) ? `<div class="dc-item-actions">
           <button onclick="deleteReply(${i},${ri})">삭제</button>
         </div>` : '';
         const rLikes = r.likes || 0;
-        const rLikeBtn = `<button class="dc-like-btn" onclick="likeReply(${i},${ri})">❤️ ${rLikes}</button>`;
+        const rLiked = currentUser && (r.likedBy || []).includes(currentUser.uid);
+        const rLikeBtn = `<button class="dc-like-btn${rLiked ? ' liked' : ''}" onclick="likeReply(${i},${ri})">❤️ ${rLikes}</button>`;
         return `<div class="dc-item">
           <div class="dc-item-top"><span class="dc-item-author">${r.author}</span><span class="dc-item-date">${r.date}</span>${replyActions}</div>
           <div class="dc-item-text">${r.text}</div>
@@ -714,41 +716,64 @@ function deleteReply(ci, ri) {
 }
 
 function likeComment(i) {
+  if (!currentUser) { document.getElementById('loginOverlay').classList.add('open'); return; }
   const p = posts.find(x => x.id === currentPostId);
   if (!p || !p.comments[i]) return;
+  if (!p.comments[i].likedBy) p.comments[i].likedBy = [];
   if (!p.comments[i].likes) p.comments[i].likes = 0;
-  p.comments[i].likes++;
-  if (currentUser && p.comments[i].author !== getDisplayName()) {
-    addNotif(`❤️ ${getDisplayName()}님이 회원님의 댓글을 좋아합니다.`, p.id);
+  const idx = p.comments[i].likedBy.indexOf(currentUser.uid);
+  if (idx !== -1) {
+    p.comments[i].likedBy.splice(idx, 1);
+    p.comments[i].likes = Math.max(0, p.comments[i].likes - 1);
+  } else {
+    p.comments[i].likedBy.push(currentUser.uid);
+    p.comments[i].likes++;
+    if (p.comments[i].author !== getDisplayName()) {
+      addNotif(`❤️ ${getDisplayName()}님이 회원님의 댓글을 좋아합니다.`, p.id);
+    }
   }
   renderDetailComments(p);
   renderPosts();
 }
 
 function likeReply(ci, ri) {
+  if (!currentUser) { document.getElementById('loginOverlay').classList.add('open'); return; }
   const p = posts.find(x => x.id === currentPostId);
   if (!p || !p.comments[ci] || !p.comments[ci].replies[ri]) return;
-  if (!p.comments[ci].replies[ri].likes) p.comments[ci].replies[ri].likes = 0;
-  p.comments[ci].replies[ri].likes++;
-  if (currentUser && p.comments[ci].replies[ri].author !== getDisplayName()) {
-    addNotif(`❤️ ${getDisplayName()}님이 회원님의 답글을 좋아합니다.`, p.id);
+  const r = p.comments[ci].replies[ri];
+  if (!r.likedBy) r.likedBy = [];
+  if (!r.likes) r.likes = 0;
+  const idx = r.likedBy.indexOf(currentUser.uid);
+  if (idx !== -1) {
+    r.likedBy.splice(idx, 1);
+    r.likes = Math.max(0, r.likes - 1);
+  } else {
+    r.likedBy.push(currentUser.uid);
+    r.likes++;
+    if (r.author !== getDisplayName()) {
+      addNotif(`❤️ ${getDisplayName()}님이 회원님의 답글을 좋아합니다.`, p.id);
+    }
   }
   renderDetailComments(p);
   renderPosts();
 }
 
 function toggleLike(id) {
+  if (!currentUser) { document.getElementById('loginOverlay').classList.add('open'); return; }
   const p = posts.find(x => x.id === id);
   if (!p) return;
+  if (!p.likedBy) p.likedBy = [];
   const btn = document.getElementById('likeBtn');
-  if (btn.classList.contains('liked')) {
+  const idx = p.likedBy.indexOf(currentUser.uid);
+  if (idx !== -1) {
+    p.likedBy.splice(idx, 1);
+    p.likes = Math.max(0, (p.likes || 0) - 1);
     btn.classList.remove('liked');
-    p.likes--;
   } else {
+    p.likedBy.push(currentUser.uid);
+    p.likes = (p.likes || 0) + 1;
     btn.classList.add('liked');
-    p.likes++;
-    // 글 작성자에게 알림
-    if (currentUser && p.author !== getDisplayName()) {
+    if (p.author !== getDisplayName()) {
       addNotif(`❤️ ${getDisplayName()}님이 "${p.title}" 글을 좋아합니다.`, p.id);
     }
   }
