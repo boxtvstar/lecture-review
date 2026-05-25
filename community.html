@@ -1064,7 +1064,7 @@ function closeWriteModal() {
   resetWriteImgUI();
 }
 
-async function submitPost() {
+function submitPost() {
   const category = document.getElementById('writeCategory').value;
   const title = document.getElementById('writeTitle').value.trim();
   const content = document.getElementById('writeContent').value.trim();
@@ -1081,26 +1081,9 @@ async function submitPost() {
     content, comments: []
   };
 
-  // 이미지 업로드
-  if (writeSelectedImage) {
-    try {
-      const submitBtn = document.querySelector('.write-submit');
-      submitBtn.textContent = '업로드 중...';
-      submitBtn.disabled = true;
-      const storage = firebase.storage();
-      const fileName = `community/${Date.now()}_${writeSelectedImage.name}`;
-      const ref = storage.ref(fileName);
-      await ref.put(writeSelectedImage);
-      newPost.imageUrl = await ref.getDownloadURL();
-      submitBtn.textContent = '등록하기';
-      submitBtn.disabled = false;
-    } catch(e) {
-      alert('이미지 업로드 실패: ' + e.message);
-      const submitBtn = document.querySelector('.write-submit');
-      submitBtn.textContent = '등록하기';
-      submitBtn.disabled = false;
-      return;
-    }
+  // 이미지 첨부 (미리보기용 Data URL 사용)
+  if (writeSelectedImage && document.getElementById('writeImgPreview').src) {
+    newPost.imageUrl = document.getElementById('writeImgPreview').src;
   }
 
   // 공지 설정 (관리자만)
@@ -1118,6 +1101,7 @@ async function submitPost() {
 
   document.getElementById('writeTitle').value = '';
   document.getElementById('writeContent').value = '';
+  resetWriteImgUI();
   closeWriteModal();
   renderPosts();
 }
