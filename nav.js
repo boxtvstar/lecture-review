@@ -263,6 +263,7 @@ const navHTML = `
           <a href="#" onclick="openMyPage(); return false;"><span class="dropdown-icon">👤</span> 마이페이지</a>
           <a href="#" onclick="toggleNotifPanel(); return false;"><span class="dropdown-icon">🔔</span> 알림 <span id="notifCountInline" style="color:#EF4444;font-weight:700;font-size:12px"></span></a>
           <a href="#" onclick="${dropdownWriteAction}"><span class="dropdown-icon">✏️</span> ${dropdownWriteLabel}</a>
+          <a href="#" id="instructorVerifyLink" onclick="openInstructorVerifyModal(); closeProfileDropdown(); return false;" style="display:none"><span class="dropdown-icon">🎓</span> 강사 인증 신청</a>
           <button class="logout-btn" onclick="logoutUser()"><span class="dropdown-icon">🚪</span> 로그아웃</button>
         </div>
         <div class="notif-dropdown" id="notifDropdown">
@@ -352,13 +353,19 @@ const ADMIN_EMAIL = 'boxtvstar@gmail.com';
 // ─── Auth ───
 firebase.auth().onAuthStateChanged(async user => {
   if (user) {
-    currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '' };
+    currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '', isInstructor: false, instructorName: '', instructorId: null };
     isAdmin = (user.email === ADMIN_EMAIL);
     try {
       const doc = await db.collection('users').doc(user.uid).get();
       if (doc.exists) {
-        if (doc.data().nickname) currentUser.nickname = doc.data().nickname;
-        if (doc.data().role === 'admin') isAdmin = true;
+        const d = doc.data();
+        if (d.nickname) currentUser.nickname = d.nickname;
+        if (d.role === 'admin') isAdmin = true;
+        if (d.isInstructor) {
+          currentUser.isInstructor = true;
+          currentUser.instructorName = d.instructorName || '';
+          currentUser.instructorId = d.instructorId || null;
+        }
       }
       const updateData = { email: user.email, displayName: user.displayName, photoURL: user.photoURL, nickname: currentUser.nickname || '', lastLogin: firebase.firestore.FieldValue.serverTimestamp() };
       if (user.email === ADMIN_EMAIL) updateData.role = 'admin';
@@ -368,6 +375,9 @@ firebase.auth().onAuthStateChanged(async user => {
     showNavProfile();
     document.getElementById('navAdminLink').style.display = isAdmin ? '' : 'none';
     document.getElementById('mobileAdminLink').style.display = isAdmin ? '' : 'none';
+    // 강사 인증 신청 링크: 이미 인증된 강사면 숨김
+    const ivLink = document.getElementById('instructorVerifyLink');
+    if (ivLink) ivLink.style.display = currentUser.isInstructor ? 'none' : '';
     // 페이지별 로그인 후 콜백
     if (typeof window.onNavLogin === 'function') window.onNavLogin();
   } else {

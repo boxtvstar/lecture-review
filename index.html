@@ -359,6 +359,49 @@ body {
   font-size: 10px; font-weight: 700; margin-left: 6px;
   background: var(--gray-100); color: var(--gray-400);
 }
+.comment-badge-instructor {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 800; margin-left: 6px;
+  background: linear-gradient(135deg, #FFF0E9, #FFFBEB); color: var(--orange);
+  border: 1px solid rgba(255,107,53,0.2);
+}
+.instructor-verify-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 24px;
+}
+.instructor-verify-overlay.open { display: flex; }
+.instructor-verify-modal {
+  background: white; border-radius: 16px; max-width: 480px; width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2); overflow: hidden;
+}
+.iv-header {
+  padding: 24px; border-bottom: 1px solid var(--gray-100);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.iv-title { font-size: 18px; font-weight: 800; color: var(--navy); }
+.iv-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray-400); }
+.iv-body { padding: 24px; }
+.iv-field { margin-bottom: 16px; }
+.iv-label { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; display: block; }
+.iv-input, .iv-textarea {
+  width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-200);
+  border-radius: 10px; font-size: 14px; font-family: inherit; outline: none;
+  transition: border-color 0.2s;
+}
+.iv-input:focus, .iv-textarea:focus { border-color: var(--orange); }
+.iv-textarea { min-height: 80px; resize: vertical; }
+.iv-submit {
+  width: 100%; padding: 12px; background: var(--orange); color: white;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background 0.2s;
+}
+.iv-submit:hover { background: var(--orange-hover); }
+.iv-note { font-size: 12px; color: var(--gray-400); margin-top: 12px; line-height: 1.6; }
+.iv-status {
+  padding: 16px; text-align: center; font-size: 14px; font-weight: 600;
+}
+.iv-status.pending { color: var(--gold); }
+.iv-status.approved { color: var(--green); }
 .comment-date { font-size: 11px; color: var(--gray-400); }
 .comment-text { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
 .comment-login-msg {
@@ -1537,6 +1580,36 @@ body {
 
 <!-- 마이페이지는 nav.js에서 생성 -->
 
+<!-- ═══ 강사 인증 신청 모달 ═══ -->
+<div class="instructor-verify-overlay" id="instructorVerifyOverlay" onclick="if(event.target===this)closeInstructorVerifyModal()">
+  <div class="instructor-verify-modal">
+    <div class="iv-header">
+      <div class="iv-title">🎓 강사 본인 인증 신청</div>
+      <button class="iv-close" onclick="closeInstructorVerifyModal()">&times;</button>
+    </div>
+    <div class="iv-body" id="ivBody">
+      <div class="iv-field">
+        <label class="iv-label">강사명 (활동명)</label>
+        <input class="iv-input" id="ivName" placeholder="예: 홍길동">
+      </div>
+      <div class="iv-field">
+        <label class="iv-label">소속 플랫폼</label>
+        <input class="iv-input" id="ivPlatform" placeholder="예: 인프런, 클래스101, 패스트캠퍼스 등">
+      </div>
+      <div class="iv-field">
+        <label class="iv-label">대표 강의명</label>
+        <input class="iv-input" id="ivCourse" placeholder="예: 실전 React 완전정복">
+      </div>
+      <div class="iv-field">
+        <label class="iv-label">본인 증명 (설명)</label>
+        <textarea class="iv-textarea" id="ivProof" placeholder="강사 본인임을 증명할 수 있는 정보를 적어주세요.&#10;예: 플랫폼 프로필 URL, SNS 계정, 이메일 등"></textarea>
+      </div>
+      <button class="iv-submit" onclick="submitInstructorVerify()">인증 신청하기</button>
+      <div class="iv-note">※ 관리자 승인 후 강사 배지가 부여됩니다. 승인 시 해당 강사의 리뷰에 댓글을 달 수 있습니다.</div>
+    </div>
+  </div>
+</div>
+
 <div class="popup-overlay" id="loginPopup" onclick="if(event.target===this)closeLoginPopup()">
   <div class="login-popup">
     <div class="login-popup-header">
@@ -2162,6 +2235,66 @@ window.onNotifClick = function(n) {
   if (n.type === 'inst' && n.targetId) openDetail(n.targetId);
 };
 
+// ═══ 강사 인증 시스템 ═══
+window.openInstructorVerifyModal = function() {
+  if (!currentUser) { navGoogleLogin(); return; }
+  const overlay = document.getElementById('instructorVerifyOverlay');
+  if (!overlay) return;
+  // 이미 인증된 강사
+  if (currentUser.isInstructor) {
+    document.getElementById('ivBody').innerHTML = `<div class="iv-status approved">✅ 이미 인증된 강사입니다.<br><strong>${currentUser.instructorName}</strong></div>`;
+    overlay.classList.add('open');
+    return;
+  }
+  // 기존 신청 확인
+  db.collection('instructorVerifications').where('uid', '==', currentUser.uid).get().then(snap => {
+    if (!snap.empty) {
+      const d = snap.docs[0].data();
+      if (d.status === 'pending') {
+        document.getElementById('ivBody').innerHTML = `<div class="iv-status pending">⏳ 인증 신청이 접수되었습니다.<br>관리자 승인을 기다려주세요.</div>`;
+      } else if (d.status === 'rejected') {
+        document.getElementById('ivBody').innerHTML = `<div class="iv-status" style="color:var(--red)">❌ 인증이 거부되었습니다.<br>사유: ${d.rejectReason || '자료 불충분'}<br><br><button class="iv-submit" onclick="resetInstructorVerify('${snap.docs[0].id}')">다시 신청하기</button></div>`;
+      }
+    }
+  });
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeInstructorVerifyModal = function() {
+  document.getElementById('instructorVerifyOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+window.submitInstructorVerify = async function() {
+  if (!currentUser) return;
+  const name = document.getElementById('ivName').value.trim();
+  const platform = document.getElementById('ivPlatform').value.trim();
+  const course = document.getElementById('ivCourse').value.trim();
+  const proof = document.getElementById('ivProof').value.trim();
+  if (!name || !platform || !course || !proof) { alert('모든 항목을 입력해주세요.'); return; }
+  try {
+    await db.collection('instructorVerifications').add({
+      uid: currentUser.uid,
+      email: currentUser.email,
+      userName: getDisplayName(),
+      instructorName: name,
+      platform: platform,
+      course: course,
+      proof: proof,
+      status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('ivBody').innerHTML = `<div class="iv-status pending">✅ 인증 신청이 완료되었습니다!<br>관리자 승인 후 강사 배지가 부여됩니다.</div>`;
+  } catch(e) { alert('신청 실패: ' + e.message); }
+};
+
+window.resetInstructorVerify = async function(docId) {
+  await db.collection('instructorVerifications').doc(docId).delete();
+  closeInstructorVerifyModal();
+  setTimeout(() => openInstructorVerifyModal(), 300);
+};
+
 // ═══ AUTOCOMPLETE ═══
 function acSearch(type) {
   const input = document.getElementById(type === 'instructor' ? 'reviewInstructor' : 'reviewCourse');
@@ -2350,7 +2483,7 @@ function renderComments(instId) {
       const replyActions = (isMyReply || isAdmin) ? `<div class="comment-actions"><button onclick="event.stopPropagation();deleteInstReply(${instId},${i},${ri})">삭제</button></div>` : '';
       const rLikeBtn = `<button class="comment-like-btn" onclick="event.stopPropagation();likeInstReply(${instId},${i},${ri})">❤️ ${r.likes || 0}</button>`;
       return `<div class="comment-item">
-        <div class="comment-top"><div><span class="comment-author">${r.author}</span></div><span class="comment-date">${r.date}</span>${replyActions}</div>
+        <div class="comment-top"><div><span class="comment-author">${r.author}</span>${r.isInstructor ? '<span class="comment-badge-instructor">🎓 강사</span>' : ''}</div><span class="comment-date">${r.date}</span>${replyActions}</div>
         <div class="comment-text">${r.text}</div>${rLikeBtn}
       </div>`;
     }).join('');
@@ -2358,7 +2491,7 @@ function renderComments(instId) {
       <div class="comment-top">
         <div>
           <span class="comment-author">${c.author}</span>
-          ${c.verified ? '' : '<span class="comment-badge-unverified">미인증</span>'}
+          ${c.isInstructor ? '<span class="comment-badge-instructor">🎓 강사</span>' : c.verified ? '' : '<span class="comment-badge-unverified">미인증</span>'}
           ${replyBtn}
         </div>
         <span class="comment-date">${c.date}</span>${cmtActions}
@@ -2382,6 +2515,7 @@ function submitComment(instId) {
   commentsData[instId].unshift({
     author: getDisplayName(),
     verified: false,
+    isInstructor: currentUser.isInstructor || false,
     date: `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`,
     text: text,
     likes: 0,
@@ -2407,7 +2541,7 @@ function submitInstReply(instId, i) {
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
   if (!comments[i].replies) comments[i].replies = [];
-  comments[i].replies.push({ author: getDisplayName(), date: dateStr, text: input.value.trim(), likes: 0 });
+  comments[i].replies.push({ author: getDisplayName(), date: dateStr, text: input.value.trim(), likes: 0, isInstructor: currentUser.isInstructor || false });
   if (comments[i].author !== getDisplayName()) {
     addNotif(`↩ ${getDisplayName()}님이 회원님의 의견에 답글을 남겼습니다.`, instId, 'inst');
   }
