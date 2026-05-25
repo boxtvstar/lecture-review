@@ -36,6 +36,43 @@ body {
 
 /* nav.js가 NAV CSS를 자동 주입 */
 
+/* NOTICE (공지) */
+.post-item.notice {
+  background: linear-gradient(135deg, #FFF7ED, #FFFBEB);
+  border: 1.5px solid #FDBA74;
+  position: relative;
+}
+.post-item.notice:hover { border-color: var(--orange); }
+.notice-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 800; color: var(--orange);
+  background: rgba(255,138,76,0.15); margin-right: 6px;
+}
+.notice-scope {
+  display: inline-block; padding: 1px 6px; border-radius: 3px;
+  font-size: 9px; font-weight: 700; color: var(--gray-500);
+  background: var(--gray-100); margin-left: 4px;
+}
+
+/* WRITE MODAL - NOTICE OPTIONS */
+.notice-options {
+  margin-top: 8px; padding: 12px; background: var(--orange-light);
+  border-radius: 8px; border: 1px solid rgba(255,138,76,0.2);
+}
+.notice-options-title {
+  font-size: 12px; font-weight: 700; color: var(--orange); margin-bottom: 8px;
+}
+.notice-check { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.notice-check label {
+  font-size: 13px; color: var(--gray-600); cursor: pointer; display: flex; align-items: center; gap: 6px;
+}
+.notice-check input[type="checkbox"] { accent-color: var(--orange); }
+.notice-scope-select {
+  padding: 6px 10px; border: 1px solid var(--gray-200); border-radius: 6px;
+  font-size: 12px; font-family: inherit; background: white; margin-left: 8px;
+}
+
 /* CONTAINER */
 .container {
   max-width: 800px; margin: 0 auto; padding: 88px 24px 60px;
@@ -383,6 +420,28 @@ body {
           <option value="꿀팁">꿀팁</option>
         </select>
       </div>
+      <div class="write-field" id="noticeField" style="display:none">
+        <div class="notice-options">
+          <div class="notice-options-title">📌 공지 설정 (관리자 전용)</div>
+          <div class="notice-check">
+            <label><input type="checkbox" id="isNotice" onchange="toggleNoticeScope()"> 공지로 등록하기</label>
+          </div>
+          <div id="noticeScopeArea" style="display:none">
+            <div class="notice-check">
+              <label><input type="radio" name="noticeScope" value="all" checked> 전체 게시판 공지</label>
+            </div>
+            <div class="notice-check">
+              <label><input type="radio" name="noticeScope" value="category"> 특정 카테고리만 공지</label>
+              <select class="notice-scope-select" id="noticeScopeCategory" style="display:none">
+                <option value="자유">자유</option>
+                <option value="수강후기">수강후기</option>
+                <option value="질문">질문</option>
+                <option value="꿀팁">꿀팁</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="write-field">
         <label class="write-label">제목</label>
         <input class="write-input" id="writeTitle" placeholder="제목을 입력하세요">
@@ -474,6 +533,18 @@ function googleLogin() {
 
 // ═══ DATA ═══
 const posts = [
+  { id: 100, category: '자유', title: '팔이피플 커뮤니티 이용 규칙 안내', author: '관리자',
+    date: '2026.05.25', views: 1520, likes: 0, commentCount: 0,
+    isNotice: true, noticeScope: 'all',
+    content: '안녕하세요, 팔이피플 커뮤니티 이용 규칙을 안내합니다.\n\n1. 욕설, 비방, 인신공격은 금지합니다.\n2. 광고성 게시글은 즉시 삭제됩니다.\n3. 허위 리뷰 작성 시 계정이 정지될 수 있습니다.\n4. 강사 관련 의견은 근거에 기반하여 작성해주세요.\n5. 개인정보 노출에 주의해주세요.\n\n건전한 커뮤니티 문화를 위해 협조 부탁드립니다!',
+    comments: []
+  },
+  { id: 101, category: '수강후기', title: '수강후기 게시판 작성 가이드', author: '관리자',
+    date: '2026.05.25', views: 820, likes: 0, commentCount: 0,
+    isNotice: true, noticeScope: 'category', noticeCategory: '수강후기',
+    content: '수강후기 작성 시 아래 내용을 포함하면 다른 수강생에게 도움이 됩니다.\n\n- 수강한 강의명과 플랫폼\n- 수강 기간\n- 난이도 (초급/중급/고급)\n- 장점과 단점\n- 전체 만족도 (별점)\n\n솔직하고 구체적인 후기를 남겨주세요!',
+    comments: []
+  },
   { id: 1, category: '수강후기', title: '인프런 김코딩 React 강의 솔직 후기', author: '개발자지망생',
     date: '2026.05.22', views: 342, likes: 47, commentCount: 12,
     content: '3개월 동안 수강했는데, 확실히 실무에서 바로 쓸 수 있는 내용이 많습니다.\n\n특히 에러 핸들링 파트가 다른 강의에서는 잘 안 다루는 심화 내용이라 좋았어요.\n\n질문 올리면 보통 하루 안에 답변이 옵니다. 이 부분은 진짜 다른 강사들도 배웠으면 좋겠어요.\n\n다만 후반부로 갈수록 난이도가 급격히 올라가서 초보자는 중간에 다른 강의로 보충이 필요할 수도 있습니다.\n\n총평: 4.7/5 추천합니다.',
@@ -518,7 +589,7 @@ const posts = [
 
 let currentFilter = '전체';
 let currentSort = 'popular';
-let nextId = posts.length + 1;
+let nextId = Math.max(...posts.map(p => p.id)) + 1;
 
 // ═══ RENDER ═══
 const categoryStyles = {
@@ -535,22 +606,40 @@ function renderPosts() {
   const list = document.getElementById('postList');
   let filtered = currentFilter === '전체' ? [...posts] : posts.filter(p => p.category === currentFilter);
 
+  // 공지 분리: 전체공지 + 해당 카테고리 공지를 최상단에
+  const notices = filtered.filter(p => {
+    if (!p.isNotice) return false;
+    if (p.noticeScope === 'all') return true; // 전체 공지는 항상 표시
+    if (p.noticeScope === 'category') {
+      return currentFilter === '전체' || p.noticeCategory === currentFilter;
+    }
+    return false;
+  });
+  const normalPosts = filtered.filter(p => !p.isNotice);
+
   if (currentSort === 'popular') {
-    filtered.sort((a, b) => (b.likes + getTotalCommentLikes(b)) - (a.likes + getTotalCommentLikes(a)));
+    normalPosts.sort((a, b) => (b.likes + getTotalCommentLikes(b)) - (a.likes + getTotalCommentLikes(a)));
   } else {
-    filtered.sort((a, b) => b.id - a.id);
+    normalPosts.sort((a, b) => b.id - a.id);
   }
 
-  if (filtered.length === 0) {
+  const allPosts = [...notices, ...normalPosts];
+
+  if (allPosts.length === 0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">아직 작성된 글이 없습니다.</div></div>';
     return;
   }
 
-  list.innerHTML = filtered.map(p => `
-    <div class="post-item" onclick="openPost(${p.id})">
+  list.innerHTML = allPosts.map(p => {
+    const isNotice = p.isNotice;
+    const scopeLabel = p.noticeScope === 'all' ? '전체' : (p.noticeCategory || '');
+    return `
+    <div class="post-item${isNotice ? ' notice' : ''}" onclick="openPost(${p.id})">
       <div class="post-top">
+        ${isNotice ? '<span class="notice-badge">📌 공지</span>' : ''}
         <span class="post-category-badge ${categoryStyles[p.category] || ''}">${p.category}</span>
-        ${p.likes >= 100 ? '<span class="post-hot">HOT</span>' : ''}
+        ${isNotice ? '<span class="notice-scope">' + scopeLabel + '</span>' : ''}
+        ${!isNotice && p.likes >= 100 ? '<span class="post-hot">HOT</span>' : ''}
       </div>
       <div class="post-title">${p.title}</div>
       <div class="post-preview">${p.content.replace(/\n/g, ' ').substring(0, 80)}...</div>
@@ -563,8 +652,8 @@ function renderPosts() {
           <span class="post-stat">${p.date}</span>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function filterPosts(cat, btn) {
@@ -592,7 +681,7 @@ function openPost(id) {
 
   const catStyle = categoryStyles[p.category] || '';
   document.getElementById('detailCategory').className = `detail-category post-category-badge ${catStyle}`;
-  document.getElementById('detailCategory').textContent = p.category;
+  document.getElementById('detailCategory').innerHTML = (p.isNotice ? '<span class="notice-badge">📌 공지</span> ' : '') + p.category;
   document.getElementById('detailTitle').textContent = p.title;
   document.getElementById('detailMeta').innerHTML = `<strong>${p.author}</strong> · ${p.date} · 조회 ${p.views}`;
   document.getElementById('detailBody').textContent = p.content;
@@ -867,9 +956,29 @@ function openWriteModal() {
   document.getElementById('writeTitle').value = '';
   document.getElementById('writeContent').value = '';
   document.getElementById('writeCategory').value = '자유';
+  // 관리자만 공지 옵션 표시
+  const noticeField = document.getElementById('noticeField');
+  if (noticeField) noticeField.style.display = isAdmin ? 'block' : 'none';
+  const isNoticeEl = document.getElementById('isNotice');
+  if (isNoticeEl) isNoticeEl.checked = false;
+  const scopeArea = document.getElementById('noticeScopeArea');
+  if (scopeArea) scopeArea.style.display = 'none';
   document.getElementById('writeOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
+
+function toggleNoticeScope() {
+  const checked = document.getElementById('isNotice').checked;
+  document.getElementById('noticeScopeArea').style.display = checked ? 'block' : 'none';
+}
+
+// 라디오 버튼으로 카테고리 셀렉트 표시/숨김
+document.addEventListener('change', function(e) {
+  if (e.target.name === 'noticeScope') {
+    const catSelect = document.getElementById('noticeScopeCategory');
+    catSelect.style.display = e.target.value === 'category' ? 'inline-block' : 'none';
+  }
+});
 
 function closeWriteModal() {
   document.getElementById('writeOverlay').classList.remove('open');
@@ -887,11 +996,24 @@ function submitPost() {
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
 
-  posts.unshift({
+  const newPost = {
     id: nextId++, category, title, author: getDisplayName(),
     date: dateStr, views: 0, likes: 0, commentCount: 0,
     content, comments: []
-  });
+  };
+
+  // 공지 설정 (관리자만)
+  const isNoticeEl = document.getElementById('isNotice');
+  if (isAdmin && isNoticeEl && isNoticeEl.checked) {
+    newPost.isNotice = true;
+    const scope = document.querySelector('input[name="noticeScope"]:checked');
+    newPost.noticeScope = scope ? scope.value : 'all';
+    if (newPost.noticeScope === 'category') {
+      newPost.noticeCategory = document.getElementById('noticeScopeCategory').value;
+    }
+  }
+
+  posts.unshift(newPost);
 
   document.getElementById('writeTitle').value = '';
   document.getElementById('writeContent').value = '';

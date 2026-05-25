@@ -1751,6 +1751,7 @@ function renderAll() {
   renderCommentsTable();
   renderWeeklyChart();
   updatePendingCount();
+  loadInstVerifyRequests();
 }
 
 // ═══ MOBILE SIDEBAR ═══
@@ -1927,7 +1928,7 @@ async function loadInstVerifyRequests() {
     renderInstVerifyTable();
     updateInstVerifyBadge();
   } catch(e) {
-    document.getElementById('instVerifyTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red)">로드 실패: ${e.message}</td></tr>`;
+    document.getElementById('instVerifyTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--red)">로드 실패: ${e.message}</td></tr>`;
   }
 }
 
