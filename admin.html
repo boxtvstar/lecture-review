@@ -680,79 +680,47 @@ body {
 
         <div class="analytics-grid">
           <div class="analytics-card">
-            <div class="analytics-card-title">인기 페이지</div>
-            <div class="analytics-card-sub">페이지별 조회수 TOP</div>
-            <div class="page-views-row">
-              <div class="page-view-item">
-                <div class="page-view-name">🏠 메인</div>
-                <div class="page-view-count">2,156</div>
-                <div class="page-view-pct">41.2%</div>
-              </div>
-              <div class="page-view-item">
-                <div class="page-view-name">🔍 검색</div>
-                <div class="page-view-count">1,087</div>
-                <div class="page-view-pct">20.8%</div>
-              </div>
-              <div class="page-view-item">
-                <div class="page-view-name">👤 강사 상세</div>
-                <div class="page-view-count">892</div>
-                <div class="page-view-pct">17.0%</div>
-              </div>
-              <div class="page-view-item">
-                <div class="page-view-name">🚨 감별기</div>
-                <div class="page-view-count">634</div>
-                <div class="page-view-pct">12.1%</div>
-              </div>
-              <div class="page-view-item">
-                <div class="page-view-name">✏️ 리뷰작성</div>
-                <div class="page-view-count">465</div>
-                <div class="page-view-pct">8.9%</div>
-              </div>
+            <div class="analytics-card-title">최근 등록 리뷰</div>
+            <div class="analytics-card-sub">Firestore에 저장된 리뷰</div>
+            <div class="page-views-row" id="recentReviewsList">
+              <div style="text-align:center;padding:16px;color:var(--gray-400);font-size:13px">로딩 중...</div>
             </div>
           </div>
           <div class="analytics-card">
-            <div class="analytics-card-title">유입 경로</div>
-            <div class="analytics-card-sub">방문자 유입 소스</div>
+            <div class="analytics-card-title">사이트 정보</div>
+            <div class="analytics-card-sub">82people.kr</div>
             <div class="traffic-source-list">
               <div class="traffic-source-item">
-                <div class="traffic-source-icon" style="background:#FEF3C7">🔍</div>
+                <div class="traffic-source-icon" style="background:#FEF3C7">🌐</div>
                 <div class="traffic-source-info">
-                  <div class="traffic-source-name">네이버 검색</div>
-                  <div class="traffic-source-count">687명</div>
+                  <div class="traffic-source-name">도메인</div>
+                  <div class="traffic-source-count">82people.kr</div>
                 </div>
-                <div class="traffic-source-pct">37.3%</div>
+                <div class="traffic-source-pct">-</div>
               </div>
               <div class="traffic-source-item">
-                <div class="traffic-source-icon" style="background:#DBEAFE">🌐</div>
+                <div class="traffic-source-icon" style="background:#DBEAFE">🚀</div>
                 <div class="traffic-source-info">
-                  <div class="traffic-source-name">구글 검색</div>
-                  <div class="traffic-source-count">412명</div>
+                  <div class="traffic-source-name">호스팅</div>
+                  <div class="traffic-source-count">Vercel</div>
                 </div>
-                <div class="traffic-source-pct">22.4%</div>
+                <div class="traffic-source-pct">-</div>
               </div>
               <div class="traffic-source-item">
-                <div class="traffic-source-icon" style="background:#FCE7F3">💬</div>
+                <div class="traffic-source-icon" style="background:#FCE7F3">🔥</div>
                 <div class="traffic-source-info">
-                  <div class="traffic-source-name">커뮤니티 / SNS</div>
-                  <div class="traffic-source-count">324명</div>
+                  <div class="traffic-source-name">백엔드</div>
+                  <div class="traffic-source-count">Firebase</div>
                 </div>
-                <div class="traffic-source-pct">17.6%</div>
+                <div class="traffic-source-pct">-</div>
               </div>
               <div class="traffic-source-item">
-                <div class="traffic-source-icon" style="background:#D1FAE5">🔗</div>
+                <div class="traffic-source-icon" style="background:#D1FAE5">📊</div>
                 <div class="traffic-source-info">
-                  <div class="traffic-source-name">직접 접속</div>
-                  <div class="traffic-source-count">289명</div>
+                  <div class="traffic-source-name">상태</div>
+                  <div class="traffic-source-count">운영 중</div>
                 </div>
-                <div class="traffic-source-pct">15.7%</div>
-              </div>
-              <div class="traffic-source-item">
-                <div class="traffic-source-icon" style="background:#EDE9FE">📱</div>
-                <div class="traffic-source-info">
-                  <div class="traffic-source-name">기타</div>
-                  <div class="traffic-source-count">130명</div>
-                </div>
-                <div class="traffic-source-pct">7.0%</div>
+                <div class="traffic-source-pct">-</div>
               </div>
             </div>
           </div>
@@ -1647,18 +1615,11 @@ function showToast(msg, type = 'success') {
 
 // ═══ RENDER ALL ═══
 function renderWeeklyChart() {
-  const days = ['월', '화', '수', '목', '금', '토', '일'];
-  const visitors = [1245, 1578, 1842, 2103, 1967, 1423, 1842];
-  const max = Math.max(...visitors);
-  const colors = ['blue', 'blue', 'orange', 'green', 'blue', 'purple', 'orange'];
-  document.getElementById('weeklyChart').innerHTML = days.map((d, i) => `
-    <div class="chart-bar-row">
-      <span class="chart-bar-label">${d}</span>
-      <div class="chart-bar-track">
-        <div class="chart-bar-fill ${colors[i]}" style="width:${(visitors[i]/max*100).toFixed(0)}%">${visitors[i].toLocaleString()}</div>
-      </div>
-    </div>
-  `).join('');
+  document.getElementById('weeklyChart').innerHTML = `
+    <div style="text-align:center;padding:24px;color:var(--gray-400);font-size:13px">
+      📊 실제 방문자 데이터가 쌓이면 여기에 표시됩니다.<br>
+      <span style="font-size:11px">Google Analytics 연동 후 활성화</span>
+    </div>`;
 }
 
 // ═══ ADMIN COMMENTS DATA & RENDER ═══
@@ -1750,6 +1711,22 @@ async function loadDashboardStats() {
     document.getElementById('todayBounce').textContent = instVerifiedSnap.size.toLocaleString();
     document.getElementById('todayBounceChange').textContent = '인증 완료';
     document.getElementById('todayBounceChange').className = 'stat-card-change up';
+
+    // 최근 리뷰 목록 (Firestore)
+    const reviewListEl = document.getElementById('recentReviewsList');
+    if (reviewCount > 0) {
+      const recentSnap = await db.collection('reviews').orderBy('createdAt', 'desc').limit(5).get();
+      reviewListEl.innerHTML = recentSnap.docs.map(doc => {
+        const r = doc.data();
+        return `<div class="page-view-item">
+          <div class="page-view-name" style="font-size:13px">${r.instructor || '-'} <span style="color:var(--gray-400);font-size:11px">${r.course || ''}</span></div>
+          <div class="page-view-count" style="font-size:12px">${r.author || '익명'}</div>
+          <div class="page-view-pct" style="font-size:11px">${r.score ? r.score + '★' : '-'}</div>
+        </div>`;
+      }).join('') || '<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:13px">리뷰 없음</div>';
+    } else {
+      reviewListEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:13px">아직 등록된 리뷰가 없습니다.</div>';
+    }
   } catch(e) {
     console.error('대시보드 통계 로드 실패:', e);
   }

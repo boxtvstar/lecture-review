@@ -2626,7 +2626,7 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('#courseAcWrapper')) document.getElementById('courseDropdown').classList.remove('open');
 });
 
-function submitReview() {
+async function submitReview() {
   const instName = selectedInstructor?.name || document.getElementById('reviewInstructor').value.trim();
   const courseName = selectedCourse?.name || document.getElementById('reviewCourse').value.trim();
   const platformSelect = document.getElementById('reviewPlatform').value;
@@ -2640,6 +2640,45 @@ function submitReview() {
     document.getElementById('loginPopup').classList.add('open');
     return;
   }
+
+  // Firestore에 리뷰 저장
+  try {
+    const db = firebase.firestore();
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+    const isAnon = document.getElementById('anonToggle')?.classList.contains('on');
+    const reviewData = {
+      instructor: instName,
+      course: courseName,
+      platform: platform,
+      text: text,
+      author: isAnon ? '익명' : getDisplayName(),
+      authorUid: currentUser.uid,
+      email: currentUser.email,
+      date: dateStr,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      verified: false,
+      score: 0,
+      files: reviewUploadFiles.filter(f => !f.isPdf).map(f => f.dataUrl).slice(0, 3)
+    };
+    // 평점 계산
+    const stars = document.querySelectorAll('.form-star.selected');
+    if (stars.length > 0) {
+      const ratings = {};
+      document.querySelectorAll('.form-rating-item').forEach(item => {
+        const label = item.querySelector('.form-rating-label')?.textContent;
+        const selected = item.querySelectorAll('.form-star.selected').length;
+        if (label && selected > 0) ratings[label] = selected;
+      });
+      const vals = Object.values(ratings);
+      reviewData.score = vals.length > 0 ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length * 10)/10 : 0;
+      reviewData.ratings = ratings;
+    }
+    await db.collection('reviews').add(reviewData);
+  } catch(e) {
+    console.error('리뷰 저장 실패:', e);
+  }
+
   closeReviewModal();
   document.getElementById('successUser').innerHTML =
     `<img src="${currentUser.picture}" alt="">${getDisplayName()} (${currentUser.email})`;
