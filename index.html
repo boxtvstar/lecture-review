@@ -1211,8 +1211,8 @@ body {
       <a href="#rankings" class="active">랭킹</a>
       <a href="#platforms">플랫폼</a>
       <a href="#detector">감별기</a>
-      <a href="community.html">커뮤니티</a>
-      <a href="admin.html" style="font-size:12px;color:var(--gray-400)">관리자</a>
+      <a href="/community">커뮤니티</a>
+      <a href="/admin" style="font-size:12px;color:var(--gray-400)">관리자</a>
       <a href="#" onclick="openReviewModal(); return false;" class="btn-write-review">✏️ 리뷰 쓰기</a>
       <div class="nav-profile" id="navProfile" onclick="toggleProfileDropdown(event)">
         <img class="nav-profile-img" id="navProfileImg" src="" alt="">
@@ -1370,7 +1370,7 @@ body {
 <section class="community-preview" id="community">
   <div class="section-header">
     <h2 class="section-title"><span class="icon">💬</span> 커뮤니티</h2>
-    <a href="community.html" class="section-link">전체 보기 →</a>
+    <a href="/community" class="section-link">전체 보기 →</a>
   </div>
   <div class="community-grid" id="communityGrid"></div>
 </section>
@@ -1597,8 +1597,8 @@ body {
     <a href="#worst" onclick="closeMobileNav()"><span class="nav-icon">💀</span> 최악의 강사</a>
     <a href="#platforms" onclick="closeMobileNav()"><span class="nav-icon">🏢</span> 플랫폼 신뢰지수</a>
     <a href="#detector" onclick="closeMobileNav()"><span class="nav-icon">🚨</span> 강의팔이 감별기</a>
-    <a href="community.html"><span class="nav-icon">💬</span> 커뮤니티</a>
-    <a href="admin.html"><span class="nav-icon">⚙️</span> 관리자</a>
+    <a href="/community"><span class="nav-icon">💬</span> 커뮤니티</a>
+    <a href="/admin"><span class="nav-icon">⚙️</span> 관리자</a>
   </div>
   <a href="#" class="mobile-nav-write" onclick="closeMobileNav(); openReviewModal(); return false;">✏️ 리뷰 쓰기</a>
 </div>
@@ -2169,12 +2169,6 @@ firebase.initializeApp({
 const db = firebase.firestore();
 let currentUser = null;
 
-// localStorage 캐시로 즉시 프로필 표시
-try {
-  const cached = JSON.parse(localStorage.getItem('cachedUser'));
-  if (cached) { currentUser = cached; showNavProfile(); }
-} catch(e) {}
-
 // 로그인 상태 유지
 firebase.auth().onAuthStateChanged(async user => {
   if (user) {
@@ -2231,8 +2225,15 @@ document.addEventListener('click', e => {
 });
 function logoutUser() {
   firebase.auth().signOut();
+  localStorage.removeItem('cachedUser');
   closeProfileDropdown();
 }
+// localStorage 캐시로 즉시 프로필 표시 (페이지 이동 시 깜빡임 방지)
+try {
+  const cached = JSON.parse(localStorage.getItem('cachedUser'));
+  if (cached) { currentUser = cached; showNavProfile(); }
+} catch(e) {}
+
 async function saveNickname() {
   if (!currentUser) return;
   const nick = document.getElementById('nicknameInput').value.trim();
@@ -2653,7 +2654,7 @@ const communityPosts = [
 
 function renderCommunityPreview() {
   document.getElementById('communityGrid').innerHTML = communityPosts.slice(0, 6).map(p => `
-    <a class="community-card" href="community.html">
+    <a class="community-card" href="/community">
       <div class="community-card-top">
         <span class="community-cat ${p.catClass}">${p.category}</span>
         ${p.hot ? '<span class="community-hot">HOT</span>' : ''}

@@ -435,16 +435,16 @@ body {
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-inner">
-    <a href="index.html" class="nav-logo">
+    <a href="/" class="nav-logo">
       <div class="logo-icon">82</div>
       팔이피플
     </a>
     <div class="nav-links">
-      <a href="index.html#rankings">랭킹</a>
-      <a href="index.html#platforms">플랫폼</a>
-      <a href="index.html#detector">감별기</a>
-      <a href="community.html" class="active">커뮤니티</a>
-      <a href="admin.html" style="font-size:12px;color:var(--gray-400)">관리자</a>
+      <a href="/#rankings">랭킹</a>
+      <a href="/#platforms">플랫폼</a>
+      <a href="/#detector">감별기</a>
+      <a href="/community" class="active">커뮤니티</a>
+      <a href="/admin" style="font-size:12px;color:var(--gray-400)">관리자</a>
       <div class="nav-profile" id="navProfile" onclick="toggleProfileDropdown(event)">
         <img class="nav-profile-img" id="navProfileImg" src="" alt="">
         <span class="nav-profile-name" id="navProfileName"></span>
@@ -472,12 +472,12 @@ body {
   <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
   <div class="mobile-nav-logo"><div class="logo-icon" style="width:30px;height:30px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:900;letter-spacing:-1px">82</div> 팔이피플</div>
   <div class="mobile-nav-links">
-    <a href="index.html"><span class="nav-icon">🏠</span> 홈</a>
-    <a href="index.html#rankings"><span class="nav-icon">🏆</span> 랭킹</a>
-    <a href="index.html#platforms"><span class="nav-icon">📦</span> 플랫폼</a>
-    <a href="index.html#detector"><span class="nav-icon">🔍</span> 감별기</a>
-    <a href="community.html" class="active"><span class="nav-icon">💬</span> 커뮤니티</a>
-    <a href="admin.html"><span class="nav-icon">⚙️</span> 관리자</a>
+    <a href="/"><span class="nav-icon">🏠</span> 홈</a>
+    <a href="/#rankings"><span class="nav-icon">🏆</span> 랭킹</a>
+    <a href="/#platforms"><span class="nav-icon">📦</span> 플랫폼</a>
+    <a href="/#detector"><span class="nav-icon">🔍</span> 감별기</a>
+    <a href="/community" class="active"><span class="nav-icon">💬</span> 커뮤니티</a>
+    <a href="/admin"><span class="nav-icon">⚙️</span> 관리자</a>
   </div>
 </div>
 
@@ -612,12 +612,6 @@ function getDisplayName() {
   return currentUser.nickname || currentUser.name;
 }
 
-// localStorage 캐시로 즉시 프로필 표시
-try {
-  const cached = JSON.parse(localStorage.getItem('cachedUser'));
-  if (cached) { currentUser = cached; showNavProfile(); }
-} catch(e) {}
-
 firebase.auth().onAuthStateChanged(async user => {
   if (user) {
     currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '' };
@@ -665,8 +659,14 @@ document.addEventListener('click', e => {
 });
 function logoutUser() {
   firebase.auth().signOut();
+  localStorage.removeItem('cachedUser');
   closeProfileDropdown();
 }
+// localStorage 캐시로 즉시 프로필 표시 (페이지 이동 시 깜빡임 방지)
+try {
+  const cached = JSON.parse(localStorage.getItem('cachedUser'));
+  if (cached) { currentUser = cached; showNavProfile(); }
+} catch(e) {}
 async function saveNickname() {
   if (!currentUser) return;
   const nick = document.getElementById('nicknameInput').value.trim();
