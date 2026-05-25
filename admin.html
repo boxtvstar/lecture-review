@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>팔이피플 — 관리자 페이지</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -839,10 +842,27 @@ body {
           <div class="admin-table-header">
             <div class="admin-table-title">전체 회원</div>
             <div class="admin-table-actions">
+              <button class="admin-filter-btn" onclick="loadFirebaseUsers()" style="background:var(--orange);color:white;border-color:var(--orange)">🔄 실제 가입 회원 불러오기</button>
               <button class="admin-filter-btn active" onclick="filterUsers('all',this)">전체</button>
               <button class="admin-filter-btn" onclick="filterUsers('verified',this)">인증 수강생</button>
               <button class="admin-filter-btn" onclick="filterUsers('unverified',this)">비인증</button>
             </div>
+          </div>
+          <!-- 실제 Firebase 가입 회원 -->
+          <div id="firebaseUsersSection" style="display:none;margin-bottom:20px">
+            <div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px">🔥 실제 가입 회원 (Firebase)</div>
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>프로필</th>
+                  <th>이메일</th>
+                  <th>구글 이름</th>
+                  <th>닉네임</th>
+                  <th>마지막 로그인</th>
+                </tr>
+              </thead>
+              <tbody id="firebaseUsersBody"></tbody>
+            </table>
           </div>
           <table class="admin-table">
             <thead>
@@ -1803,6 +1823,44 @@ function handleReport(idx, result) {
   renderReportsTable();
   if (result === 'done') showToast('신고가 처리 완료되었습니다.', 'success');
   else showToast('신고가 반려되었습니다.', 'error');
+}
+
+// ═══ FIREBASE 실제 가입 회원 ═══
+firebase.initializeApp({
+  apiKey: "AIzaSyAEmmwEmFAizI2mGFV2DwkIwU_4dAVMJno",
+  authDomain: "people-8a88a.firebaseapp.com",
+  projectId: "people-8a88a",
+  storageBucket: "people-8a88a.firebasestorage.app",
+  messagingSenderId: "272453703283",
+  appId: "1:272453703283:web:3f84237ac3f25742473c06",
+  measurementId: "G-YGVFDXM9HM"
+});
+const db = firebase.firestore();
+
+async function loadFirebaseUsers() {
+  try {
+    const snapshot = await db.collection('users').orderBy('lastLogin', 'desc').get();
+    if (snapshot.empty) {
+      document.getElementById('firebaseUsersBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:20px">아직 가입한 회원이 없습니다.</td></tr>';
+    } else {
+      document.getElementById('firebaseUsersBody').innerHTML = snapshot.docs.map(doc => {
+        const u = doc.data();
+        const lastLogin = u.lastLogin ? u.lastLogin.toDate().toLocaleString('ko-KR') : '-';
+        const photo = u.photoURL ? `<img src="${u.photoURL}" style="width:32px;height:32px;border-radius:50%">` : '<div class="user-avatar-sm">' + (u.displayName || '?')[0] + '</div>';
+        return `<tr>
+          <td>${photo}</td>
+          <td style="font-size:13px">${u.email || '-'}</td>
+          <td style="font-weight:700">${u.displayName || '-'}</td>
+          <td style="font-weight:700;color:var(--orange)">${u.nickname || '<span style="color:var(--gray-300)">미설정</span>'}</td>
+          <td style="font-size:12px;color:var(--gray-400)">${lastLogin}</td>
+        </tr>`;
+      }).join('');
+    }
+    document.getElementById('firebaseUsersSection').style.display = 'block';
+    showToast('Firebase 회원 목록을 불러왔습니다.', 'success');
+  } catch(e) {
+    showToast('회원 목록 로드 실패: ' + e.message, 'error');
+  }
 }
 </script>
 </body>

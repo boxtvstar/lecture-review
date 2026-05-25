@@ -9,6 +9,7 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -162,6 +163,7 @@ body {
 .mypage-review-meta { font-size: 12px; color: var(--gray-400); margin-bottom: 6px; }
 .mypage-review-text { font-size: 14px; color: var(--gray-600); line-height: 1.5; }
 .mypage-empty { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 14px; }
+.mypage-nickname-tag { display: inline-block; background: var(--orange-light); color: var(--orange); font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
 @media (max-width: 768px) {
   .nav-profile-name { display: none; }
   .mypage-modal { margin: 16px; max-height: 85vh; }
@@ -1531,6 +1533,14 @@ body {
     </div>
     <div class="mypage-user" id="mypageUser"></div>
     <div class="mypage-section">
+      <div class="mypage-section-title">✏️ 닉네임 설정</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="nicknameInput" placeholder="닉네임을 입력하세요" style="flex:1;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border 0.2s" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--gray-200)'">
+        <button onclick="saveNickname()" style="padding:10px 20px;border-radius:10px;background:var(--orange);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">저장</button>
+      </div>
+      <div id="nicknameSaved" style="display:none;margin-top:8px;font-size:13px;color:var(--green);font-weight:600">닉네임이 저장되었습니다!</div>
+    </div>
+    <div class="mypage-section">
       <div class="mypage-section-title">📝 내가 쓴 리뷰</div>
       <div id="mypageReviews"></div>
     </div>
@@ -2156,12 +2166,28 @@ firebase.initializeApp({
   measurementId: "G-YGVFDXM9HM"
 });
 
+const db = firebase.firestore();
 let currentUser = null;
 
 // 로그인 상태 유지
-firebase.auth().onAuthStateChanged(user => {
+firebase.auth().onAuthStateChanged(async user => {
   if (user) {
-    currentUser = { name: user.displayName, email: user.email, picture: user.photoURL };
+    currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '' };
+    // Firestore에서 닉네임 불러오기
+    try {
+      const doc = await db.collection('users').doc(user.uid).get();
+      if (doc.exists && doc.data().nickname) {
+        currentUser.nickname = doc.data().nickname;
+      }
+      // 유저 정보 저장/업데이트
+      await db.collection('users').doc(user.uid).set({
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        nickname: currentUser.nickname || '',
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    } catch(e) { console.log('Firestore:', e); }
     showNavProfile();
   } else {
     currentUser = null;
@@ -2169,13 +2195,17 @@ firebase.auth().onAuthStateChanged(user => {
   }
 });
 
+function getDisplayName() {
+  if (!currentUser) return '';
+  return currentUser.nickname || currentUser.name;
+}
 function showNavProfile() {
   if (!currentUser) return;
   const el = document.getElementById('navProfile');
   document.getElementById('navProfileImg').src = currentUser.picture;
-  document.getElementById('navProfileName').textContent = currentUser.name;
+  document.getElementById('navProfileName').textContent = getDisplayName();
   document.getElementById('dropdownProfileImg').src = currentUser.picture;
-  document.getElementById('dropdownName').textContent = currentUser.name;
+  document.getElementById('dropdownName').textContent = getDisplayName();
   document.getElementById('dropdownEmail').textContent = currentUser.email;
   el.classList.add('show');
 }
@@ -2197,21 +2227,38 @@ function logoutUser() {
   firebase.auth().signOut();
   closeProfileDropdown();
 }
+async function saveNickname() {
+  if (!currentUser) return;
+  const nick = document.getElementById('nicknameInput').value.trim();
+  if (!nick) { alert('닉네임을 입력해주세요.'); return; }
+  if (nick.length > 20) { alert('닉네임은 20자 이내로 입력해주세요.'); return; }
+  try {
+    await db.collection('users').doc(currentUser.uid).update({ nickname: nick });
+    currentUser.nickname = nick;
+    showNavProfile();
+    document.getElementById('nicknameSaved').style.display = 'block';
+    setTimeout(() => document.getElementById('nicknameSaved').style.display = 'none', 2000);
+    // 마이페이지 유저 영역도 업데이트
+    document.querySelector('.mypage-user-name').textContent = getDisplayName();
+  } catch(e) { alert('저장 실패: ' + e.message); }
+}
 function openMyPage() {
   closeProfileDropdown();
   if (!currentUser) return;
+  const nickLabel = currentUser.nickname ? `<span class="mypage-nickname-tag">${currentUser.nickname}</span>` : '';
   document.getElementById('mypageUser').innerHTML = `
     <img src="${currentUser.picture}" alt="">
     <div>
-      <div class="mypage-user-name">${currentUser.name}</div>
-      <div class="mypage-user-email">${currentUser.email}</div>
+      <div class="mypage-user-name">${getDisplayName()}${currentUser.nickname ? '' : ''}</div>
+      <div class="mypage-user-email">${currentUser.email}${currentUser.nickname ? ' · 구글: ' + currentUser.name : ''}</div>
     </div>`;
+  document.getElementById('nicknameInput').value = currentUser.nickname || '';
   // 내가 쓴 리뷰 (현재 세션에서 작성한 것)
   const myReviews = document.querySelectorAll('.review-card');
   let reviewHTML = '';
   myReviews.forEach(card => {
     const name = card.querySelector('.review-author-name');
-    if (name && name.textContent === currentUser.name) {
+    if (name && (name.textContent === getDisplayName() || name.textContent === currentUser.name)) {
       const text = card.querySelector('.review-text');
       const meta = card.querySelector('.review-date');
       reviewHTML += `<div class="mypage-review-item">
@@ -2226,7 +2273,7 @@ function openMyPage() {
   let commentHTML = '';
   myComments.forEach(item => {
     const author = item.querySelector('.comment-author');
-    if (author && author.textContent === currentUser.name) {
+    if (author && (author.textContent === getDisplayName() || author.textContent === currentUser.name)) {
       const text = item.querySelector('.comment-text');
       commentHTML += `<div class="mypage-review-item">
         <div class="mypage-review-text">${text ? text.textContent : ''}</div>
@@ -2426,7 +2473,7 @@ function submitComment(instId) {
   if (!commentsData[instId]) commentsData[instId] = [];
   const today = new Date();
   commentsData[instId].unshift({
-    author: currentUser.name,
+    author: getDisplayName(),
     verified: false,
     date: `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`,
     text: text
@@ -2457,7 +2504,7 @@ function submitReview() {
   }
   closeReviewModal();
   document.getElementById('successUser').innerHTML =
-    `<img src="${currentUser.picture}" alt="">${currentUser.name} (${currentUser.email})`;
+    `<img src="${currentUser.picture}" alt="">${getDisplayName()} (${currentUser.email})`;
   document.getElementById('successPopup').classList.add('open');
 }
 
