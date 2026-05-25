@@ -1052,14 +1052,6 @@ const verificationRequests = [
     instructor: '[예시] 테스트 강사A', course: '실전 React 개발', platform: '인프런',
     type: '결제 영수증', fileName: 'receipt_sample_01.jpg',
     status: 'pending', date: '2026.05.20', note: '' },
-  { id: 2, userId: 'user_42', userName: '[예시] 사용자B', email: 'test_b@example.com',
-    instructor: '[예시] 테스트 강사B', course: '퍼포먼스 마케팅 실전', platform: '클래스101',
-    type: '수료증', fileName: 'certificate_sample.png',
-    status: 'pending', date: '2026.05.20', note: '' },
-  { id: 3, userId: 'user_15', userName: '[예시] 사용자C', email: 'test_c@example.com',
-    instructor: '[예시] 테스트 강사C', course: 'Figma UI/UX 실전', platform: '콜로소',
-    type: '결제 영수증', fileName: 'payment_sample.pdf',
-    status: 'pending', date: '2026.05.19', note: '' },
   { id: 4, userId: 'user_08', userName: '[예시] 사용자D', email: 'test_d@example.com',
     instructor: '[예시] 테스트 강사D', course: '3개월 만에 월 1000만원', platform: '유데미',
     type: '수강 화면 캡처', fileName: 'screen_capture_sample.jpg',
@@ -1068,10 +1060,6 @@ const verificationRequests = [
     instructor: '[예시] 테스트 강사A', course: '실전 React 개발', platform: '인프런',
     type: '수료증', fileName: 'cert_sample.jpg',
     status: 'approved', date: '2026.05.15', note: '인프런 수료증 확인 완료' },
-  { id: 6, userId: 'user_33', userName: '[예시] 사용자F', email: 'test_f@example.com',
-    instructor: '[예시] 테스트 강사C', course: 'Figma UI/UX 실전', platform: '콜로소',
-    type: '결제 영수증', fileName: 'pay_sample.pdf',
-    status: 'approved', date: '2026.05.14', note: '영수증 확인 완료' },
   { id: 7, userId: 'user_55', userName: '[예시] 가짜리뷰어', email: 'fake_test@example.com',
     instructor: '[예시] 테스트 강사F', course: '1주일 앱 개발 마스터', platform: '패스트캠퍼스',
     type: '수강 화면 캡처', fileName: 'fake_capture_sample.jpg',
@@ -1092,14 +1080,10 @@ const allUsers = [
 const recentReviews = [
   { author: '[예시] 수강생1', instructor: '[예시] 테스트 강사A', score: 5, text: '실무에서 바로 쓸 수 있는 내용이 많아서 정말 만족합니다. 체계적인 커리큘럼이 좋았어요.', verified: true, date: '2026.05.20' },
   { author: '[예시] 수강생2', instructor: '[예시] 테스트 강사A', score: 4, text: '기초부터 심화까지 체계적. 다만 후반부 속도가 조금 빠른 감이 있습니다.', verified: false, date: '2026.05.18' },
-  { author: '[예시] 수강생3', instructor: '[예시] 테스트 강사C', score: 5, text: '디자인 실무 꿀팁이 많아서 업무에 바로 적용 가능했습니다.', verified: true, date: '2026.05.17' },
-  { author: '[예시] 수강생4', instructor: '[예시] 테스트 강사B', score: 4, text: '마케팅 실전 노하우가 괜찮았어요. 가격이 좀 비쌈.', verified: false, date: '2026.05.15' },
   { author: '[예시] 수강생5', instructor: '[예시] 테스트 강사D', score: 1, text: '3개월 만에 월 1000만원? 유튜브 수준... 환불도 안 됨.', verified: false, date: '2026.05.14' },
   { author: '[예시] 수강생6', instructor: '[예시] 테스트 강사D', score: 1, text: '과대광고 심함. 기본적인 내용만 알려주고 끝.', verified: false, date: '2026.05.12' },
   { author: '[예시] 수강생1', instructor: '[예시] 테스트 강사F', score: 2, text: '1주일 완성이라더니 내용이 부실. 무료 강의가 더 나음.', verified: true, date: '2026.05.10' },
-  { author: '[예시] 수강생7', instructor: '[예시] 테스트 강사E', score: 3, text: '자기계발 콘텐츠인데 유튜브에서 볼 수 있는 수준. 가격 대비 아쉬움.', verified: false, date: '2026.05.08' },
   { author: '[예시] 수강생4', instructor: '[예시] 테스트 강사F', score: 1, text: '앱 개발 마스터라더니 Hello World 수준... 완전 낚임.', verified: true, date: '2026.05.06' },
-  { author: '[예시] 수강생5', instructor: '[예시] 테스트 강사B', score: 5, text: '마케팅 기초부터 실전까지 잘 정리되어 있어요. 초보자 추천.', verified: true, date: '2026.05.04' },
 ];
 
 const reportItems = [
@@ -1112,10 +1096,7 @@ const adminInstructors = [
   // ── 인프런 ──
   // ── [예시] 테스트 강사 ──
   { name: '[예시] 테스트 강사A', category: '개발', platform: '인프런', course: '실전 React 개발', score: 4.7, reviews: 5, hype: 3 },
-  { name: '[예시] 테스트 강사B', category: '마케팅', platform: '클래스101', course: '퍼포먼스 마케팅 실전', score: 4.3, reviews: 4, hype: 5 },
-  { name: '[예시] 테스트 강사C', category: '디자인', platform: '콜로소', course: 'Figma UI/UX 실전', score: 4.8, reviews: 3, hype: 2 },
   { name: '[예시] 테스트 강사D', category: '재테크', platform: '유데미', course: '3개월 만에 월 1000만원', score: 2.1, reviews: 6, hype: 45 },
-  { name: '[예시] 테스트 강사E', category: '자기계발', platform: '클래스101', course: '인생이 바뀌는 습관 혁명', score: 3.2, reviews: 4, hype: 30 },
   { name: '[예시] 테스트 강사F', category: '개발', platform: '패스트캠퍼스', course: '1주일 앱 개발 마스터', score: 1.8, reviews: 5, hype: 50 },
   // ── 인프런 ──
   { name: '김영한', category: '개발', platform: '인프런', course: '스프링 완전 정복 로드맵', score: 0, reviews: 0, hype: 0 },
@@ -1670,8 +1651,6 @@ const adminComments = [
   { author: '[예시] 구경꾼', instructor: '[예시] 테스트 강사D', verified: false, date: '2026.05.21', text: '리뷰 보니까 진짜 심각하네요;; 과대광고가 너무 심한 것 같아요', deleted: false },
   { author: '[예시] 지나가다', instructor: '[예시] 테스트 강사F', verified: false, date: '2026.05.22', text: '유튜브에서 광고 엄청 나오던데 여기서 보니 평가가 안 좋네', deleted: false },
   { author: '[예시] 수강생6', instructor: '[예시] 테스트 강사D', verified: false, date: '2026.05.18', text: '환불 받으신 분 계신가요? 절차 좀 알려주세요', deleted: false },
-  { author: '[예시] 수강생3', instructor: '[예시] 테스트 강사C', verified: false, date: '2026.05.15', text: '후속 강의 나올 예정 있나요? 심화 과정 듣고 싶어요', deleted: false },
-  { author: '[예시] 수강생7', instructor: '[예시] 테스트 강사B', verified: false, date: '2026.05.13', text: '구글 애즈 파트 추가되면 좋겠어요', deleted: false },
   { author: '[예시] 수강생2', instructor: '[예시] 테스트 강사A', verified: false, date: '2026.05.12', text: 'JS 기초가 없어도 React 강의 따라갈 수 있을까요?', deleted: false },
 ];
 

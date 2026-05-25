@@ -1606,22 +1606,6 @@ const instructors = [
       { author: '수강생B', badge: 'verified', date: '2026.05.10', stars: 4, text: '전반적으로 좋은 강의입니다. 다만 후반부로 갈수록 난이도가 급상승해서 초보자에게는 조금 어려울 수 있어요.', helpful: 23, rebuttal: '소중한 피드백 감사합니다. 보충 자료를 준비 중입니다.' }
     ]
   },
-  { id: 2, name: '[예시] 테스트 강사B', category: '마케팅', platform: '클래스101', avatar: '#8B5CF6',
-    score: 4.3, reviews: 3, hype: 62, hypeLv: 'mid',
-    tags: ['퍼포먼스 마케팅', '사례 풍부'],
-    ratings: { quality: 4.2, value: 3.8, expertise: 4.5, hype: 3.8, growth: 4.0, support: 4.1 },
-    reviewList: [
-      { author: '마케터3년차', badge: 'verified', date: '2026.05.12', stars: 4, text: '실제 운영 사례가 많아서 좋았어요. 다만 썸네일 광고는 좀 과장된 느낌이 있습니다.', helpful: 31, rebuttal: null }
-    ]
-  },
-  { id: 3, name: '[예시] 테스트 강사C', category: '디자인', platform: '콜로소', avatar: '#EC4899',
-    score: 4.8, reviews: 2, hype: 8, hypeLv: 'low',
-    tags: ['Figma', 'UI/UX', '포트폴리오'],
-    ratings: { quality: 4.9, value: 4.7, expertise: 4.8, hype: 0.8, growth: 4.9, support: 4.8 },
-    reviewList: [
-      { author: '디자인전공생', badge: 'expert', date: '2026.05.18', stars: 5, text: '수강 후 포트폴리오 퀄리티가 확 올라갔어요. 실무 프로세스를 그대로 보여줘서 회사에서 바로 적용 가능합니다.', helpful: 56, rebuttal: null }
-    ]
-  },
   { id: 4, name: '[예시] 테스트 강사D', category: '재테크', platform: '유데미', avatar: '#F59E0B',
     score: 2.1, reviews: 4, hype: 89, hypeLv: 'high',
     tags: ['주식', '논란 있음', '과대광고'],
@@ -1629,14 +1613,6 @@ const instructors = [
     reviewList: [
       { author: '피해자모임', badge: 'verified', date: '2026.05.19', stars: 1, text: '"3개월 만에 1억" 광고 보고 들었는데, 내용은 유튜브 무료 영상 수준입니다. 환불 요청했는데 연락도 안 됨.', helpful: 203, rebuttal: '사실과 다른 내용이 포함되어 있어 법적 대응을 검토 중입니다.' },
       { author: '호구탈출', badge: 'expert', date: '2026.05.17', stars: 1, text: '수강생 단톡방에서 추가 유료 코칭 압박이 심합니다. 강의 내용은 빈약하고, 계속 상위 과정을 결제하라고 유도해요.', helpful: 178, rebuttal: null }
-    ]
-  },
-  { id: 5, name: '[예시] 테스트 강사E', category: '자기계발', platform: '클래스101', avatar: '#6366F1',
-    score: 3.2, reviews: 2, hype: 71, hypeLv: 'high',
-    tags: ['습관', '시간관리', '과대광고 주의'],
-    ratings: { quality: 3.0, value: 2.5, expertise: 3.5, hype: 4.2, growth: 3.0, support: 2.8 },
-    reviewList: [
-      { author: '직장인A', badge: 'unverified', date: '2026.05.11', stars: 2, text: '"인생이 바뀐다"는 광고에 비해 내용은 자기계발서 요약 수준. 새로운 건 거의 없습니다.', helpful: 42, rebuttal: null }
     ]
   },
   { id: 6, name: '[예시] 테스트 강사F', category: '개발', platform: '패스트캠퍼스', avatar: '#14B8A6',
@@ -1732,10 +1708,6 @@ const detectorItems = [
     verdict: 'sus', verdictText: '의심',
     reason: '(예시) 1주일 만에 앱 개발이 가능하다는 광고. 실제 수강생 리뷰: "Hello World 수준에서 끝남"',
     yes: 187, no: 45 },
-  { course: '[예시] "인생이 바뀌는 습관 혁명"', instructor: '[예시] 테스트 강사E · 클래스101',
-    verdict: 'pending', verdictText: '검증 중',
-    reason: '(예시) 과장 광고 의심 제보 접수. 현재 수강생 의견 수집 중.',
-    yes: 89, no: 67 },
   { course: '[예시] "실전 React 마스터클래스"', instructor: '[예시] 테스트 강사A · 인프런',
     verdict: 'ok', verdictText: '적정',
     reason: '(예시) 광고 내용과 실제 강의 내용 일치. 인증된 수강생 리뷰 92% 긍정 평가.',
