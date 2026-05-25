@@ -12,10 +12,11 @@ const navStyle = document.createElement('style');
 navStyle.textContent = `
 /* ═══ NAV ═══ */
 .nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
-  background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--gray-100);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gray-200); transition: box-shadow 0.3s;
 }
+.nav.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
 .nav-inner {
   max-width: 1200px; margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between;
@@ -569,5 +570,18 @@ try {
 } catch(e) {}
 
 renderNotifs();
+
+// ─── 스크롤 그림자 효과 ───
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('nav');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 10);
+});
+
+// ─── 강사 인증 신청: 커뮤니티에서는 메인으로 이동 ───
+if (!window.openInstructorVerifyModal) {
+  window.openInstructorVerifyModal = function() {
+    location.href = '/?instructor-verify=1';
+  };
+}
 
 })();
