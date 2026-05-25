@@ -1264,21 +1264,14 @@ body {
     </div>
   </div>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="num">2,847</div><div class="label">인증된 리뷰</div></div>
-    <div class="hero-stat"><div class="num">438</div><div class="label">등록된 강사</div></div>
-    <div class="hero-stat"><div class="num">1,203</div><div class="label">인증 수강생</div></div>
+    <div class="hero-stat"><div class="num" id="heroReviewCount">0</div><div class="label">인증된 리뷰</div></div>
+    <div class="hero-stat"><div class="num" id="heroInstructorCount">0</div><div class="label">등록된 강사</div></div>
+    <div class="hero-stat"><div class="num" id="heroStudentCount">0</div><div class="label">인증 수강생</div></div>
   </div>
 </section>
 
 <!-- ═══ CATEGORIES ═══ -->
-<div class="categories" id="categories">
-  <div class="cat-pill active" onclick="selectCategory(this, '전체')">전체 <span class="cat-count">438</span></div>
-  <div class="cat-pill" onclick="selectCategory(this, '개발')">💻 개발 <span class="cat-count">156</span></div>
-  <div class="cat-pill" onclick="selectCategory(this, '디자인')">🎨 디자인 <span class="cat-count">89</span></div>
-  <div class="cat-pill" onclick="selectCategory(this, '마케팅')">📢 마케팅 <span class="cat-count">72</span></div>
-  <div class="cat-pill" onclick="selectCategory(this, '재테크')">💰 재테크 <span class="cat-count">64</span></div>
-  <div class="cat-pill" onclick="selectCategory(this, '자기계발')">📚 자기계발 <span class="cat-count">57</span></div>
-</div>
+<div class="categories" id="categories"></div>
 
 <!-- ═══ TRENDING INSTRUCTORS ═══ -->
 <section class="section">
@@ -1780,6 +1773,33 @@ let currentSort = 'reviews';
 let currentPlatformFilter = '전체';
 let selectedInstructor = null;
 let selectedCourse = null;
+
+// ═══ HERO STATS + CATEGORY TABS ═══
+const catIcons = { '개발': '💻', '디자인': '🎨', '마케팅': '📢', '재테크': '💰', '자기계발': '📚' };
+
+function renderHeroStats() {
+  document.getElementById('heroInstructorCount').textContent = instructors.length.toLocaleString();
+  const totalReviews = instructors.reduce((sum, i) => sum + i.reviews, 0);
+  document.getElementById('heroReviewCount').textContent = totalReviews.toLocaleString();
+  // 인증 수강생은 Firestore에서 가져오기
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    firebase.firestore().collection('users').get().then(snap => {
+      document.getElementById('heroStudentCount').textContent = snap.size.toLocaleString();
+    }).catch(() => {
+      document.getElementById('heroStudentCount').textContent = '0';
+    });
+  }
+}
+
+function renderCategoryTabs() {
+  const cats = ['전체', ...new Set(instructors.map(i => i.category))];
+  document.getElementById('categories').innerHTML = cats.map(cat => {
+    const count = cat === '전체' ? instructors.length : instructors.filter(i => i.category === cat).length;
+    const icon = catIcons[cat] ? catIcons[cat] + ' ' : '';
+    const active = cat === currentCategory ? ' active' : '';
+    return `<div class="cat-pill${active}" onclick="selectCategory(this, '${cat}')">${icon}${cat} <span class="cat-count">${count}</span></div>`;
+  }).join('');
+}
 
 // ═══ RENDER FUNCTIONS ═══
 
@@ -2872,6 +2892,8 @@ function renderCommunityPreview() {
 // 알림 시스템은 nav.js에서 관리
 
 // ═══ INIT ═══
+renderHeroStats();
+renderCategoryTabs();
 renderPlatformTabs();
 renderInstructors();
 renderWorst();
