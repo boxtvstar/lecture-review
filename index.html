@@ -1999,7 +1999,7 @@ function renderFormRatings() {
   const items = ['강의 퀄리티', '가성비', '강사 전문성', '과대광고 지수', '실력 향상도', 'AS/답변 만족도'];
   document.getElementById('formRatings').innerHTML = items.map((label, idx) => `
     <div class="form-rating-item">
-      <span class="form-rating-label">${label}</span>
+      <span class="form-rating-label">${label}${label === '과대광고 지수' ? ' <span style="font-size:11px;color:var(--gray-400);font-weight:400">(높을수록 과대광고 심함)</span>' : ''}</span>
       <div class="form-stars" id="formStarGroup${idx}">
         ${[1,2,3,4,5].map(s => `<span class="form-star" onclick="setFormStar(${idx},${s})" data-group="${idx}" data-val="${s}">★</span>`).join('')}
       </div>
