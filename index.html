@@ -2435,7 +2435,8 @@ function filterReviews(filter, instId) {
         <span class="review-date">${r.date}</span>
       </div>
       <div class="review-stars">${generateStars(r.stars, 14)}</div>
-      <div class="review-text">${r.text}</div>
+      <div class="review-text${r.text.length > 200 ? ' collapsed' : ''}" id="rvFlt${instId}_${origIdx}">${r.text}</div>
+      ${r.text.length > 200 ? `<div class="review-expand" onclick="event.stopPropagation();toggleReviewText('rvFlt${instId}_${origIdx}',this)">더보기 ▾</div>` : ''}
       ${r.rebuttal ? `<div class="rebuttal"><div class="rebuttal-label">💬 강사 답변</div><div class="rebuttal-text">${r.rebuttal}</div></div>` : ''}
       <div class="review-helpful">
         <button class="helpful-btn${hVoted2 ? ' voted-yes' : ''}" ${hVoted2 ? 'style="background:var(--orange-light);color:var(--orange)"' : ''} onclick="event.stopPropagation(); helpfulClick(${instId},${origIdx})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
@@ -2965,60 +2966,84 @@ const ratingKeyMap = {
 
 async function loadFirestoreReviews() {
   try {
-    const db = firebase.firestore();
-    const snap = await db.collection('reviews').get();
-    if (snap.empty) return;
+    const snap = await firebase.firestore().collection('reviews').get();
+    if (snap.empty) { console.log('리뷰 0건'); return; }
 
     // 강사별 리뷰 그룹핑
     const grouped = {};
     snap.forEach(doc => {
       const d = doc.data();
       if (!d.instructor) return;
-      if (!grouped[d.instructor]) grouped[d.instructor] = [];
-      grouped[d.instructor].push(d);
+      const name = d.instructor.trim();
+      if (!grouped[name]) grouped[name] = [];
+      grouped[name].push(d);
+    });
+    console.log('Firestore 리뷰 로드:', snap.size, '건, 강사:', Object.keys(grouped).join(', '));
+
+    // 강사명 → 인덱스 매핑 (유연한 매칭)
+    const instMap = {};
+    instructors.forEach((inst, idx) => {
+      instMap[inst.name.trim()] = idx;
+      // 괄호 제거 버전도 매핑 (예: "캡틴판교 (장기효)" → "캡틴판교")
+      const noParens = inst.name.replace(/\s*\(.*?\)\s*/g, '').trim();
+      if (noParens !== inst.name.trim()) instMap[noParens] = idx;
     });
 
-    // 강사 데이터에 병합
-    instructors.forEach(inst => {
-      const reviews = grouped[inst.name];
-      if (!reviews || reviews.length === 0) return;
-
+    // 리뷰를 강사에 병합
+    function applyReviews(inst, reviews) {
       inst.reviewList = reviews.map(r => ({
         author: r.author || '익명',
         stars: r.score || 0,
         date: r.date || '',
         text: r.text || '',
         badge: r.verified ? 'verified' : 'unverified',
-        helpful: 0,
-        rebuttal: ''
+        helpful: 0, rebuttal: ''
       }));
       inst.reviews = reviews.length;
 
-      // 평균 점수 계산
+      // 평균 점수
       const scores = reviews.filter(r => r.score > 0).map(r => r.score);
       inst.score = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length * 10) / 10 : 0;
 
-      // 세부 평점 평균 계산
-      const ratingSums = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 };
-      const ratingCounts = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 };
+      // 세부 평점 평균
+      const sums = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 };
+      const cnts = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 };
       reviews.forEach(r => {
         if (!r.ratings) return;
         Object.entries(r.ratings).forEach(([label, val]) => {
-          const key = ratingKeyMap[label] || label;
-          if (ratingSums.hasOwnProperty(key)) {
-            ratingSums[key] += val;
-            ratingCounts[key]++;
-          }
+          const key = ratingKeyMap[label.trim()] || label.trim();
+          if (sums.hasOwnProperty(key)) { sums[key] += val; cnts[key]++; }
         });
       });
-      Object.keys(ratingSums).forEach(key => {
-        inst.ratings[key] = ratingCounts[key] > 0 ? Math.round(ratingSums[key] / ratingCounts[key] * 10) / 10 : 0;
+      Object.keys(sums).forEach(key => {
+        inst.ratings[key] = cnts[key] > 0 ? Math.round(sums[key] / cnts[key] * 10) / 10 : 0;
       });
 
-      // 과대광고 지수 계산 (hype 평점 기반)
+      // 과대광고 지수
       if (inst.ratings.hype > 0) {
         inst.hype = Math.round(inst.ratings.hype / 5 * 100);
         inst.hypeLv = inst.hype >= 70 ? 'high' : inst.hype >= 40 ? 'mid' : 'low';
+      }
+    }
+
+    let nextId = Math.max(...instructors.map(i => i.id)) + 1;
+    Object.entries(grouped).forEach(([name, reviews]) => {
+      // 기존 강사 매칭
+      const idx = instMap[name];
+      if (idx !== undefined) {
+        applyReviews(instructors[idx], reviews);
+      } else {
+        // 매칭 안 되면 새 강사로 동적 추가
+        const r0 = reviews[0];
+        const newInst = {
+          id: nextId++, name, category: '기타', platform: r0.platform || '기타',
+          avatar: '#6B7280', score: 0, reviews: 0, hype: 0, hypeLv: 'low',
+          tags: [], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 },
+          reviewList: []
+        };
+        applyReviews(newInst, reviews);
+        instructors.push(newInst);
+        console.log('새 강사 추가:', name, '리뷰', reviews.length, '건');
       }
     });
 
@@ -3041,6 +3066,7 @@ async function loadFirestoreReviews() {
     renderWorst();
     renderRankings();
     renderPlatforms();
+    console.log('홈페이지 리뷰 반영 완료');
   } catch(e) {
     console.error('Firestore 리뷰 로드 실패:', e);
   }
