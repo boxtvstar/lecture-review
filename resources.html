@@ -205,6 +205,24 @@ body {
 }
 .res-write-cost-row input { width: 80px; text-align: center; }
 .res-write-cost-row span { font-size: 13px; color: var(--gray-400); }
+.res-img-upload {
+  border: 2px dashed var(--gray-200); border-radius: var(--radius-sm);
+  padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.res-img-upload:hover { border-color: var(--orange); background: var(--orange-light); }
+.res-img-upload input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.res-img-upload .upload-icon { font-size: 32px; margin-bottom: 6px; }
+.res-img-upload .upload-text { font-size: 13px; color: var(--gray-400); }
+.res-img-preview { margin-top: 10px; position: relative; display: none; }
+.res-img-preview img { max-width: 100%; max-height: 200px; border-radius: var(--radius-sm); border: 1px solid var(--gray-200); }
+.res-img-preview .remove-img {
+  position: absolute; top: 4px; right: 4px; width: 24px; height: 24px;
+  border-radius: 50%; background: rgba(0,0,0,0.6); color: white; border: none;
+  font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.res-detail-image { margin-bottom: 16px; }
+.res-detail-image img { max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--gray-200); }
 .res-write-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
 .res-write-btns button {
   padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 700;
@@ -243,6 +261,35 @@ body {
 </head>
 <body>
 
+<!-- ── INSUFFICIENT POINTS POPUP ── -->
+<div class="res-pay-overlay" id="insuffOverlay" onclick="if(event.target===this)closeInsuffPopup()">
+  <div class="res-pay-box">
+    <div class="res-pay-icon">😢</div>
+    <div class="res-pay-title">포인트가 부족합니다</div>
+    <div class="res-pay-desc" id="insuffDesc">필요한 포인트가 부족합니다.</div>
+    <div style="display:flex;justify-content:center;gap:24px;margin-bottom:16px">
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--gray-400)">필요</div>
+        <div style="font-size:24px;font-weight:900;color:var(--red)" id="insuffNeed">0P</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--gray-400)">보유</div>
+        <div style="font-size:24px;font-weight:900;color:var(--orange)" id="insuffHave">0P</div>
+      </div>
+    </div>
+    <div style="background:var(--gray-50);border-radius:10px;padding:14px;margin-bottom:20px;text-align:left">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">포인트 모으는 방법</div>
+      <div style="font-size:12px;color:var(--gray-500);line-height:2">
+        📝 리뷰 작성 <span style="float:right;font-weight:700;color:var(--green)">+5P</span><br>
+        ✍️ 커뮤니티 글 작성 <span style="float:right;font-weight:700;color:var(--green)">+1P</span><br>
+        💬 댓글 작성 <span style="float:right;font-weight:700;color:var(--green)">+0.5P</span><br>
+        ❤️ 좋아요 받기 <span style="float:right;font-weight:700;color:var(--green)">+0.1P</span>
+      </div>
+    </div>
+    <button class="res-pay-confirm" onclick="closeInsuffPopup()" style="width:100%">확인</button>
+  </div>
+</div>
+
 <!-- ── PAY CONFIRM ── -->
 <div class="res-pay-overlay" id="payOverlay" onclick="if(event.target===this)closePayConfirm()">
   <div class="res-pay-box">
@@ -279,6 +326,18 @@ body {
     <div class="res-write-field">
       <label>본문 내용</label>
       <textarea id="resWriteContent" placeholder="자료 내용을 작성해주세요 (최소 50자)"></textarea>
+    </div>
+    <div class="res-write-field">
+      <label>이미지 첨부 (선택)</label>
+      <div class="res-img-upload" id="resImgUpload">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">클릭하여 이미지를 선택하세요</div>
+        <input type="file" id="resWriteImage" accept="image/*" onchange="previewResImage(this)">
+      </div>
+      <div class="res-img-preview" id="resImgPreview">
+        <img id="resImgPreviewImg" src="" alt="">
+        <button class="remove-img" onclick="removeResImage()">&times;</button>
+      </div>
     </div>
     <div class="res-write-field">
       <label>열람 비용 (포인트)</label>
@@ -345,6 +404,7 @@ body {
     <button class="res-detail-close" onclick="closeDetail()">&times;</button>
     <div class="res-detail-title" id="detailTitle"></div>
     <div class="res-detail-meta" id="detailMeta"></div>
+    <div class="res-detail-image" id="detailImage" style="display:none"><img id="detailImageImg" src="" alt=""></div>
     <div class="res-detail-content" id="detailContent"></div>
   </div>
 </div>
@@ -353,6 +413,41 @@ body {
 <script>
 // ═══ RESOURCES PAGE ═══
 // db는 nav.js에서 window.db로 이미 초기화됨
+const storage = firebase.storage();
+
+// ─── 포인트 부족 팝업 ───
+function showInsuffPopup(need, desc) {
+  document.getElementById('insuffDesc').textContent = desc || '필요한 포인트가 부족합니다.';
+  document.getElementById('insuffNeed').textContent = need + 'P';
+  document.getElementById('insuffHave').textContent = (currentUser?.points || 0).toFixed(1) + 'P';
+  document.getElementById('insuffOverlay').classList.add('open');
+}
+function closeInsuffPopup() {
+  document.getElementById('insuffOverlay').classList.remove('open');
+}
+
+// ─── 이미지 업로드 ───
+let resSelectedFile = null;
+function previewResImage(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    if (file.size > 5 * 1024 * 1024) { alert('이미지 크기는 5MB 이하만 가능합니다.'); input.value = ''; return; }
+    resSelectedFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('resImgPreviewImg').src = e.target.result;
+      document.getElementById('resImgPreview').style.display = 'block';
+      document.getElementById('resImgUpload').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+function removeResImage() {
+  resSelectedFile = null;
+  document.getElementById('resWriteImage').value = '';
+  document.getElementById('resImgPreview').style.display = 'none';
+  document.getElementById('resImgUpload').style.display = '';
+}
 let resources = [];
 let currentFilter = 'all';
 let pendingPayRes = null;
@@ -395,11 +490,12 @@ function renderResources() {
     const alreadyRead = currentUser && r.readers && r.readers.includes(currentUser.uid);
     const costLabel = alreadyRead ? '완료' : `${r.cost}P`;
     const costClass = alreadyRead ? 'free' : '';
+    const imgIcon = r.imageUrl ? '🖼 ' : '';
     const titleBadge = isPending ? '<span class="pending-badge">대기</span>' : (alreadyRead ? '<span class="read-badge">열람</span>' : '');
     return `<div class="res-row" onclick="openResource('${r.id}')">
       <div class="col-no">${list.length - idx}</div>
       <div class="col-cat">${r.category}</div>
-      <div class="col-title">${r.title}${titleBadge}</div>
+      <div class="col-title">${imgIcon}${r.title}${titleBadge}</div>
       <div class="col-cost ${costClass}">${costLabel}</div>
       <div class="col-author">${r.author}</div>
       <div class="col-date">${r.date}</div>
@@ -459,8 +555,8 @@ async function confirmPay() {
   const cost = r.cost || 1;
 
   if ((currentUser.points || 0) < cost) {
-    alert(`포인트가 부족합니다.\n필요: ${cost}P / 보유: ${(currentUser.points || 0).toFixed(1)}P\n\n리뷰 작성(5P), 댓글(0.5P), 글 작성(1P) 등으로 포인트를 모아보세요!`);
     closePayConfirm();
+    showInsuffPopup(cost, `"${r.title}" 자료를 열람하려면 ${cost}P가 필요합니다.`);
     return;
   }
 
@@ -499,6 +595,14 @@ function showDetail(r) {
     <span>${r.date}</span>
     <span>열람 비용: ${r.cost}P</span>
     <span>👁 ${r.viewCount || 0}명 열람</span>`;
+  // 이미지 표시
+  const imgEl = document.getElementById('detailImage');
+  if (r.imageUrl) {
+    document.getElementById('detailImageImg').src = r.imageUrl;
+    imgEl.style.display = '';
+  } else {
+    imgEl.style.display = 'none';
+  }
   document.getElementById('detailContent').textContent = r.content;
   document.getElementById('detailOverlay').classList.add('open');
 }
@@ -533,12 +637,26 @@ async function submitResource() {
 
   // 자료 등록 시 5P 차감 확인
   if ((currentUser.points || 0) < 5) {
-    alert(`포인트가 부족합니다.\n자료 등록에는 5P가 필요합니다.\n현재 보유: ${(currentUser.points || 0).toFixed(1)}P\n\n리뷰 작성(5P), 댓글(0.5P), 글 작성(1P) 등으로 포인트를 모아보세요!`);
+    showInsuffPopup(5, '자료 등록에는 5P가 필요합니다.');
     return;
   }
 
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+
+  // 이미지 업로드 (선택)
+  let imageUrl = '';
+  if (resSelectedFile) {
+    try {
+      const ext = resSelectedFile.name.split('.').pop();
+      const ref = storage.ref(`resources/${currentUser.uid}_${Date.now()}.${ext}`);
+      await ref.put(resSelectedFile);
+      imageUrl = await ref.getDownloadURL();
+    } catch(e) {
+      console.error('이미지 업로드 실패:', e);
+      alert('이미지 업로드 실패. 이미지 없이 등록합니다.');
+    }
+  }
 
   const resData = {
     title, category, content, cost,
@@ -549,7 +667,8 @@ async function submitResource() {
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     status: isAdmin ? 'approved' : 'pending',
     readers: [currentUser.uid],
-    viewCount: 0
+    viewCount: 0,
+    imageUrl: imageUrl
   };
 
   try {
@@ -560,6 +679,7 @@ async function submitResource() {
     document.getElementById('resWriteTitle').value = '';
     document.getElementById('resWriteContent').value = '';
     document.getElementById('resWriteCost').value = '1';
+    removeResImage();
 
     // 포인트 차감: 자료 등록 -5P
     await addPoints(currentUser.uid, -5, '자료 등록');

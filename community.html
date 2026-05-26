@@ -1105,6 +1105,23 @@ function submitPost() {
 
   posts.unshift(newPost);
 
+  // Firestore에도 저장 (관리자 관리용)
+  if (currentUser && window.db) {
+    try {
+      db.collection('community_posts').add({
+        title, category, content,
+        author: getDisplayName(),
+        authorUid: currentUser.uid,
+        date: dateStr,
+        likes: 0,
+        commentCount: 0,
+        imageUrl: newPost.imageUrl || '',
+        isNotice: newPost.isNotice || false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch(e) { console.error('커뮤니티 Firestore 저장 실패:', e); }
+  }
+
   document.getElementById('writeTitle').value = '';
   document.getElementById('writeContent').value = '';
   resetWriteImgUI();
