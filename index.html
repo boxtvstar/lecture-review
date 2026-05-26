@@ -1466,6 +1466,9 @@ body {
             </div>
           </div>
         </div>
+        <div style="margin-top:10px">
+          <input class="form-input" placeholder="플랫폼에 대한 한줄 평가 (예: 환불이 편리하고 고객센터 응대가 빠름)" id="platformReviewText" style="font-size:13px">
+        </div>
       </div>
       <div class="form-section">
         <label class="form-label">수강 후기 <span class="form-sublabel">최소 30자</span></label>
@@ -2143,6 +2146,7 @@ function closeReviewModal() {
   document.querySelectorAll('.form-star').forEach(s => s.classList.remove('active'));
   platformRating = 0;
   document.querySelectorAll('[data-pval]').forEach(s => s.classList.remove('active'));
+  document.getElementById('platformReviewText').value = '';
 }
 
 function setFormStar(group, val) {
@@ -2794,6 +2798,11 @@ async function submitReview() {
     if (platformRating > 0) {
       reviewData.platformRating = platformRating;
     }
+    // 플랫폼 한줄평가 저장
+    const platformReviewText = document.getElementById('platformReviewText').value.trim();
+    if (platformReviewText) {
+      reviewData.platformReview = platformReviewText;
+    }
     await db.collection('reviews').add(reviewData);
     // 포인트는 관리자 승인 시 지급 (리뷰 작성 시에는 지급 안 함)
     // 즉시 홈페이지 반영
@@ -2841,6 +2850,7 @@ function closeSuccessPopup() {
   document.getElementById('customPlatform').style.display = 'none';
   platformRating = 0;
   document.querySelectorAll('[data-pval]').forEach(s => s.classList.remove('active'));
+  document.getElementById('platformReviewText').value = '';
   clearAcInstructor();
   clearAcCourse();
 }
