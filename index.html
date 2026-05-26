@@ -2134,6 +2134,10 @@ function closeReviewModal() {
   document.getElementById('reviewModal').classList.remove('open');
   document.body.style.overflow = '';
   resetReviewUploadUI();
+  // 별점 리셋
+  document.querySelectorAll('.form-star').forEach(s => s.classList.remove('active'));
+  platformRating = 0;
+  document.querySelectorAll('[data-pval]').forEach(s => s.classList.remove('active'));
 }
 
 function setFormStar(group, val) {
@@ -2768,18 +2772,22 @@ async function submitReview() {
       score: 0,
       files: reviewUploadFiles.filter(f => !f.isPdf).map(f => f.dataUrl).slice(0, 3)
     };
-    // 평점 계산
-    const stars = document.querySelectorAll('.form-star.selected');
-    if (stars.length > 0) {
+    // 평점 계산 (.active 클래스로 선택된 별 찾기)
+    const activeStars = document.querySelectorAll('#formRatings .form-star.active');
+    if (activeStars.length > 0) {
       const ratings = {};
-      document.querySelectorAll('.form-rating-item').forEach(item => {
-        const label = item.querySelector('.form-rating-label')?.textContent;
-        const selected = item.querySelectorAll('.form-star.selected').length;
+      document.querySelectorAll('#formRatings .form-rating-item').forEach(item => {
+        const label = item.querySelector('.form-rating-label')?.textContent?.trim();
+        const selected = item.querySelectorAll('.form-star.active').length;
         if (label && selected > 0) ratings[label] = selected;
       });
       const vals = Object.values(ratings);
       reviewData.score = vals.length > 0 ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length * 10)/10 : 0;
       reviewData.ratings = ratings;
+    }
+    // 플랫폼 만족도 저장
+    if (platformRating > 0) {
+      reviewData.platformRating = platformRating;
     }
     await db.collection('reviews').add(reviewData);
     // 포인트는 관리자 승인 시 지급 (리뷰 작성 시에는 지급 안 함)

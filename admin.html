@@ -2027,7 +2027,8 @@ async function loadFirestoreReviews() {
         files: d.files || [],
         verified: d.verified || false,
         date: d.date || '',
-        blinded: d.blinded || false
+        blinded: d.blinded || false,
+        platformRating: d.platformRating || 0
       };
     });
     reviewsLoaded = true;
@@ -2235,13 +2236,18 @@ function openReviewDetail(idx) {
   let ratingsHtml = '';
   if (r.ratings && Object.keys(r.ratings).length > 0) {
     ratingsHtml = '<div style="margin-bottom:16px;padding:12px;background:var(--gray-50);border-radius:8px">' +
-      '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">세부 평점</div>' +
+      '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">세부 평점 (총점: ' + (r.score || 0) + ')</div>' +
       Object.entries(r.ratings).map(([k, v]) =>
         `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">
           <span style="color:var(--gray-600)">${k}</span>
           <span style="color:var(--gold);font-weight:800">${'★'.repeat(v)}${'☆'.repeat(5-v)}</span>
         </div>`
-      ).join('') + '</div>';
+      ).join('') +
+      (r.platformRating ? `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-top:1px solid var(--gray-200);margin-top:4px;padding-top:6px">
+        <span style="color:var(--blue)">플랫폼 만족도</span>
+        <span style="color:var(--gold);font-weight:800">${'★'.repeat(r.platformRating)}${'☆'.repeat(5-r.platformRating)}</span>
+      </div>` : '') +
+      '</div>';
   }
 
   // 이미지 표시
