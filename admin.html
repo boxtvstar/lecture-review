@@ -952,7 +952,7 @@ body {
                 <th>대표 강의</th>
                 <th>평점</th>
                 <th>리뷰 수</th>
-                <th>과대광고</th>
+                <th>광고 신뢰도</th>
                 <th>관리</th>
               </tr>
             </thead>
@@ -1532,7 +1532,7 @@ function renderInstructorsTable() {
         <td style="font-size:12px;color:var(--gray-500)">${i.course || '-'}</td>
         <td><span style="color:${i.score >= 4 ? 'var(--green)' : i.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${i.score} ★</span></td>
         <td>${i.reviews}개</td>
-        <td><span style="color:${i.hype > 70 ? 'var(--red)' : i.hype > 40 ? 'var(--gold)' : 'var(--green)'};font-weight:700">${i.hype}%</span></td>
+        <td><span style="color:${i.hype >= 70 ? 'var(--green)' : i.hype >= 40 ? 'var(--gold)' : 'var(--red)'};font-weight:700">${i.hype}%</span></td>
         <td>
           <button class="action-btn action-btn-view" onclick="showInstructorDetail(${origIdx})">관리</button>
           <button class="action-btn action-btn-delete" onclick="deleteInstructor(${origIdx})">삭제</button>
@@ -2183,7 +2183,7 @@ function showInstructorDetail(idx) {
         <input id="editInstScore" type="number" min="0" max="5" step="0.1" value="${i.score}" style="padding:8px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit">
       </div>
       <div class="verify-info-item" style="flex-direction:column;align-items:stretch">
-        <div class="verify-info-label" style="margin-bottom:4px">과대광고 지수 (%)</div>
+        <div class="verify-info-label" style="margin-bottom:4px">광고 신뢰도 (%)</div>
         <input id="editInstHype" type="number" min="0" max="100" value="${i.hype}" style="padding:8px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit">
       </div>
     </div>
@@ -2286,7 +2286,7 @@ function openReviewDetail(idx) {
     <div style="margin-top:16px;padding:16px;background:#FFF7ED;border:1px solid var(--orange);border-radius:8px">
       <div style="font-size:13px;font-weight:800;color:var(--orange);margin-bottom:10px">⭐ 평점 수정 (관리자)</div>
       <div id="adminRatingEdit" style="display:flex;flex-direction:column;gap:6px">
-        ${['강의 퀄리티','가성비','강사 전문성','과대광고 지수','실력 향상도','AS/답변 만족도'].map(label => {
+        ${['강의 퀄리티','가성비','강사 전문성','광고 신뢰도','실력 향상도','AS/답변 만족도','수익화 전환 지수'].map(label => {
           const curVal = (r.ratings && r.ratings[label]) || 0;
           return `<div style="display:flex;align-items:center;gap:8px">
             <span style="font-size:12px;color:var(--gray-600);width:100px;flex-shrink:0">${label}</span>

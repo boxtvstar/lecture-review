@@ -492,17 +492,17 @@ body {
   padding: 10px 14px; border-radius: var(--radius-sm);
   margin-bottom: 14px; font-size: 13px; font-weight: 700;
 }
-.card-hype.low { background: var(--green-light); color: #059669; }
+.card-hype.low { background: var(--red-light); color: var(--red); }
 .card-hype.mid { background: var(--gold-light); color: #D97706; }
-.card-hype.high { background: var(--red-light); color: var(--red); }
+.card-hype.high { background: var(--green-light); color: #059669; }
 .hype-bar {
   flex: 1; height: 6px; background: var(--gray-200);
   border-radius: 3px; overflow: hidden;
 }
 .hype-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
-.hype-bar-fill.low { background: var(--green); }
+.hype-bar-fill.low { background: var(--red); }
 .hype-bar-fill.mid { background: var(--gold); }
-.hype-bar-fill.high { background: var(--red); }
+.hype-bar-fill.high { background: var(--green); }
 .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .card-tag {
   font-size: 12px; padding: 4px 10px; border-radius: 6px;
@@ -1579,73 +1579,73 @@ body {
 const instructors = [
   // 실제 사용자 리뷰가 쌓이면 여기에 반영됩니다
   // ── 실제 강사: 인프런 ──
-  { id: 15, name: '김영한', category: '개발', platform: '인프런', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['Spring', 'Java', '실무'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 16, name: '캡틴판교 (장기효)', category: '개발', platform: '인프런', avatar: '#2563EB', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['Vue.js', 'TypeScript', '프론트엔드'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 17, name: '제로초 (조현영)', category: '개발', platform: '인프런', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['JavaScript', 'Node.js', '답변왕'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 18, name: '이정환 (Winterlood)', category: '개발', platform: '인프런', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['React', '한입크기', '입문자추천'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 15, name: '김영한', category: '개발', platform: '인프런', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['Spring', 'Java', '실무'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 16, name: '캡틴판교 (장기효)', category: '개발', platform: '인프런', avatar: '#2563EB', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['Vue.js', 'TypeScript', '프론트엔드'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 17, name: '제로초 (조현영)', category: '개발', platform: '인프런', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['JavaScript', 'Node.js', '답변왕'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 18, name: '이정환 (Winterlood)', category: '개발', platform: '인프런', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['React', '한입크기', '입문자추천'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
   // ── 실제 강사: 콜로소 ──
-  { id: 19, name: '김락희', category: '디자인', platform: '콜로소', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['인체드로잉', '해부학', '마스터클래스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 20, name: '수줍', category: '디자인', platform: '콜로소', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['빛연출', '레퍼런스', '컬러'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 21, name: '샤가무', category: '디자인', platform: '콜로소', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['독학', '실전', '일러스트'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 22, name: '감자만세', category: '영상/크리에이터', platform: '콜로소', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['애니메이션', '100강', '감독'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 19, name: '김락희', category: '디자인', platform: '콜로소', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['인체드로잉', '해부학', '마스터클래스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 20, name: '수줍', category: '디자인', platform: '콜로소', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['빛연출', '레퍼런스', '컬러'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 21, name: '샤가무', category: '디자인', platform: '콜로소', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['독학', '실전', '일러스트'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 22, name: '감자만세', category: '영상/크리에이터', platform: '콜로소', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['애니메이션', '100강', '감독'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
   // ── 실제 강사: 클래스101 ──
-  { id: 23, name: '시현하다', category: '라이프스타일', platform: '클래스101', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['감성사진', '촬영법', '보정'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 24, name: '리아킴', category: '라이프스타일', platform: '클래스101', avatar: '#E11D48', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['1MILLION', '댄스', 'K-POP'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 23, name: '시현하다', category: '라이프스타일', platform: '클래스101', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['감성사진', '촬영법', '보정'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 24, name: '리아킴', category: '라이프스타일', platform: '클래스101', avatar: '#E11D48', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['1MILLION', '댄스', 'K-POP'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
   // ── 실제 강사: 타이탄클래스 ──
-  { id: 25, name: '새벽인간', category: '이커머스', platform: '타이탄클래스', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['구매대행', '부업', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 26, name: '구타바리', category: '콘텐츠/유튜브', platform: '타이탄클래스', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['유튜브', '영화드라마', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 27, name: '어비 (송태민)', category: '콘텐츠/유튜브', platform: '타이탄클래스', avatar: '#0369A1', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['유튜브', '알고리즘', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 28, name: '자생법', category: '콘텐츠/유튜브', platform: '타이탄클래스', avatar: '#065F46', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['유튜브', '수익화', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 25, name: '새벽인간', category: '이커머스', platform: '타이탄클래스', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['구매대행', '부업', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 26, name: '구타바리', category: '콘텐츠/유튜브', platform: '타이탄클래스', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['유튜브', '영화드라마', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 27, name: '어비 (송태민)', category: '콘텐츠/유튜브', platform: '타이탄클래스', avatar: '#0369A1', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['유튜브', '알고리즘', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 28, name: '자생법', category: '콘텐츠/유튜브', platform: '타이탄클래스', avatar: '#065F46', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['유튜브', '수익화', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
   // ── 실제 강사: 디하클 ──
-  { id: 29, name: '노마드림 (최주원)', category: '부업/재테크', platform: '디하클', avatar: '#CA8A04', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['디지털노마드', '부업', '종합'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 30, name: '타로', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#B45309', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['데시벨쇼츠', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 31, name: '솔라리움', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#D97706', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['탑티어쇼츠', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 32, name: '데헷이', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#EA580C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['초효율쇼츠', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 33, name: '링밥', category: '이커머스', platform: '디하클', avatar: '#0284C7', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['쿠팡', '폰편집', '월천'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 34, name: '유쾌한케로로', category: 'AI/자동화', platform: '디하클', avatar: '#16A34A', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI뮤직', '자동화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 35, name: '레민', category: '이커머스', platform: '디하클', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['쇼핑', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 36, name: '유랑', category: '부업/재테크', platform: '디하클', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['시크릿', '부업'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 37, name: '꿍디순디', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['셀럽팬튜브', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 38, name: '크리스타스', category: 'AI/자동화', platform: '디하클', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI마스터즈', 'AI'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 39, name: '위숑', category: '이커머스', platform: '디하클', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['이베이', '이스타터'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 40, name: '쇼츠대폭발', category: 'AI/자동화', platform: '디하클', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI스위칭쇼츠', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 41, name: '개발남 노씨', category: '개발', platform: '디하클', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['오토워커', '자동화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 42, name: '엘라', category: 'AI/자동화', platform: '디하클', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['바이브타로', 'AI'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 43, name: '민이당웅', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['정치', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 44, name: '이동영 마케터', category: '마케팅', platform: '디하클', avatar: '#0369A1', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['스레드', '마케팅', '3분'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 45, name: '아모르', category: '영상/크리에이터', platform: '디하클', avatar: '#E11D48', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['천상계영드', '영상'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 46, name: '땡모반', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['역수출쇼츠', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 47, name: '그라운드', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#065F46', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['실버버튼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 48, name: '월억남', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#CA8A04', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['월억로드', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 49, name: '김히잉', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#D97706', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['트리거롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 50, name: '카라반', category: 'AI/자동화', platform: '디하클', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['사주자동화', 'AI'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 51, name: '은근쥬', category: 'AI/자동화', platform: '디하클', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['프리쇼츠자동화', 'AI'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 52, name: '마라하기', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#EA580C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['쇼츠학개론', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 53, name: '동동아빠', category: '영상/크리에이터', platform: '디하클', avatar: '#0284C7', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['무비마스터', '영상'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 54, name: '다린다윤', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#16A34A', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['실버인포롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 55, name: '테일러', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['월억쇼츠', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 56, name: '레오96', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['쇼츠포뮬러', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 57, name: '텍사스홀X', category: '부업/재테크', platform: '디하클', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['1황의사고', '전략'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 58, name: '롤루랄라릴리', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['쇼츠투벤츠', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 59, name: '꿈꾸는곰팅이', category: '이커머스', platform: '디하클', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['쿼드러플쇼핑', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 60, name: '라옴', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['금광롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 61, name: '한다해', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['이지롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 62, name: '더퓨처', category: '이커머스', platform: '디하클', avatar: '#0369A1', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['제로공구', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 63, name: '빠대', category: '이커머스', platform: '디하클', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['탑클래스쿠팡', '쿠팡'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
+  { id: 29, name: '노마드림 (최주원)', category: '부업/재테크', platform: '디하클', avatar: '#CA8A04', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['디지털노마드', '부업', '종합'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 30, name: '타로', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#B45309', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['데시벨쇼츠', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 31, name: '솔라리움', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#D97706', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['탑티어쇼츠', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 32, name: '데헷이', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#EA580C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['초효율쇼츠', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 33, name: '링밥', category: '이커머스', platform: '디하클', avatar: '#0284C7', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['쿠팡', '폰편집', '월천'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 34, name: '유쾌한케로로', category: 'AI/자동화', platform: '디하클', avatar: '#16A34A', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI뮤직', '자동화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 35, name: '레민', category: '이커머스', platform: '디하클', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['쇼핑', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 36, name: '유랑', category: '부업/재테크', platform: '디하클', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['시크릿', '부업'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 37, name: '꿍디순디', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['셀럽팬튜브', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 38, name: '크리스타스', category: 'AI/자동화', platform: '디하클', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI마스터즈', 'AI'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 39, name: '위숑', category: '이커머스', platform: '디하클', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['이베이', '이스타터'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 40, name: '쇼츠대폭발', category: 'AI/자동화', platform: '디하클', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI스위칭쇼츠', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 41, name: '개발남 노씨', category: '개발', platform: '디하클', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['오토워커', '자동화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 42, name: '엘라', category: 'AI/자동화', platform: '디하클', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['바이브타로', 'AI'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 43, name: '민이당웅', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['정치', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 44, name: '이동영 마케터', category: '마케팅', platform: '디하클', avatar: '#0369A1', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['스레드', '마케팅', '3분'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 45, name: '아모르', category: '영상/크리에이터', platform: '디하클', avatar: '#E11D48', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['천상계영드', '영상'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 46, name: '땡모반', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['역수출쇼츠', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 47, name: '그라운드', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#065F46', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['실버버튼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 48, name: '월억남', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#CA8A04', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['월억로드', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 49, name: '김히잉', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#D97706', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['트리거롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 50, name: '카라반', category: 'AI/자동화', platform: '디하클', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['사주자동화', 'AI'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 51, name: '은근쥬', category: 'AI/자동화', platform: '디하클', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['프리쇼츠자동화', 'AI'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 52, name: '마라하기', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#EA580C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['쇼츠학개론', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 53, name: '동동아빠', category: '영상/크리에이터', platform: '디하클', avatar: '#0284C7', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['무비마스터', '영상'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 54, name: '다린다윤', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#16A34A', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['실버인포롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 55, name: '테일러', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['월억쇼츠', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 56, name: '레오96', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['쇼츠포뮬러', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 57, name: '텍사스홀X', category: '부업/재테크', platform: '디하클', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['1황의사고', '전략'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 58, name: '롤루랄라릴리', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['쇼츠투벤츠', '쇼츠'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 59, name: '꿈꾸는곰팅이', category: '이커머스', platform: '디하클', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['쿼드러플쇼핑', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 60, name: '라옴', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['금광롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 61, name: '한다해', category: '콘텐츠/유튜브', platform: '디하클', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['이지롱폼', '유튜브'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 62, name: '더퓨처', category: '이커머스', platform: '디하클', avatar: '#0369A1', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['제로공구', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 63, name: '빠대', category: '이커머스', platform: '디하클', avatar: '#C2410C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['탑클래스쿠팡', '쿠팡'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
   // ── 실제 강사: 핏크닉 ──
-  { id: 64, name: '윙스', category: 'AI/자동화', platform: '핏크닉', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI시니어라디오', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 65, name: '디선제압', category: 'AI/자동화', platform: '핏크닉', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI상세페이지', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 66, name: '머니테이커', category: '부업/재테크', platform: '핏크닉', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['파이널VIP', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 67, name: '셀팜', category: 'AI/자동화', platform: '핏크닉', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI유튜브', '연금클래스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 68, name: '셀링남', category: '이커머스', platform: '핏크닉', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['로켓그로스', 'AI브랜드', '쿠팡'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 69, name: '정쌤', category: '이커머스', platform: '핏크닉', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['로켓그로스', '안전마진'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 70, name: '민대표', category: '이커머스', platform: '핏크닉', avatar: '#CA8A04', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['버티컬커머스', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 71, name: '온백', category: 'AI/자동화', platform: '핏크닉', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI브랜드', '커넥터'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 72, name: '부자꿈틀', category: 'AI/자동화', platform: '핏크닉', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI숏폼', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 73, name: '김놀부', category: '마케팅', platform: '핏크닉', avatar: '#EA580C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['인스타', '푸드릴스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 74, name: '제이온리 & 렛츠윤', category: '마케팅', platform: '핏크닉', avatar: '#065F46', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['SNS수익화', '월급5배'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 75, name: '이지디자인', category: 'AI/자동화', platform: '핏크닉', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI상세페이지', '디자인'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] },
-  { id: 76, name: '온물주', category: 'AI/자동화', platform: '핏크닉', avatar: '#0284C7', score: 0, reviews: 0, hype: 0, hypeLv: 'low', tags: ['AI쿠팡', '끝판왕'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 }, reviewList: [] }
+  { id: 64, name: '윙스', category: 'AI/자동화', platform: '핏크닉', avatar: '#7C3AED', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI시니어라디오', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 65, name: '디선제압', category: 'AI/자동화', platform: '핏크닉', avatar: '#1D4ED8', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI상세페이지', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 66, name: '머니테이커', category: '부업/재테크', platform: '핏크닉', avatar: '#DC2626', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['파이널VIP', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 67, name: '셀팜', category: 'AI/자동화', platform: '핏크닉', avatar: '#059669', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI유튜브', '연금클래스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 68, name: '셀링남', category: '이커머스', platform: '핏크닉', avatar: '#B91C1C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['로켓그로스', 'AI브랜드', '쿠팡'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 69, name: '정쌤', category: '이커머스', platform: '핏크닉', avatar: '#0891B2', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['로켓그로스', '안전마진'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 70, name: '민대표', category: '이커머스', platform: '핏크닉', avatar: '#CA8A04', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['버티컬커머스', '이커머스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 71, name: '온백', category: 'AI/자동화', platform: '핏크닉', avatar: '#4338CA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI브랜드', '커넥터'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 72, name: '부자꿈틀', category: 'AI/자동화', platform: '핏크닉', avatar: '#DB2777', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI숏폼', '수익화'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 73, name: '김놀부', category: '마케팅', platform: '핏크닉', avatar: '#EA580C', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['인스타', '푸드릴스'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 74, name: '제이온리 & 렛츠윤', category: '마케팅', platform: '핏크닉', avatar: '#065F46', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['SNS수익화', '월급5배'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 75, name: '이지디자인', category: 'AI/자동화', platform: '핏크닉', avatar: '#9333EA', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI상세페이지', '디자인'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] },
+  { id: 76, name: '온물주', category: 'AI/자동화', platform: '핏크닉', avatar: '#0284C7', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low', tags: ['AI쿠팡', '끝판왕'], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 }, reviewList: [] }
 ];
 
 // ═══ WORST INSTRUCTORS DATA ═══
@@ -1732,7 +1732,7 @@ const courseList = [
 
 const ratingLabels = {
   quality: '강의 퀄리티', value: '가성비', expertise: '전문성',
-  hype: '과대광고', growth: '실력 향상', support: 'AS/답변'
+  hype: '광고 신뢰도', growth: '실력 향상', support: 'AS/답변', monetization: '수익화 전환'
 };
 
 // ═══ PLATFORM DATA ═══
@@ -1869,9 +1869,14 @@ function renderInstructors(filter = '전체', search = '', sort = currentSort) {
         </div>
       </div>
       <div class="card-hype ${inst.hypeLv}">
-        <span>과대광고 지수</span>
+        <span>광고 신뢰도</span>
         <div class="hype-bar"><div class="hype-bar-fill ${inst.hypeLv}" style="width:${inst.hype}%"></div></div>
         <span>${inst.hype}%</span>
+      </div>
+      <div class="card-hype ${inst.monetizationLv || 'low'}" style="margin-bottom:6px">
+        <span>수익화 전환</span>
+        <div class="hype-bar"><div class="hype-bar-fill ${inst.monetizationLv || 'low'}" style="width:${inst.monetization || 0}%"></div></div>
+        <span>${inst.monetization || 0}%</span>
       </div>
       <div class="card-tags">
         ${inst.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
@@ -1989,17 +1994,17 @@ function renderWorst(category = '전체') {
           ${inst.score}
           <span style="font-size:14px;color:#FCA5A5">★</span>
         </div>
-        <div class="worst-hype">과대광고 ${inst.hype}%</div>
+        <div class="worst-hype">광고 신뢰도 ${inst.hype}%</div>
       </div>
     </div>
   `).join('');
 }
 
 function renderFormRatings() {
-  const items = ['강의 퀄리티', '가성비', '강사 전문성', '과대광고 지수', '실력 향상도', 'AS/답변 만족도'];
+  const items = ['강의 퀄리티', '가성비', '강사 전문성', '광고 신뢰도', '실력 향상도', 'AS/답변 만족도', '수익화 전환 지수'];
   document.getElementById('formRatings').innerHTML = items.map((label, idx) => `
     <div class="form-rating-item">
-      <span class="form-rating-label">${label}${label === '과대광고 지수' ? ' <span style="font-size:11px;color:var(--gray-400);font-weight:400">(높을수록 과대광고 심함)</span>' : ''}</span>
+      <span class="form-rating-label">${label}</span>
       <div class="form-stars" id="formStarGroup${idx}">
         ${[1,2,3,4,5].map(s => `<span class="form-star" onclick="setFormStar(${idx},${s})" data-group="${idx}" data-val="${s}">★</span>`).join('')}
       </div>
@@ -2965,9 +2970,10 @@ function renderCommunityPreview() {
 const ratingKeyMap = {
   '강의 퀄리티': 'quality', '가성비': 'value',
   '강사 전문성': 'expertise', '전문성': 'expertise',
-  '과대광고 지수': 'hype', '과대광고': 'hype',
+  '광고 신뢰도': 'hype', '과대광고 지수': 'hype', '과대광고': 'hype',
   '실력 향상도': 'growth', '실력 향상': 'growth',
-  'AS/답변 만족도': 'support', 'AS/답변': 'support'
+  'AS/답변 만족도': 'support', 'AS/답변': 'support',
+  '수익화 전환 지수': 'monetization', '수익화 전환': 'monetization'
 };
 
 async function loadFirestoreReviews() {
@@ -3012,8 +3018,8 @@ async function loadFirestoreReviews() {
       inst.score = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length * 10) / 10 : 0;
 
       // 세부 평점 평균
-      const sums = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 };
-      const cnts = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 };
+      const sums = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 };
+      const cnts = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 };
       reviews.forEach(r => {
         if (!r.ratings) return;
         Object.entries(r.ratings).forEach(([label, val]) => {
@@ -3025,10 +3031,15 @@ async function loadFirestoreReviews() {
         inst.ratings[key] = cnts[key] > 0 ? Math.round(sums[key] / cnts[key] * 10) / 10 : 0;
       });
 
-      // 과대광고 지수
+      // 광고 신뢰도 (높을수록 좋음)
       if (inst.ratings.hype > 0) {
         inst.hype = Math.round(inst.ratings.hype / 5 * 100);
         inst.hypeLv = inst.hype >= 70 ? 'high' : inst.hype >= 40 ? 'mid' : 'low';
+      }
+      // 수익화 전환 지수 (높을수록 좋음)
+      if (inst.ratings.monetization > 0) {
+        inst.monetization = Math.round(inst.ratings.monetization / 5 * 100);
+        inst.monetizationLv = inst.monetization >= 70 ? 'high' : inst.monetization >= 40 ? 'mid' : 'low';
       }
     }
 
@@ -3043,8 +3054,8 @@ async function loadFirestoreReviews() {
         const r0 = reviews[0];
         const newInst = {
           id: nextId++, name, category: '기타', platform: r0.platform || '기타',
-          avatar: '#6B7280', score: 0, reviews: 0, hype: 0, hypeLv: 'low',
-          tags: [], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 },
+          avatar: '#6B7280', score: 0, reviews: 0, hype: 0, hypeLv: 'low', monetization: 0, monetizationLv: 'low',
+          tags: [], ratings: { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0, monetization: 0 },
           reviewList: []
         };
         applyReviews(newInst, reviews);
