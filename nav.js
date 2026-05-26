@@ -419,8 +419,11 @@ firebase.auth().onAuthStateChanged(async user => {
     // 강사 인증 신청 링크: 이미 인증된 강사면 숨김
     const ivLink = document.getElementById('instructorVerifyLink');
     if (ivLink) ivLink.style.display = currentUser.isInstructor ? 'none' : '';
-    // 환영 팝업
-    if (!localStorage.getItem('welcomeDismissed')) showWelcomePopup();
+    // 환영 팝업: 로그인 순간에만 (새로고침 시 안 뜸), 다시보지않기 체크 시 영구 안 뜸
+    if (!localStorage.getItem('welcomeDismissed') && !sessionStorage.getItem('welcomeShown')) {
+      sessionStorage.setItem('welcomeShown', '1');
+      showWelcomePopup();
+    }
     // 페이지별 로그인 후 콜백
     if (typeof window.onNavLogin === 'function') window.onNavLogin();
   } else {
