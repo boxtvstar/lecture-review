@@ -1134,21 +1134,26 @@ body {
 </div>
 
 <!-- POINT MODAL -->
-<div class="modal-overlay" id="pointModal" onclick="if(event.target===this)closePointModal()" style="display:none">
-  <div class="modal-box" style="max-width:380px">
-    <button class="modal-close" onclick="closePointModal()">&times;</button>
-    <div class="modal-title">💰 포인트 수동 지급/차감</div>
-    <div class="modal-sub" id="pointModalUser">-</div>
-    <div style="padding:20px 0">
-      <div style="margin-bottom:12px">
+<div class="verify-modal-overlay" id="pointModal" onclick="if(event.target===this)closePointModal()">
+  <div class="verify-modal" style="max-width:420px">
+    <div class="verify-modal-header">
+      <div>
+        <div class="verify-modal-title">💰 포인트 지급/차감</div>
+        <div class="verify-modal-sub" id="pointModalUser">-</div>
+      </div>
+      <button class="verify-close" onclick="closePointModal()">&times;</button>
+    </div>
+    <div class="verify-modal-body">
+      <div style="margin-bottom:14px">
         <label style="font-size:13px;font-weight:700;color:var(--gray-600)">포인트 수량</label>
-        <input type="number" id="pointAmount" placeholder="양수=지급, 음수=차감" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;margin-top:4px">
+        <input type="number" id="pointAmount" placeholder="양수=지급, 음수=차감" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box">
       </div>
-      <div style="margin-bottom:12px">
+      <div style="margin-bottom:14px">
         <label style="font-size:13px;font-weight:700;color:var(--gray-600)">사유</label>
-        <input type="text" id="pointReason" placeholder="예: 이벤트 보상, 오류 보상 등" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;margin-top:4px">
+        <input type="text" id="pointReason" placeholder="예: 리뷰 승인, 이벤트 보상, 오류 보상 등" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box">
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <div id="pointHistoryArea" style="margin-bottom:14px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
         <button onclick="closePointModal()" style="padding:8px 20px;border-radius:8px;background:var(--gray-100);color:var(--gray-600);border:none;cursor:pointer;font-weight:700">취소</button>
         <button onclick="submitPointGrant()" style="padding:8px 20px;border-radius:8px;background:var(--orange);color:white;border:none;cursor:pointer;font-weight:700">적용</button>
       </div>
@@ -1909,15 +1914,39 @@ async function loadDashboardStats() {
 
 // ═══ 포인트 수동 지급 ═══
 let pointTargetUid = null;
-function openPointModal(uid, name) {
+let pointTargetName = '';
+async function openPointModal(uid, name) {
   pointTargetUid = uid;
+  pointTargetName = name;
   document.getElementById('pointModalUser').textContent = name;
   document.getElementById('pointAmount').value = '';
   document.getElementById('pointReason').value = '';
-  document.getElementById('pointModal').style.display = 'flex';
+  document.getElementById('pointModal').classList.add('open');
+  // 포인트 히스토리 로드
+  try {
+    const snap = await db.collection('point_logs').where('uid', '==', uid).orderBy('createdAt', 'desc').limit(10).get();
+    if (snap.empty) {
+      document.getElementById('pointHistoryArea').innerHTML = '<div style="font-size:12px;color:var(--gray-400)">지급 기록 없음</div>';
+    } else {
+      let html = '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px">최근 지급 기록</div>';
+      html += '<div style="max-height:150px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:8px;padding:8px">';
+      snap.forEach(doc => {
+        const d = doc.data();
+        const color = d.amount > 0 ? 'var(--green)' : 'var(--red)';
+        html += `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--gray-100)">
+          <span style="color:var(--gray-600)">${d.reason}</span>
+          <span style="font-weight:700;color:${color}">${d.amount > 0 ? '+' : ''}${d.amount}P</span>
+        </div>`;
+      });
+      html += '</div>';
+      document.getElementById('pointHistoryArea').innerHTML = html;
+    }
+  } catch(e) {
+    document.getElementById('pointHistoryArea').innerHTML = '<div style="font-size:12px;color:var(--gray-400)">기록 로드 실패</div>';
+  }
 }
 function closePointModal() {
-  document.getElementById('pointModal').style.display = 'none';
+  document.getElementById('pointModal').classList.remove('open');
   pointTargetUid = null;
 }
 async function submitPointGrant() {
@@ -1929,6 +1958,16 @@ async function submitPointGrant() {
     await db.collection('users').doc(pointTargetUid).set({
       points: firebase.firestore.FieldValue.increment(amount)
     }, { merge: true });
+    // 포인트 기록 저장
+    await db.collection('point_logs').add({
+      uid: pointTargetUid,
+      userName: pointTargetName,
+      amount: amount,
+      reason: reason,
+      adminEmail: currentUser?.email || 'admin',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      date: new Date().toLocaleString('ko-KR')
+    });
     // 로컬 업데이트
     const u = allUsers.find(x => x.id === pointTargetUid);
     if (u) u.points = (u.points || 0) + amount;
@@ -2294,11 +2333,25 @@ async function verifyReview(idx) {
       // 작성자 수강생 인증도 함께
       if (r.authorUid) {
         await db.collection('users').doc(r.authorUid).set({ verified: true }, { merge: true });
+        // 리뷰 승인 포인트 +5P 지급
+        await db.collection('users').doc(r.authorUid).set({
+          points: firebase.firestore.FieldValue.increment(5)
+        }, { merge: true });
+        // 포인트 기록 저장
+        await db.collection('point_logs').add({
+          uid: r.authorUid,
+          userName: r.author,
+          amount: 5,
+          reason: '리뷰 승인 (' + r.instructor + ')',
+          adminEmail: currentUser?.email || 'admin',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          date: new Date().toLocaleString('ko-KR')
+        });
       }
     } catch(e) { console.error(e); }
   }
   renderReviewsTable();
-  showToast(`✅ ${r.author}님의 리뷰가 인증되었습니다.`, 'success');
+  showToast(`✅ ${r.author}님의 리뷰가 인증되었습니다. (+5P 지급)`, 'success');
 }
 
 async function unverifyReview(idx) {

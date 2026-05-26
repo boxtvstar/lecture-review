@@ -2782,9 +2782,7 @@ async function submitReview() {
       reviewData.ratings = ratings;
     }
     await db.collection('reviews').add(reviewData);
-    // 포인트 적립: 리뷰 작성 +5P
-    await addPoints(currentUser.uid, 5, '리뷰 작성');
-    showPointToast(5, '리뷰 작성');
+    // 포인트는 관리자 승인 시 지급 (리뷰 작성 시에는 지급 안 함)
     // 즉시 홈페이지 반영
     loadFirestoreReviews();
   } catch(e) {
