@@ -2769,6 +2769,8 @@ async function submitReview() {
     // 포인트 적립: 리뷰 작성 +5P
     await addPoints(currentUser.uid, 5, '리뷰 작성');
     showPointToast(5, '리뷰 작성');
+    // 즉시 홈페이지 반영
+    loadFirestoreReviews();
   } catch(e) {
     console.error('리뷰 저장 실패:', e);
   }
@@ -2937,6 +2939,92 @@ function renderCommunityPreview() {
 
 // 알림 시스템은 nav.js에서 관리
 
+// ═══ Firestore 리뷰 → 강사 데이터 병합 ═══
+const ratingKeyMap = { '강의 퀄리티': 'quality', '가성비': 'value', '전문성': 'expertise', '과대광고': 'hype', '실력 향상': 'growth', 'AS/답변': 'support' };
+
+async function loadFirestoreReviews() {
+  try {
+    const db = firebase.firestore();
+    const snap = await db.collection('reviews').get();
+    if (snap.empty) return;
+
+    // 강사별 리뷰 그룹핑
+    const grouped = {};
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (!d.instructor) return;
+      if (!grouped[d.instructor]) grouped[d.instructor] = [];
+      grouped[d.instructor].push(d);
+    });
+
+    // 강사 데이터에 병합
+    instructors.forEach(inst => {
+      const reviews = grouped[inst.name];
+      if (!reviews || reviews.length === 0) return;
+
+      inst.reviewList = reviews.map(r => ({
+        author: r.author || '익명',
+        stars: r.score || 0,
+        date: r.date || '',
+        text: r.text || '',
+        badge: r.verified ? 'verified' : 'unverified',
+        helpful: 0,
+        rebuttal: ''
+      }));
+      inst.reviews = reviews.length;
+
+      // 평균 점수 계산
+      const scores = reviews.filter(r => r.score > 0).map(r => r.score);
+      inst.score = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length * 10) / 10 : 0;
+
+      // 세부 평점 평균 계산
+      const ratingSums = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 };
+      const ratingCounts = { quality: 0, value: 0, expertise: 0, hype: 0, growth: 0, support: 0 };
+      reviews.forEach(r => {
+        if (!r.ratings) return;
+        Object.entries(r.ratings).forEach(([label, val]) => {
+          const key = ratingKeyMap[label] || label;
+          if (ratingSums.hasOwnProperty(key)) {
+            ratingSums[key] += val;
+            ratingCounts[key]++;
+          }
+        });
+      });
+      Object.keys(ratingSums).forEach(key => {
+        inst.ratings[key] = ratingCounts[key] > 0 ? Math.round(ratingSums[key] / ratingCounts[key] * 10) / 10 : 0;
+      });
+
+      // 과대광고 지수 계산 (hype 평점 기반)
+      if (inst.ratings.hype > 0) {
+        inst.hype = Math.round(inst.ratings.hype / 5 * 100);
+        inst.hypeLv = inst.hype >= 70 ? 'high' : inst.hype >= 40 ? 'mid' : 'low';
+      }
+    });
+
+    // worstInstructors 갱신
+    worstInstructors.length = 0;
+    instructors.filter(i => i.score > 0 && i.score < 3.5).forEach(i => worstInstructors.push(i));
+
+    // 플랫폼 통계 갱신
+    platformData.forEach(p => {
+      const platInsts = instructors.filter(i => i.platform === p.name && i.reviews > 0);
+      if (platInsts.length === 0) return;
+      p.reviews = platInsts.reduce((s, i) => s + i.reviews, 0);
+      const scored = platInsts.filter(i => i.score > 0);
+      p.score = scored.length > 0 ? Math.round(scored.reduce((s, i) => s + i.score, 0) / scored.length * 10) / 10 : 0;
+    });
+
+    // 전체 렌더링 갱신
+    renderHeroStats();
+    renderInstructors();
+    renderWorst();
+    renderRankings();
+    renderPlatforms();
+  } catch(e) {
+    console.error('Firestore 리뷰 로드 실패:', e);
+  }
+}
+
 // ═══ INIT ═══
 renderHeroStats();
 renderCategoryTabs();
@@ -2947,6 +3035,7 @@ renderDetector();
 renderRankings();
 renderPlatforms();
 renderCommunityPreview();
+loadFirestoreReviews();
 </script>
 </body>
 </html>
