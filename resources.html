@@ -606,7 +606,7 @@ function renderResources() {
   const rows = list.map((r, idx) => {
     const isPending = r.status === 'pending';
     const alreadyRead = currentUser && r.readers && r.readers.includes(currentUser.uid);
-    const costLabel = alreadyRead ? '완료' : `${r.cost}P`;
+    const costLabel = alreadyRead ? '✅ 완료' : `💰 ${r.cost}P`;
     const costClass = alreadyRead ? 'free' : '';
     const fileIcon = (r.hasFiles || (r.files && r.files.length > 0)) ? '📎 ' : '';
     const imgIcon = (r.hasImages || r.imageUrl) ? '🖼 ' : '';
