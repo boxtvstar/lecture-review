@@ -164,7 +164,7 @@ body {
   border: 1px solid var(--gray-200); padding: 20px;
   transition: all 0.2s;
 }
-.stat-card:hover { box-shadow: var(--shadow-md); }
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .stat-card-label { font-size: 13px; color: var(--gray-400); font-weight: 600; margin-bottom: 8px; }
 .stat-card-value { font-size: 32px; font-weight: 900; color: var(--navy); line-height: 1; }
 .stat-card-change { font-size: 12px; font-weight: 700; margin-top: 8px; }
@@ -611,32 +611,32 @@ body {
           <div class="page-subtitle">팔이피플 운영 대시보드</div>
         </div>
         <div class="stat-grid">
-          <div class="stat-card">
+          <div class="stat-card" style="cursor:pointer" onclick="showPage('users', document.querySelector('[onclick*=\\'users\\']'))">
             <div class="stat-card-label">총 가입자</div>
             <div class="stat-card-value" id="statUsers">-</div>
             <div class="stat-card-change" id="statUsersChange">로딩 중...</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" style="cursor:pointer" onclick="showPage('verified', document.querySelector('[onclick*=\\'verified\\']'))">
             <div class="stat-card-label">인증 수강생</div>
             <div class="stat-card-value" id="statVerified">-</div>
             <div class="stat-card-change" id="statVerifiedChange">로딩 중...</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" style="cursor:pointer" onclick="showPage('verification', document.querySelector('[onclick*=\\'verification\\']'))">
             <div class="stat-card-label">인증 대기</div>
             <div class="stat-card-value" style="color:var(--orange)" id="statPending">-</div>
             <div class="stat-card-change" style="color:var(--orange)" id="statPendingChange">로딩 중...</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" style="cursor:pointer" onclick="showPage('reviews', document.querySelector('[onclick*=\\'reviews\\']'))">
             <div class="stat-card-label">등록된 리뷰</div>
             <div class="stat-card-value" id="statReviews">-</div>
             <div class="stat-card-change" id="statReviewsChange">로딩 중...</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" style="cursor:pointer" onclick="showPage('instructors', document.querySelector('[onclick*=\\'instructors\\']'))">
             <div class="stat-card-label">등록된 강사</div>
             <div class="stat-card-value" id="statInstructors">-</div>
             <div class="stat-card-change" id="statInstructorsChange">-</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" style="cursor:pointer" onclick="showPage('instructor-verify', document.querySelector('[onclick*=\\'instructor-verify\\']'))">
             <div class="stat-card-label">강사 인증 신청</div>
             <div class="stat-card-value" style="color:var(--blue)" id="statInstVerify">-</div>
             <div class="stat-card-change" id="statInstVerifyChange">로딩 중...</div>
@@ -814,28 +814,11 @@ body {
           <div class="admin-table-header">
             <div class="admin-table-title">전체 회원</div>
             <div class="admin-table-actions">
-              <button class="admin-filter-btn" onclick="loadFirebaseUsers()" style="background:var(--orange);color:white;border-color:var(--orange)">🔄 실제 가입 회원 불러오기</button>
               <button class="admin-filter-btn active" onclick="filterUsers('all',this)">전체</button>
               <button class="admin-filter-btn" onclick="filterUsers('verified',this)">인증 수강생</button>
               <button class="admin-filter-btn" onclick="filterUsers('unverified',this)">비인증</button>
+              <button class="admin-filter-btn" onclick="allUsersLoaded=false;renderUsersTable()" style="background:var(--orange);color:white;border-color:var(--orange)">🔄 새로고침</button>
             </div>
-          </div>
-          <!-- 실제 Firebase 가입 회원 -->
-          <div id="firebaseUsersSection" style="display:none;margin-bottom:20px">
-            <div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px">🔥 실제 가입 회원 (Firebase)</div>
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>프로필</th>
-                  <th>이메일</th>
-                  <th>구글 이름</th>
-                  <th>닉네임</th>
-                  <th>역할</th>
-                  <th>마지막 로그인</th>
-                </tr>
-              </thead>
-              <tbody id="firebaseUsersBody"></tbody>
-            </table>
           </div>
           <table class="admin-table">
             <thead>
@@ -1074,7 +1057,8 @@ body {
 const verificationRequests = [];
 // 실제 인증 요청은 Firestore에서 로드됩니다.
 
-const allUsers = [];
+let allUsers = [];
+let allUsersLoaded = false;
 // 실제 회원 목록은 Firestore에서 로드됩니다.
 
 const recentReviews = [];
@@ -1273,34 +1257,59 @@ function renderVerifiedTable() {
   `).join('');
 }
 
-function renderUsersTable(filter = 'all') {
+async function renderUsersTable(filter = 'all') {
+  // Firestore에서 실제 회원 로드
+  if (!allUsersLoaded) {
+    try {
+      const snap = await db.collection('users').get();
+      allUsers = snap.docs.map(doc => {
+        const d = doc.data();
+        const lastLogin = d.lastLogin ? d.lastLogin.toDate().toLocaleString('ko-KR') : '-';
+        return {
+          id: doc.id, name: d.displayName || d.nickname || '(이름없음)', email: d.email || '-',
+          photoURL: d.photoURL || '', nickname: d.nickname || '', role: d.role || '',
+          verified: d.verified || false, isInstructor: d.isInstructor || false,
+          joined: lastLogin, reviews: 0, tier: d.verified ? 'verified' : 'unverified'
+        };
+      });
+      allUsersLoaded = true;
+    } catch(e) { console.error('회원 로드 실패:', e); }
+  }
+
   let users = [...allUsers];
   if (filter === 'verified') users = users.filter(u => u.verified);
   if (filter === 'unverified') users = users.filter(u => !u.verified);
 
-  document.getElementById('usersTableBody').innerHTML = users.map(u => `
-    <tr>
+  if (users.length === 0) {
+    document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400)">등록된 회원이 없습니다.</td></tr>';
+    return;
+  }
+
+  document.getElementById('usersTableBody').innerHTML = users.map(u => {
+    const photo = u.photoURL ? `<img src="${u.photoURL}" style="width:32px;height:32px;border-radius:50%">` : `<div class="user-avatar-sm">${u.name[0]}</div>`;
+    const roleBadge = u.role === 'admin' ? '<span style="color:#6366F1;font-weight:700">👑</span> ' : u.isInstructor ? '<span style="color:var(--orange)">🎓</span> ' : '';
+    return `<tr>
       <td>
         <div class="user-cell">
-          <div class="user-avatar-sm" ${u.verified ? 'style="background:var(--green-light);color:#059669"' : ''}>${u.name[0]}</div>
+          ${photo}
           <div>
-            <div class="user-name">${u.name} ${u.tier === 'expert' ? '<span style="color:var(--gold)">⭐</span>' : u.tier === 'verified' ? '<span style="color:var(--green)">✓</span>' : ''}</div>
+            <div class="user-name">${roleBadge}${u.name}</div>
             <div class="user-email">${u.email}</div>
           </div>
         </div>
       </td>
-      <td>${u.joined}</td>
+      <td style="font-size:12px">${u.joined}</td>
       <td>${u.verified ? '<span class="status-badge status-approved">인증됨</span>' : '<span class="status-badge status-unverified">비인증</span>'}</td>
       <td>${u.reviews}개</td>
       <td>${getTierBadge(u.tier)}</td>
       <td>
         <div class="action-btn-group">
-          <button class="action-btn action-btn-view" onclick="openUserDetail('${u.id}')">상세</button>
+          ${u.role !== 'admin' ? `<button class="action-btn action-btn-approve" onclick="setAdmin('${u.id}')">관리자</button>` : ''}
           ${!u.verified ? `<button class="action-btn action-btn-approve" onclick="manualVerify('${u.id}')">수동 인증</button>` : ''}
         </div>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 function renderReviewsTable() {
