@@ -2185,7 +2185,6 @@ async function approveResource(id) {
     const r = adminResources.find(x => x.id === id);
     if (r) r.status = 'approved';
     renderResAdminTable();
-    loadAdminResources();
     showToast('자료가 승인되었습니다.');
   } catch(e) { console.error(e); showToast('승인 실패', 'error'); }
 }
@@ -2196,7 +2195,6 @@ async function rejectResource(id) {
     await db.collection('resources').doc(id).delete();
     adminResources = adminResources.filter(x => x.id !== id);
     renderResAdminTable();
-    loadAdminResources();
     showToast('자료가 거부되었습니다.');
   } catch(e) { console.error(e); showToast('처리 실패', 'error'); }
 }

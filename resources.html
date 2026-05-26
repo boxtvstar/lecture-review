@@ -325,7 +325,7 @@ body {
 <script src="nav.js"></script>
 <script>
 // ═══ RESOURCES PAGE ═══
-const db = firebase.firestore();
+// db는 nav.js에서 window.db로 이미 초기화됨
 let resources = [];
 let currentFilter = 'all';
 let pendingPayRes = null;
@@ -432,15 +432,15 @@ async function confirmPay() {
   }
 
   try {
-    // 독자 포인트 차감
-    await addPoints(currentUser.uid, -cost, '자료 열람');
-    // 작성자 포인트 지급
-    await addPoints(r.authorUid, cost, '자료 열람 수익');
-    // readers 목록에 추가
+    // readers 목록에 먼저 추가 (실패 시 포인트 차감 방지)
     await db.collection('resources').doc(r.id).update({
       readers: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
       viewCount: firebase.firestore.FieldValue.increment(1)
     });
+    // 독자 포인트 차감
+    await addPoints(currentUser.uid, -cost, '자료 열람');
+    // 작성자 포인트 지급
+    await addPoints(r.authorUid, cost, '자료 열람 수익');
     // 로컬 업데이트
     if (!r.readers) r.readers = [];
     r.readers.push(currentUser.uid);
@@ -453,7 +453,7 @@ async function confirmPay() {
     updatePointsDisplay();
   } catch(e) {
     console.error('결제 실패:', e);
-    alert('처리 중 오류가 발생했습니다.');
+    alert('처리 중 오류가 발생했습니다. 다시 시도해주세요.');
   }
 }
 
@@ -525,14 +525,14 @@ async function submitResource() {
     document.getElementById('resWriteContent').value = '';
     document.getElementById('resWriteCost').value = '1';
 
+    // 포인트 적립: 자료 등록 +1P
+    await addPoints(currentUser.uid, 1, '자료 등록');
+    showPointToast(1, '자료 등록');
     if (isAdmin) {
       alert('자료가 등록되었습니다!');
     } else {
       alert('자료가 등록 신청되었습니다.\n관리자 승인 후 공개됩니다.');
     }
-    // 포인트 적립: 자료 등록 +1P
-    await addPoints(currentUser.uid, 1, '자료 등록');
-    showPointToast(1, '자료 등록');
   } catch(e) {
     console.error('자료 등록 실패:', e);
     alert('등록 중 오류가 발생했습니다.');
@@ -550,9 +550,11 @@ function updatePointsDisplay() {
 }
 
 // ─── 로그인 후 콜백 ───
+let resLoaded = false;
 window.onNavLogin = function() {
   updatePointsDisplay();
-  loadResources();
+  if (resLoaded) renderResources(); // 이미 로드됐으면 필터만 다시
+  else loadResources();
 };
 window.onNavLogout = function() {
   updatePointsDisplay();
@@ -560,7 +562,7 @@ window.onNavLogout = function() {
 };
 
 // ─── INIT ───
-loadResources();
+loadResources().then(() => { resLoaded = true; });
 updatePointsDisplay();
 </script>
 </body>

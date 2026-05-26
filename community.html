@@ -827,8 +827,10 @@ function likeComment(i) {
     if (p.comments[i].author !== getDisplayName()) {
       addNotif(`❤️ ${getDisplayName()}님이 회원님의 댓글을 좋아합니다.`, p.id);
     }
-    // 댓글 작성자에게 좋아요 포인트 +0.1P
-    if (p.comments[i].authorUid && p.comments[i].authorUid !== currentUser.uid) {
+    // 댓글 작성자에게 좋아요 포인트 +0.1P (최초 1회만)
+    if (!p.comments[i].pointedLikeBy) p.comments[i].pointedLikeBy = [];
+    if (p.comments[i].authorUid && p.comments[i].authorUid !== currentUser.uid && !p.comments[i].pointedLikeBy.includes(currentUser.uid)) {
+      p.comments[i].pointedLikeBy.push(currentUser.uid);
       addPoints(p.comments[i].authorUid, 0.1, '댓글 좋아요 받음');
     }
   }
@@ -876,8 +878,10 @@ function toggleLike(id) {
     if (p.author !== getDisplayName()) {
       addNotif(`❤️ ${getDisplayName()}님이 "${p.title}" 글을 좋아합니다.`, p.id);
     }
-    // 글 작성자에게 좋아요 포인트 +0.1P
-    if (p.authorUid && p.authorUid !== currentUser.uid) {
+    // 글 작성자에게 좋아요 포인트 +0.1P (최초 1회만)
+    if (!p.pointedLikeBy) p.pointedLikeBy = [];
+    if (p.authorUid && p.authorUid !== currentUser.uid && !p.pointedLikeBy.includes(currentUser.uid)) {
+      p.pointedLikeBy.push(currentUser.uid);
       addPoints(p.authorUid, 0.1, '좋아요 받음');
     }
   }

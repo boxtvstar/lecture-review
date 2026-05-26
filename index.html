@@ -2609,6 +2609,7 @@ function submitComment(instId) {
   const today = new Date();
   commentsData[instId].unshift({
     author: getDisplayName(),
+    authorUid: currentUser.uid,
     verified: false,
     isInstructor: currentUser.isInstructor || false,
     date: `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`,
