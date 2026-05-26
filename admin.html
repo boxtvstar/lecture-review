@@ -2855,7 +2855,7 @@ function renderCommunityTable() {
   }
   document.getElementById('communityTableBody').innerHTML = list.map(p => `
     <tr>
-      <td><span class="user-name" style="cursor:pointer" title="${(p.content || '').substring(0, 100)}">${p.title || '(제목없음)'}</span></td>
+      <td><span class="user-name" style="cursor:pointer" title="${(p.content || '').substring(0, 100)}">${p.isNotice ? '<span style="display:inline-block;padding:2px 6px;background:#FFF3E0;color:var(--orange);border-radius:4px;font-size:10px;font-weight:800;margin-right:4px">📌 공지</span>' : ''}${p.title || '(제목없음)'}</span></td>
       <td><span style="font-size:12px">${p.category || '-'}</span></td>
       <td><span style="font-size:12px">${p.author || '-'}</span></td>
       <td><span style="font-size:12px">${p.likes || 0}</span></td>

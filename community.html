@@ -294,6 +294,40 @@ body {
   border-color: var(--orange);
 }
 .write-textarea { min-height: 180px; resize: vertical; line-height: 1.7; }
+/* RICH EDITOR */
+.editor-toolbar {
+  display: flex; flex-wrap: wrap; gap: 2px; padding: 8px 10px;
+  border: 1px solid var(--gray-200); border-bottom: none; border-radius: 10px 10px 0 0;
+  background: var(--gray-50);
+}
+.editor-toolbar button {
+  width: 32px; height: 32px; border: none; background: transparent;
+  border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--gray-600);
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.editor-toolbar button:hover { background: var(--gray-200); color: var(--gray-900); }
+.editor-toolbar button.active { background: var(--orange-light); color: var(--orange); }
+.editor-toolbar .tb-sep { width: 1px; background: var(--gray-200); margin: 4px 4px; }
+.editor-content {
+  min-height: 200px; max-height: 400px; overflow-y: auto;
+  padding: 14px 16px; border: 1px solid var(--gray-200); border-radius: 0 0 10px 10px;
+  font-size: 14px; line-height: 1.8; font-family: inherit;
+  outline: none; background: white;
+}
+.editor-content:focus { border-color: var(--orange); }
+.editor-content h2 { font-size: 18px; margin: 8px 0; }
+.editor-content h3 { font-size: 16px; margin: 6px 0; }
+.editor-content blockquote {
+  border-left: 3px solid var(--orange); margin: 8px 0; padding: 6px 12px;
+  color: var(--gray-600); background: #FFF8F0;
+}
+.editor-content ul, .editor-content ol { padding-left: 20px; margin: 6px 0; }
+.editor-content a { color: var(--blue); text-decoration: underline; }
+.editor-content hr { border: none; border-top: 1px solid var(--gray-200); margin: 12px 0; }
+.editor-content img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+.editor-content:empty::before {
+  content: attr(data-placeholder); color: var(--gray-400); pointer-events: none;
+}
 .write-footer {
   padding: 16px 28px; border-top: 1px solid var(--gray-100);
   display: flex; justify-content: flex-end; gap: 10px;
@@ -480,7 +514,24 @@ body {
       </div>
       <div class="write-field">
         <label class="write-label">내용</label>
-        <textarea class="write-textarea" id="writeContent" placeholder="내용을 입력하세요"></textarea>
+        <div class="editor-toolbar" id="editorToolbar">
+          <button type="button" onclick="editorCmd('bold')" title="굵게"><b>B</b></button>
+          <button type="button" onclick="editorCmd('italic')" title="기울임"><i>I</i></button>
+          <button type="button" onclick="editorCmd('underline')" title="밑줄"><u>U</u></button>
+          <button type="button" onclick="editorCmd('strikeThrough')" title="취소선"><s>S</s></button>
+          <div class="tb-sep"></div>
+          <button type="button" onclick="editorBlock('h2')" title="제목">H2</button>
+          <button type="button" onclick="editorBlock('h3')" title="소제목">H3</button>
+          <div class="tb-sep"></div>
+          <button type="button" onclick="editorCmd('insertUnorderedList')" title="목록">•</button>
+          <button type="button" onclick="editorCmd('insertOrderedList')" title="번호 목록">1.</button>
+          <button type="button" onclick="editorBlock('blockquote')" title="인용">❝</button>
+          <div class="tb-sep"></div>
+          <button type="button" onclick="editorInsertLink()" title="링크">🔗</button>
+          <button type="button" onclick="editorInsertHr()" title="구분선">―</button>
+          <button type="button" onclick="editorCmd('removeFormat')" title="서식 제거">✕</button>
+        </div>
+        <div class="editor-content" id="writeContent" contenteditable="true" data-placeholder="내용을 입력하세요"></div>
       </div>
       <div class="write-field">
         <label class="write-label">이미지 첨부 (선택, 여러 장 가능)</label>
@@ -663,7 +714,7 @@ function renderPosts() {
       <div style="display:flex;gap:12px;align-items:flex-start">
         <div style="flex:1;min-width:0">
           <div class="post-title">${p.title}</div>
-          <div class="post-preview">${p.content.replace(/\n/g, ' ').substring(0, 80)}...</div>
+          <div class="post-preview">${p.content.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').substring(0, 80)}...</div>
         </div>
         ${p.imageUrl ? `<img src="${p.imageUrl}" class="post-thumb" alt="">` : ''}
       </div>
@@ -710,7 +761,10 @@ function openPost(id) {
   document.getElementById('detailMeta').innerHTML = `<strong>${p.author}</strong> · ${p.date} · 조회 ${p.views}`;
   const imgs = p.images || (p.imageUrl ? [p.imageUrl] : []);
   const imgHTML = imgs.map(url => `<img src="${url}" class="post-image" alt="첨부 이미지" style="margin-top:12px">`).join('');
-  document.getElementById('detailBody').innerHTML = p.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + imgHTML;
+  // HTML 콘텐츠인지 판별 (에디터로 작성된 글은 태그 포함)
+  const isHtml = /<[a-z][\s\S]*>/i.test(p.content);
+  const bodyHtml = isHtml ? p.content : p.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+  document.getElementById('detailBody').innerHTML = bodyHtml + imgHTML;
   const isMyPost = currentUser && (p.author === getDisplayName() || p.author === currentUser.name);
   const manageBtns = (isMyPost || isAdmin) ? `
     <div class="post-manage-btns">
@@ -967,7 +1021,7 @@ function editPost(id) {
   closeDetail();
   document.getElementById('writeCategory').value = p.category;
   document.getElementById('writeTitle').value = p.title;
-  document.getElementById('writeContent').value = p.content;
+  document.getElementById('writeContent').innerHTML = p.content;
   document.querySelector('.write-title').textContent = '글 수정';
   document.querySelector('.write-submit').textContent = '수정하기';
   document.querySelector('.write-submit').onclick = submitEditPost;
@@ -979,16 +1033,17 @@ function submitEditPost() {
   const p = posts.find(x => x.id === editingPostId);
   if (!p) return;
   const title = document.getElementById('writeTitle').value.trim();
-  const content = document.getElementById('writeContent').value.trim();
+  const content = getEditorContent();
+  const plainText = getEditorText();
   if (!title) { alert('제목을 입력해주세요.'); return; }
-  if (!content) { alert('내용을 입력해주세요.'); return; }
+  if (!plainText) { alert('내용을 입력해주세요.'); return; }
   p.category = document.getElementById('writeCategory').value;
   p.title = title;
   p.content = content;
   syncPostToFirestore(p);
   editingPostId = null;
   document.getElementById('writeTitle').value = '';
-  document.getElementById('writeContent').value = '';
+  document.getElementById('writeContent').innerHTML = '';
   document.querySelector('.write-title').textContent = '글쓰기';
   document.querySelector('.write-submit').textContent = '등록하기';
   document.querySelector('.write-submit').onclick = submitPost;
@@ -1044,7 +1099,7 @@ function openWriteModal() {
   document.querySelector('.write-submit').textContent = '등록하기';
   document.querySelector('.write-submit').onclick = submitPost;
   document.getElementById('writeTitle').value = '';
-  document.getElementById('writeContent').value = '';
+  document.getElementById('writeContent').innerHTML = '';
   document.getElementById('writeCategory').value = '자유';
   resetWriteImgUI();
   // 관리자만 공지 옵션 표시
@@ -1140,13 +1195,46 @@ function closeWriteModal() {
   resetWriteImgUI();
 }
 
+// ═══ RICH EDITOR FUNCTIONS ═══
+function editorCmd(cmd) {
+  document.execCommand(cmd, false, null);
+  document.getElementById('writeContent').focus();
+}
+
+function editorBlock(tag) {
+  document.execCommand('formatBlock', false, '<' + tag + '>');
+  document.getElementById('writeContent').focus();
+}
+
+function editorInsertLink() {
+  const url = prompt('링크 URL을 입력하세요:', 'https://');
+  if (url) document.execCommand('createLink', false, url);
+  document.getElementById('writeContent').focus();
+}
+
+function editorInsertHr() {
+  document.execCommand('insertHTML', false, '<hr>');
+  document.getElementById('writeContent').focus();
+}
+
+function getEditorContent() {
+  const el = document.getElementById('writeContent');
+  return el.innerHTML.trim();
+}
+
+function getEditorText() {
+  const el = document.getElementById('writeContent');
+  return el.innerText.trim();
+}
+
 function submitPost() {
   const category = document.getElementById('writeCategory').value;
   const title = document.getElementById('writeTitle').value.trim();
-  const content = document.getElementById('writeContent').value.trim();
+  const content = getEditorContent();
+  const plainText = getEditorText();
   if (!title) { alert('제목을 입력해주세요.'); return; }
-  if (!content) { alert('내용을 입력해주세요.'); return; }
-  if (content.length < 10) { alert('내용을 10자 이상 작성해주세요.'); return; }
+  if (!plainText) { alert('내용을 입력해주세요.'); return; }
+  if (plainText.length < 10) { alert('내용을 10자 이상 작성해주세요.'); return; }
 
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
@@ -1178,7 +1266,7 @@ function submitPost() {
 
   // Firestore에도 저장 + docId 보관
   if (currentUser && window.db) {
-    db.collection('community_posts').add({
+    const fsData = {
       title, category, content,
       author: getDisplayName(),
       authorUid: currentUser.uid,
@@ -1188,14 +1276,20 @@ function submitPost() {
       commentCount: 0,
       comments: [],
       imageUrl: newPost.imageUrl || '',
+      images: newPost.images || [],
       isNotice: newPost.isNotice || false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(ref => { newPost._docId = ref.id; })
+    };
+    if (newPost.isNotice) {
+      fsData.noticeScope = newPost.noticeScope || 'all';
+      if (newPost.noticeCategory) fsData.noticeCategory = newPost.noticeCategory;
+    }
+    db.collection('community_posts').add(fsData).then(ref => { newPost._docId = ref.id; })
       .catch(e => console.error('커뮤니티 Firestore 저장 실패:', e));
   }
 
   document.getElementById('writeTitle').value = '';
-  document.getElementById('writeContent').value = '';
+  document.getElementById('writeContent').innerHTML = '';
   resetWriteImgUI();
   closeWriteModal();
   renderPosts();
