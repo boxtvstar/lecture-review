@@ -760,7 +760,9 @@ body {
 }
 .review-date { font-size: 12px; color: var(--gray-400); }
 .review-stars { margin-bottom: 8px; font-size: 14px; }
-.review-text { font-size: 14px; color: var(--gray-600); line-height: 1.7; }
+.review-text { font-size: 14px; color: var(--gray-600); line-height: 1.7; word-break: break-word; }
+.review-text.collapsed { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.review-expand { font-size: 13px; color: var(--orange); cursor: pointer; font-weight: 700; margin-top: 4px; }
 .review-helpful {
   display: flex; gap: 12px; margin-top: 12px; padding-top: 12px;
   border-top: 1px solid var(--gray-200);
@@ -2074,7 +2076,8 @@ function openDetail(id) {
             <span class="review-date">${r.date}</span>
           </div>
           <div class="review-stars">${generateStars(r.stars, 14)}</div>
-          <div class="review-text">${r.text}</div>
+          <div class="review-text${r.text.length > 200 ? ' collapsed' : ''}" id="rvTxt${inst.id}_${ri}">${r.text}</div>
+          ${r.text.length > 200 ? `<div class="review-expand" onclick="event.stopPropagation();toggleReviewText('rvTxt${inst.id}_${ri}',this)">더보기 ▾</div>` : ''}
           ${r.rebuttal ? `
             <div class="rebuttal">
               <div class="rebuttal-label">💬 강사 답변</div>
@@ -2440,6 +2443,18 @@ function filterReviews(filter, instId) {
       </div>
     </div>`;
     }).join('');
+}
+
+function toggleReviewText(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.classList.contains('collapsed')) {
+    el.classList.remove('collapsed');
+    btn.textContent = '접기 ▴';
+  } else {
+    el.classList.add('collapsed');
+    btn.textContent = '더보기 ▾';
+  }
 }
 
 const helpfulVotes = JSON.parse(localStorage.getItem('helpfulVotes') || '{}');
@@ -2940,7 +2955,13 @@ function renderCommunityPreview() {
 // 알림 시스템은 nav.js에서 관리
 
 // ═══ Firestore 리뷰 → 강사 데이터 병합 ═══
-const ratingKeyMap = { '강의 퀄리티': 'quality', '가성비': 'value', '전문성': 'expertise', '과대광고': 'hype', '실력 향상': 'growth', 'AS/답변': 'support' };
+const ratingKeyMap = {
+  '강의 퀄리티': 'quality', '가성비': 'value',
+  '강사 전문성': 'expertise', '전문성': 'expertise',
+  '과대광고 지수': 'hype', '과대광고': 'hype',
+  '실력 향상도': 'growth', '실력 향상': 'growth',
+  'AS/답변 만족도': 'support', 'AS/답변': 'support'
+};
 
 async function loadFirestoreReviews() {
   try {
