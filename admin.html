@@ -1431,10 +1431,17 @@ function renderReviewsTable() {
       <td>${r.instructor}</td>
       <td><span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score ? r.score + ' ★' : '-'}</span></td>
       <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.blinded ? '<span style="color:var(--gray-400)">🚫 블라인드 처리된 리뷰</span>' : r.text}</td>
-      <td>${r.verified ? '<span class="status-badge status-approved">인증</span>' : '<span class="status-badge status-unverified">비인증</span>'}</td>
+      <td>${r.verified
+        ? '<span class="status-badge status-approved" style="cursor:pointer" onclick="unverifyReview(' + idx + ')" title="클릭하면 인증 해제">✅ 인증</span>'
+        : '<span class="status-badge status-unverified" style="cursor:pointer" onclick="verifyReview(' + idx + ')" title="클릭하면 수강생 인증">비인증</span>'
+      }</td>
       <td>${r.date}</td>
       <td>
         <div class="action-btn-group">
+          ${r.verified
+            ? ''
+            : `<button class="action-btn action-btn-approve" onclick="verifyReview(${idx})">✅ 인증</button>`
+          }
           ${r.blinded
             ? `<button class="action-btn action-btn-approve" onclick="unblindReview(${idx})">복구</button>`
             : `<button class="action-btn action-btn-delete" onclick="blindReview(${idx})">블라인드</button>`
@@ -2122,6 +2129,32 @@ async function unblindReview(idx) {
   if (r.id) { try { await db.collection('reviews').doc(r.id).update({ blinded: false }); } catch(e) { console.error(e); } }
   renderReviewsTable();
   showToast('리뷰 블라인드가 해제되었습니다.', 'success');
+}
+
+async function verifyReview(idx) {
+  const r = recentReviews[idx];
+  r.verified = true;
+  if (r.id) {
+    try {
+      await db.collection('reviews').doc(r.id).update({ verified: true });
+      // 작성자 수강생 인증도 함께
+      if (r.authorUid) {
+        await db.collection('users').doc(r.authorUid).set({ verified: true }, { merge: true });
+      }
+    } catch(e) { console.error(e); }
+  }
+  renderReviewsTable();
+  showToast(`✅ ${r.author}님의 리뷰가 인증되었습니다.`, 'success');
+}
+
+async function unverifyReview(idx) {
+  const r = recentReviews[idx];
+  r.verified = false;
+  if (r.id) {
+    try { await db.collection('reviews').doc(r.id).update({ verified: false }); } catch(e) { console.error(e); }
+  }
+  renderReviewsTable();
+  showToast('리뷰 인증이 해제되었습니다.', 'info');
 }
 
 async function deleteReviewPerm(idx) {

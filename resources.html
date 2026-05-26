@@ -142,9 +142,12 @@ body {
 .res-detail-meta { font-size: 13px; color: var(--gray-400); margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
 .res-detail-content {
   font-size: 14px; color: var(--gray-700); line-height: 1.8;
-  white-space: pre-wrap; word-break: break-word;
+  word-break: break-word;
   border-top: 1px solid var(--gray-200); padding-top: 20px;
 }
+.res-detail-content img { max-width: 100%; border-radius: 6px; margin: 8px 0; }
+.res-detail-content ul, .res-detail-content ol { padding-left: 20px; margin: 8px 0; }
+.res-detail-content b, .res-detail-content strong { font-weight: 800; }
 .res-detail-close {
   float: right; background: none; border: none; font-size: 24px;
   cursor: pointer; color: var(--gray-400); padding: 4px;
@@ -223,6 +226,63 @@ body {
 }
 .res-detail-image { margin-bottom: 16px; }
 .res-detail-image img { max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--gray-200); }
+/* ── FILE ATTACHMENT ── */
+.res-file-upload {
+  border: 2px dashed var(--gray-200); border-radius: var(--radius-sm);
+  padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.res-file-upload:hover { border-color: var(--blue); background: var(--blue-light); }
+.res-file-upload input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.res-file-list { margin-top: 8px; }
+.res-file-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: var(--gray-50); border-radius: var(--radius-sm); margin-bottom: 6px;
+  font-size: 13px;
+}
+.res-file-item .file-icon { font-size: 18px; }
+.res-file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.res-file-item .file-size { color: var(--gray-400); font-size: 11px; }
+.res-file-item .file-remove {
+  background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 0 4px;
+}
+/* ── DETAIL FILE ── */
+.res-detail-files { margin-bottom: 16px; }
+.res-detail-file-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  background: var(--gray-50); border-radius: var(--radius-sm); margin-bottom: 6px;
+  cursor: pointer; transition: background 0.15s;
+}
+.res-detail-file-item:hover { background: var(--blue-light); }
+.res-detail-file-item .file-icon { font-size: 24px; }
+.res-detail-file-item .file-info { flex: 1; }
+.res-detail-file-item .file-name { font-weight: 700; font-size: 14px; color: var(--navy); }
+.res-detail-file-item .file-meta { font-size: 11px; color: var(--gray-400); }
+.res-detail-file-item .file-download {
+  padding: 6px 16px; border-radius: 8px; background: var(--blue); color: white;
+  border: none; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+/* ── EDITOR TOOLBAR ── */
+.res-editor-toolbar {
+  display: flex; gap: 2px; padding: 6px 8px; background: var(--gray-50);
+  border: 1px solid var(--gray-200); border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.res-editor-toolbar button {
+  padding: 4px 10px; background: none; border: 1px solid transparent;
+  border-radius: 4px; font-size: 13px; cursor: pointer; color: var(--gray-600);
+  transition: all 0.15s;
+}
+.res-editor-toolbar button:hover { background: white; border-color: var(--gray-200); }
+.res-editor-toolbar .sep { width: 1px; background: var(--gray-200); margin: 0 4px; }
+.res-editor-area {
+  width: 100%; min-height: 200px; padding: 14px; border: 1px solid var(--gray-200);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm); font-size: 14px;
+  font-family: inherit; line-height: 1.8; outline: none; overflow-y: auto;
+  max-height: 400px;
+}
+.res-editor-area:focus { border-color: var(--orange); }
+.res-editor-area img { max-width: 100%; border-radius: 6px; margin: 8px 0; }
 .res-write-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
 .res-write-btns button {
   padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 700;
@@ -325,19 +385,30 @@ body {
     </div>
     <div class="res-write-field">
       <label>본문 내용</label>
-      <textarea id="resWriteContent" placeholder="자료 내용을 작성해주세요 (최소 50자)"></textarea>
+      <div class="res-editor-toolbar">
+        <button type="button" onclick="editorCmd('bold')" title="굵게"><b>B</b></button>
+        <button type="button" onclick="editorCmd('italic')" title="기울임"><i>I</i></button>
+        <button type="button" onclick="editorCmd('underline')" title="밑줄"><u>U</u></button>
+        <div class="sep"></div>
+        <button type="button" onclick="editorCmd('insertUnorderedList')" title="목록">• 목록</button>
+        <button type="button" onclick="editorCmd('insertOrderedList')" title="번호목록">1. 번호</button>
+        <div class="sep"></div>
+        <button type="button" onclick="editorFontSize('18px')" title="큰 글씨">A+</button>
+        <button type="button" onclick="editorFontSize('14px')" title="보통 글씨">A</button>
+        <div class="sep"></div>
+        <button type="button" onclick="editorInsertImage()" title="이미지 삽입">📷 이미지</button>
+      </div>
+      <div class="res-editor-area" id="resWriteContent" contenteditable="true" data-placeholder="자료 내용을 작성해주세요 (최소 50자)"></div>
+      <input type="file" id="editorImgInput" accept="image/*" style="display:none" onchange="editorImgSelected(this)">
     </div>
     <div class="res-write-field">
-      <label>이미지 첨부 (선택)</label>
-      <div class="res-img-upload" id="resImgUpload">
-        <div class="upload-icon">📷</div>
-        <div class="upload-text">클릭하여 이미지를 선택하세요</div>
-        <input type="file" id="resWriteImage" accept="image/*" onchange="previewResImage(this)">
+      <label>파일 첨부 (선택, 최대 3개, 각 10MB)</label>
+      <div class="res-file-upload" id="resFileUpload">
+        <div class="upload-icon">📎</div>
+        <div class="upload-text">클릭하여 파일을 선택하세요 (PDF, DOC, HWP, ZIP 등)</div>
+        <input type="file" id="resWriteFile" multiple onchange="addResFiles(this)">
       </div>
-      <div class="res-img-preview" id="resImgPreview">
-        <img id="resImgPreviewImg" src="" alt="">
-        <button class="remove-img" onclick="removeResImage()">&times;</button>
-      </div>
+      <div class="res-file-list" id="resFileList"></div>
     </div>
     <div class="res-write-field">
       <label>열람 비용 (포인트)</label>
@@ -404,7 +475,7 @@ body {
     <button class="res-detail-close" onclick="closeDetail()">&times;</button>
     <div class="res-detail-title" id="detailTitle"></div>
     <div class="res-detail-meta" id="detailMeta"></div>
-    <div class="res-detail-image" id="detailImage" style="display:none"><img id="detailImageImg" src="" alt=""></div>
+    <div class="res-detail-files" id="detailFiles" style="display:none"></div>
     <div class="res-detail-content" id="detailContent"></div>
   </div>
 </div>
@@ -426,28 +497,75 @@ function closeInsuffPopup() {
   document.getElementById('insuffOverlay').classList.remove('open');
 }
 
-// ─── 이미지 업로드 ───
-let resSelectedFile = null;
-function previewResImage(input) {
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-    if (file.size > 5 * 1024 * 1024) { alert('이미지 크기는 5MB 이하만 가능합니다.'); input.value = ''; return; }
-    resSelectedFile = file;
-    const reader = new FileReader();
-    reader.onload = e => {
-      document.getElementById('resImgPreviewImg').src = e.target.result;
-      document.getElementById('resImgPreview').style.display = 'block';
-      document.getElementById('resImgUpload').style.display = 'none';
-    };
-    reader.readAsDataURL(file);
+// ─── 에디터 ───
+function editorCmd(cmd) { document.execCommand(cmd, false, null); document.getElementById('resWriteContent').focus(); }
+function editorFontSize(size) {
+  document.execCommand('fontSize', false, '7');
+  const editor = document.getElementById('resWriteContent');
+  editor.querySelectorAll('font[size="7"]').forEach(el => { el.removeAttribute('size'); el.style.fontSize = size; });
+  editor.focus();
+}
+function editorInsertImage() { document.getElementById('editorImgInput').click(); }
+function editorImgSelected(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (file.size > 5 * 1024 * 1024) { alert('이미지는 5MB 이하만 가능합니다.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.execCommand('insertImage', false, e.target.result);
+    document.getElementById('resWriteContent').focus();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+// 에디터 placeholder
+const editorEl = document.getElementById('resWriteContent');
+editorEl.addEventListener('focus', function() { if (this.textContent.trim() === '') this.innerHTML = ''; });
+editorEl.addEventListener('blur', function() {
+  if (this.textContent.trim() === '') this.innerHTML = '';
+});
+
+// ─── 파일 첨부 ───
+let resFiles = [];
+function getFileIcon(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  if (['pdf'].includes(ext)) return '📄';
+  if (['doc','docx','hwp','hwpx'].includes(ext)) return '📝';
+  if (['xls','xlsx','csv'].includes(ext)) return '📊';
+  if (['ppt','pptx'].includes(ext)) return '📋';
+  if (['zip','rar','7z','tar','gz'].includes(ext)) return '📦';
+  if (['jpg','jpeg','png','gif','webp','svg'].includes(ext)) return '🖼';
+  if (['mp4','avi','mov','mkv'].includes(ext)) return '🎥';
+  return '📎';
+}
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + 'B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + 'KB';
+  return (bytes/1024/1024).toFixed(1) + 'MB';
+}
+function addResFiles(input) {
+  for (const file of input.files) {
+    if (file.size > 10 * 1024 * 1024) { alert(`${file.name}: 파일은 10MB 이하만 가능합니다.`); continue; }
+    if (resFiles.length >= 3) { alert('파일은 최대 3개까지 첨부 가능합니다.'); break; }
+    resFiles.push(file);
   }
+  input.value = '';
+  renderResFileList();
 }
-function removeResImage() {
-  resSelectedFile = null;
-  document.getElementById('resWriteImage').value = '';
-  document.getElementById('resImgPreview').style.display = 'none';
-  document.getElementById('resImgUpload').style.display = '';
+function removeResFile(idx) { resFiles.splice(idx, 1); renderResFileList(); }
+function renderResFileList() {
+  const el = document.getElementById('resFileList');
+  if (resFiles.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = resFiles.map((f, i) => `
+    <div class="res-file-item">
+      <span class="file-icon">${getFileIcon(f.name)}</span>
+      <span class="file-name">${f.name}</span>
+      <span class="file-size">${formatFileSize(f.size)}</span>
+      <button class="file-remove" onclick="removeResFile(${i})">&times;</button>
+    </div>
+  `).join('');
 }
+function resetResFiles() { resFiles = []; renderResFileList(); }
 let resources = [];
 let currentFilter = 'all';
 let pendingPayRes = null;
@@ -490,12 +608,13 @@ function renderResources() {
     const alreadyRead = currentUser && r.readers && r.readers.includes(currentUser.uid);
     const costLabel = alreadyRead ? '완료' : `${r.cost}P`;
     const costClass = alreadyRead ? 'free' : '';
-    const imgIcon = r.imageUrl ? '🖼 ' : '';
+    const fileIcon = (r.hasFiles || (r.files && r.files.length > 0)) ? '📎 ' : '';
+    const imgIcon = (r.hasImages || r.imageUrl) ? '🖼 ' : '';
     const titleBadge = isPending ? '<span class="pending-badge">대기</span>' : (alreadyRead ? '<span class="read-badge">열람</span>' : '');
     return `<div class="res-row" onclick="openResource('${r.id}')">
       <div class="col-no">${list.length - idx}</div>
       <div class="col-cat">${r.category}</div>
-      <div class="col-title">${imgIcon}${r.title}${titleBadge}</div>
+      <div class="col-title">${fileIcon}${imgIcon}${r.title}${titleBadge}</div>
       <div class="col-cost ${costClass}">${costLabel}</div>
       <div class="col-author">${r.author}</div>
       <div class="col-date">${r.date}</div>
@@ -595,15 +714,30 @@ function showDetail(r) {
     <span>${r.date}</span>
     <span>열람 비용: ${r.cost}P</span>
     <span>👁 ${r.viewCount || 0}명 열람</span>`;
-  // 이미지 표시
-  const imgEl = document.getElementById('detailImage');
-  if (r.imageUrl) {
-    document.getElementById('detailImageImg').src = r.imageUrl;
-    imgEl.style.display = '';
+  // 파일 첨부 표시
+  const filesEl = document.getElementById('detailFiles');
+  if (r.files && r.files.length > 0) {
+    filesEl.style.display = '';
+    filesEl.innerHTML = '<div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px">📎 첨부 파일</div>' +
+      r.files.map(f => `
+        <div class="res-detail-file-item" onclick="window.open('${f.url}','_blank')">
+          <span class="file-icon">${getFileIcon(f.name)}</span>
+          <div class="file-info">
+            <div class="file-name">${f.name}</div>
+            <div class="file-meta">${formatFileSize(f.size)}</div>
+          </div>
+          <a href="${f.url}" download="${f.name}" class="file-download" onclick="event.stopPropagation()">다운로드</a>
+        </div>
+      `).join('');
   } else {
-    imgEl.style.display = 'none';
+    filesEl.style.display = 'none';
   }
-  document.getElementById('detailContent').textContent = r.content;
+  // 본문 표시 (HTML 에디터 내용)
+  if (r.contentHtml) {
+    document.getElementById('detailContent').innerHTML = r.contentHtml;
+  } else {
+    document.getElementById('detailContent').textContent = r.content;
+  }
   document.getElementById('detailOverlay').classList.add('open');
 }
 
@@ -627,12 +761,14 @@ function closeResWrite() {
 async function submitResource() {
   const title = document.getElementById('resWriteTitle').value.trim();
   const category = document.getElementById('resWriteCategory').value;
-  const content = document.getElementById('resWriteContent').value.trim();
+  const editorEl = document.getElementById('resWriteContent');
+  const contentHtml = editorEl.innerHTML.trim();
+  const contentText = editorEl.textContent.trim();
   let cost = parseInt(document.getElementById('resWriteCost').value) || 1;
   cost = Math.max(1, Math.min(5, cost));
 
   if (!title) { alert('제목을 입력해주세요.'); return; }
-  if (content.length < 50) { alert('본문 내용을 50자 이상 작성해주세요.'); return; }
+  if (contentText.length < 50) { alert('본문 내용을 50자 이상 작성해주세요.'); return; }
   if (!currentUser) { document.getElementById('loginOverlay').classList.add('open'); return; }
 
   // 자료 등록 시 5P 차감 확인
@@ -644,22 +780,46 @@ async function submitResource() {
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
 
-  // 이미지 업로드 (선택)
-  let imageUrl = '';
-  if (resSelectedFile) {
-    try {
-      const ext = resSelectedFile.name.split('.').pop();
-      const ref = storage.ref(`resources/${currentUser.uid}_${Date.now()}.${ext}`);
-      await ref.put(resSelectedFile);
-      imageUrl = await ref.getDownloadURL();
-    } catch(e) {
-      console.error('이미지 업로드 실패:', e);
-      alert('이미지 업로드 실패. 이미지 없이 등록합니다.');
+  // 에디터 내 이미지를 Firebase Storage에 업로드하고 URL 교체
+  let processedHtml = contentHtml;
+  const imgTags = editorEl.querySelectorAll('img');
+  for (const img of imgTags) {
+    if (img.src.startsWith('data:')) {
+      try {
+        const resp = await fetch(img.src);
+        const blob = await resp.blob();
+        const ext = blob.type.split('/')[1] || 'png';
+        const ref = storage.ref(`resources/img_${currentUser.uid}_${Date.now()}_${Math.random().toString(36).substr(2,5)}.${ext}`);
+        await ref.put(blob);
+        const url = await ref.getDownloadURL();
+        processedHtml = processedHtml.replace(img.src, url);
+      } catch(e) { console.error('인라인 이미지 업로드 실패:', e); }
     }
   }
 
+  // 파일 업로드
+  const uploadedFiles = [];
+  for (const file of resFiles) {
+    try {
+      const ext = file.name.split('.').pop();
+      const ref = storage.ref(`resources/files/${currentUser.uid}_${Date.now()}_${Math.random().toString(36).substr(2,5)}.${ext}`);
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+      uploadedFiles.push({ name: file.name, size: file.size, url });
+    } catch(e) {
+      console.error('파일 업로드 실패:', file.name, e);
+      alert(`${file.name} 업로드 실패.`);
+    }
+  }
+
+  const hasFiles = uploadedFiles.length > 0;
+  const hasImages = processedHtml.includes('<img');
+
   const resData = {
-    title, category, content, cost,
+    title, category,
+    content: contentText,
+    contentHtml: processedHtml,
+    cost,
     author: getDisplayName(),
     authorUid: currentUser.uid,
     authorEmail: currentUser.email,
@@ -668,7 +828,9 @@ async function submitResource() {
     status: isAdmin ? 'approved' : 'pending',
     readers: [currentUser.uid],
     viewCount: 0,
-    imageUrl: imageUrl
+    files: uploadedFiles,
+    hasFiles: hasFiles,
+    hasImages: hasImages
   };
 
   try {
@@ -677,9 +839,9 @@ async function submitResource() {
     closeResWrite();
     renderResources();
     document.getElementById('resWriteTitle').value = '';
-    document.getElementById('resWriteContent').value = '';
+    editorEl.innerHTML = '';
     document.getElementById('resWriteCost').value = '1';
-    removeResImage();
+    resetResFiles();
 
     // 포인트 차감: 자료 등록 -5P
     await addPoints(currentUser.uid, -5, '자료 등록');
