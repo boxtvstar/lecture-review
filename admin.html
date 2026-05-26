@@ -2295,6 +2295,12 @@ function openReviewDetail(idx) {
             ).join('')}</div>
           </div>`;
         }).join('')}
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding-top:6px;border-top:1px solid var(--gray-200)">
+          <span style="font-size:12px;color:var(--blue);width:100px;flex-shrink:0;font-weight:700">플랫폼 만족도</span>
+          <div style="display:flex;gap:2px">${[1,2,3,4,5].map(s =>
+            `<span class="admin-edit-star" data-label="platformRating" data-val="${s}" onclick="setAdminStar(this,'platformRating',${s})" style="cursor:pointer;font-size:18px;color:${s <= (r.platformRating || 0) ? 'var(--blue)' : '#D1D5DB'}">${s <= (r.platformRating || 0) ? '★' : '☆'}</span>`
+          ).join('')}</div>
+        </div>
       </div>
       <button onclick="saveAdminRatings(${idx})" style="margin-top:10px;padding:8px 20px;background:var(--orange);color:white;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">평점 저장</button>
     </div>
@@ -2334,21 +2340,29 @@ async function saveAdminRatings(idx) {
   const r = recentReviews[idx];
   if (!r || !r.id) { showToast('리뷰 ID가 없습니다.', 'error'); return; }
   const ratings = {};
+  let platRating = 0;
   document.querySelectorAll('#adminRatingEdit .admin-edit-star').forEach(s => {
     const label = s.dataset.label;
     const val = parseInt(s.dataset.val);
     if (s.textContent === '★') {
-      if (!ratings[label] || val > ratings[label]) ratings[label] = val;
+      if (label === 'platformRating') {
+        if (val > platRating) platRating = val;
+      } else {
+        if (!ratings[label] || val > ratings[label]) ratings[label] = val;
+      }
     }
   });
   const vals = Object.values(ratings);
   if (vals.length === 0) { showToast('최소 1개 항목에 평점을 매겨주세요.', 'error'); return; }
   const score = Math.round(vals.reduce((a,b)=>a+b,0) / vals.length * 10) / 10;
+  const updateData = { ratings, score };
+  if (platRating > 0) updateData.platformRating = platRating;
   try {
-    await db.collection('reviews').doc(r.id).update({ ratings, score });
+    await db.collection('reviews').doc(r.id).update(updateData);
     r.ratings = ratings;
     r.score = score;
-    showToast(`평점 저장 완료! (총점: ${score})`, 'success');
+    if (platRating > 0) r.platformRating = platRating;
+    showToast(`평점 저장 완료! (총점: ${score}${platRating > 0 ? ', 플랫폼: ★' + platRating : ''})`, 'success');
     renderReviewsTable();
   } catch(e) {
     console.error('평점 저장 실패:', e);

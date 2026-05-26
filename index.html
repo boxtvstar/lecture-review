@@ -3069,12 +3069,29 @@ async function loadFirestoreReviews() {
     instructors.filter(i => i.score > 0 && i.score < 3.5).forEach(i => worstInstructors.push(i));
 
     // 플랫폼 통계 갱신
+    // 플랫폼별 통계 업데이트
+    const platReviews = {};
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (!d.platform) return;
+      const pName = d.platform.trim();
+      if (!platReviews[pName]) platReviews[pName] = [];
+      platReviews[pName].push(d);
+    });
+
     platformData.forEach(p => {
       const platInsts = instructors.filter(i => i.platform === p.name && i.reviews > 0);
-      if (platInsts.length === 0) return;
+      if (platInsts.length === 0 && !platReviews[p.name]) return;
       p.reviews = platInsts.reduce((s, i) => s + i.reviews, 0);
       const scored = platInsts.filter(i => i.score > 0);
       p.score = scored.length > 0 ? Math.round(scored.reduce((s, i) => s + i.score, 0) / scored.length * 10) / 10 : 0;
+
+      // 플랫폼 만족도: 리뷰의 platformRating 평균
+      const pRevs = platReviews[p.name] || [];
+      const satRatings = pRevs.filter(r => r.platformRating > 0).map(r => r.platformRating);
+      if (satRatings.length > 0) {
+        p.satisfaction = Math.round(satRatings.reduce((a, b) => a + b, 0) / satRatings.length * 10) / 10;
+      }
     });
 
     // 전체 렌더링 갱신
