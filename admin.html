@@ -765,6 +765,7 @@ body {
             <div class="admin-table-actions">
               <button class="admin-filter-btn active" onclick="filterVerify('pending',this)">대기중</button>
               <button class="admin-filter-btn" onclick="filterVerify('all',this)">전체</button>
+              <button class="admin-filter-btn" onclick="verificationsLoaded=false;loadFirestoreVerifications()" style="background:var(--orange);color:white;border-color:var(--orange)">🔄 새로고침</button>
             </div>
           </div>
           <table class="admin-table">
@@ -832,7 +833,7 @@ body {
                 <th>회원</th>
                 <th>가입일</th>
                 <th>인증 상태</th>
-                <th>리뷰 수</th>
+                <th>포인트</th>
                 <th>등급</th>
                 <th>관리</th>
               </tr>
@@ -851,6 +852,7 @@ body {
         <div class="admin-table-wrapper">
           <div class="admin-table-header">
             <div class="admin-table-title">최근 리뷰</div>
+            <button class="admin-filter-btn" onclick="reviewsLoaded=false;loadFirestoreReviews()" style="background:var(--orange);color:white;border-color:var(--orange)">🔄 새로고침</button>
           </div>
           <table class="admin-table">
             <thead>
@@ -864,7 +866,9 @@ body {
                 <th>관리</th>
               </tr>
             </thead>
-            <tbody id="reviewsTableBody"></tbody>
+            <tbody id="reviewsTableBody">
+              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400)">로딩 중...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -1090,20 +1094,43 @@ body {
   </div>
 </div>
 
+<!-- POINT MODAL -->
+<div class="modal-overlay" id="pointModal" onclick="if(event.target===this)closePointModal()" style="display:none">
+  <div class="modal-box" style="max-width:380px">
+    <button class="modal-close" onclick="closePointModal()">&times;</button>
+    <div class="modal-title">💰 포인트 수동 지급/차감</div>
+    <div class="modal-sub" id="pointModalUser">-</div>
+    <div style="padding:20px 0">
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px;font-weight:700;color:var(--gray-600)">포인트 수량</label>
+        <input type="number" id="pointAmount" placeholder="양수=지급, 음수=차감" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;margin-top:4px">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px;font-weight:700;color:var(--gray-600)">사유</label>
+        <input type="text" id="pointReason" placeholder="예: 이벤트 보상, 오류 보상 등" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;margin-top:4px">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button onclick="closePointModal()" style="padding:8px 20px;border-radius:8px;background:var(--gray-100);color:var(--gray-600);border:none;cursor:pointer;font-weight:700">취소</button>
+        <button onclick="submitPointGrant()" style="padding:8px 20px;border-radius:8px;background:var(--orange);color:white;border:none;cursor:pointer;font-weight:700">적용</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ═══ DATA ═══
-const verificationRequests = [];
-// 실제 인증 요청은 Firestore에서 로드됩니다.
+let verificationRequests = [];
+let verificationsLoaded = false;
 
 let allUsers = [];
 let allUsersLoaded = false;
 // 실제 회원 목록은 Firestore에서 로드됩니다.
 
-const recentReviews = [];
-// 실제 리뷰는 Firestore에서 로드됩니다.
+let recentReviews = [];
+let reviewsLoaded = false;
 
 const reportItems = [];
 // 실제 신고는 Firestore에서 로드됩니다.
@@ -1310,7 +1337,7 @@ async function renderUsersTable(filter = 'all') {
           id: doc.id, name: d.displayName || d.nickname || '(이름없음)', email: d.email || '-',
           photoURL: d.photoURL || '', nickname: d.nickname || '', role: d.role || '',
           verified: d.verified || false, isInstructor: d.isInstructor || false,
-          joined: lastLogin, reviews: 0, tier: d.verified ? 'verified' : 'unverified'
+          joined: lastLogin, points: d.points || 0, tier: d.verified ? 'verified' : 'unverified'
         };
       });
       allUsersLoaded = true;
@@ -1341,10 +1368,11 @@ async function renderUsersTable(filter = 'all') {
       </td>
       <td style="font-size:12px">${u.joined}</td>
       <td>${u.verified ? '<span class="status-badge status-approved">인증됨</span>' : '<span class="status-badge status-unverified">비인증</span>'}</td>
-      <td>${u.reviews}개</td>
+      <td><span style="font-weight:700;color:var(--orange)">${(u.points || 0).toFixed(1)}P</span></td>
       <td>${getTierBadge(u.tier)}</td>
       <td>
         <div class="action-btn-group">
+          <button class="action-btn action-btn-view" onclick="openPointModal('${u.id}','${u.name.replace(/'/g,'\\&#39;')}')">💰 포인트</button>
           ${u.role !== 'admin' ? `<button class="action-btn action-btn-approve" onclick="setAdmin('${u.id}')">관리자</button>` : ''}
           ${!u.verified ? `<button class="action-btn action-btn-approve" onclick="manualVerify('${u.id}')">수동 인증</button>` : ''}
         </div>
@@ -1354,11 +1382,15 @@ async function renderUsersTable(filter = 'all') {
 }
 
 function renderReviewsTable() {
+  if (recentReviews.length === 0) {
+    document.getElementById('reviewsTableBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400)">등록된 리뷰가 없습니다.</td></tr>';
+    return;
+  }
   document.getElementById('reviewsTableBody').innerHTML = recentReviews.map((r, idx) => `
     <tr id="reviewRow${idx}" ${r.blinded ? 'style="opacity:0.4"' : ''}>
       <td><span class="user-name">${r.author}</span></td>
       <td>${r.instructor}</td>
-      <td><span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score}.0 ★</span></td>
+      <td><span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score ? r.score + ' ★' : '-'}</span></td>
       <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.blinded ? '<span style="color:var(--gray-400)">🚫 블라인드 처리된 리뷰</span>' : r.text}</td>
       <td>${r.verified ? '<span class="status-badge status-approved">인증</span>' : '<span class="status-badge status-unverified">비인증</span>'}</td>
       <td>${r.date}</td>
@@ -1368,6 +1400,7 @@ function renderReviewsTable() {
             ? `<button class="action-btn action-btn-approve" onclick="unblindReview(${idx})">복구</button>`
             : `<button class="action-btn action-btn-delete" onclick="blindReview(${idx})">블라인드</button>`
           }
+          <button class="action-btn action-btn-delete" onclick="deleteReviewPerm(${idx})">삭제</button>
         </div>
       </td>
     </tr>
@@ -1413,50 +1446,63 @@ function renderInstructorsTable() {
 }
 
 // ═══ ACTIONS ═══
-function approveVerify(id) {
+async function approveVerify(id) {
   const req = verificationRequests.find(v => v.id === id);
   if (!req) return;
   req.status = 'approved';
+  // Firestore 업데이트
+  if (req.docId) {
+    try {
+      await db.collection('verifications').doc(req.docId).update({ status: 'approved' });
+      if (req.userId) {
+        await db.collection('users').doc(req.userId).set({ verified: true }, { merge: true });
+      }
+    } catch(e) { console.error(e); }
+  }
   const user = allUsers.find(u => u.id === req.userId);
   if (user) {
     user.verified = true;
-    user.verifiedDate = '2026.05.21';
     user.tier = user.reviews >= 3 ? 'expert' : 'verified';
-    user.verifiedCourses.push(req.course);
   }
   updatePendingCount();
-  renderAll();
+  renderVerificationTable();
+  renderDashboardRecent();
+  renderUsersTable();
   closeVerifyModal();
-  showToast(`✅ ${req.userName}님의 인증이 승인되었습니다. 인증 수강생 뱃지가 부여됩니다.`, 'success');
+  showToast(`✅ ${req.userName}님의 인증이 승인되었습니다.`, 'success');
 }
 
-function rejectVerify(id) {
+async function rejectVerify(id) {
   const req = verificationRequests.find(v => v.id === id);
   if (!req) return;
   req.status = 'rejected';
   req.note = '관리자 검토 결과 인증 자료 불충분';
+  if (req.docId) {
+    try { await db.collection('verifications').doc(req.docId).update({ status: 'rejected', note: req.note }); } catch(e) { console.error(e); }
+  }
   updatePendingCount();
-  renderAll();
+  renderVerificationTable();
+  renderDashboardRecent();
   closeVerifyModal();
   showToast(`❌ ${req.userName}님의 인증 요청이 거부되었습니다.`, 'error');
 }
 
-function revokeVerify(userId) {
+async function revokeVerify(userId) {
   const user = allUsers.find(u => u.id === userId);
   if (!user) return;
   user.verified = false;
   user.tier = 'unverified';
-  user.verifiedCourses = [];
-  renderAll();
+  try { await db.collection('users').doc(userId).set({ verified: false }, { merge: true }); } catch(e) { console.error(e); }
+  renderUsersTable();
   showToast(`${user.name}님의 인증이 해제되었습니다.`, 'info');
 }
 
-function manualVerify(userId) {
+async function manualVerify(userId) {
   const user = allUsers.find(u => u.id === userId);
   if (!user) return;
   user.verified = true;
-  user.verifiedDate = '2026.05.21';
   user.tier = user.reviews >= 3 ? 'expert' : 'verified';
+  try { await db.collection('users').doc(userId).set({ verified: true }, { merge: true }); } catch(e) { console.error(e); }
   renderAll();
   showToast(`✅ ${user.name}님이 수동 인증되었습니다.`, 'success');
 }
@@ -1792,6 +1838,99 @@ async function loadDashboardStats() {
   }
 }
 
+// ═══ 포인트 수동 지급 ═══
+let pointTargetUid = null;
+function openPointModal(uid, name) {
+  pointTargetUid = uid;
+  document.getElementById('pointModalUser').textContent = name;
+  document.getElementById('pointAmount').value = '';
+  document.getElementById('pointReason').value = '';
+  document.getElementById('pointModal').style.display = 'flex';
+}
+function closePointModal() {
+  document.getElementById('pointModal').style.display = 'none';
+  pointTargetUid = null;
+}
+async function submitPointGrant() {
+  if (!pointTargetUid) return;
+  const amount = parseFloat(document.getElementById('pointAmount').value);
+  const reason = document.getElementById('pointReason').value.trim() || '관리자 수동 지급';
+  if (!amount || isNaN(amount)) { alert('포인트 수량을 입력해주세요.'); return; }
+  try {
+    await db.collection('users').doc(pointTargetUid).set({
+      points: firebase.firestore.FieldValue.increment(amount)
+    }, { merge: true });
+    // 로컬 업데이트
+    const u = allUsers.find(x => x.id === pointTargetUid);
+    if (u) u.points = (u.points || 0) + amount;
+    closePointModal();
+    renderUsersTable();
+    showToast(`${amount > 0 ? '+' : ''}${amount}P ${reason}`, 'success');
+  } catch(e) {
+    console.error(e);
+    showToast('포인트 지급 실패', 'error');
+  }
+}
+
+// ═══ Firestore 리뷰 로드 ═══
+async function loadFirestoreReviews() {
+  if (reviewsLoaded) return;
+  try {
+    const snap = await db.collection('reviews').orderBy('createdAt', 'desc').get();
+    recentReviews = snap.docs.map(doc => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        author: d.author || '익명',
+        authorUid: d.authorUid || '',
+        instructor: d.instructor || '-',
+        course: d.course || '',
+        score: d.score || 0,
+        text: d.text || '',
+        verified: d.verified || false,
+        date: d.date || '',
+        blinded: d.blinded || false
+      };
+    });
+    reviewsLoaded = true;
+    renderReviewsTable();
+  } catch(e) {
+    console.error('리뷰 로드 실패:', e);
+  }
+}
+
+// ═══ Firestore 인증 요청 로드 ═══
+async function loadFirestoreVerifications() {
+  if (verificationsLoaded) return;
+  try {
+    const snap = await db.collection('verifications').orderBy('createdAt', 'desc').get();
+    verificationRequests = snap.docs.map((doc, idx) => {
+      const d = doc.data();
+      return {
+        id: idx + 1,
+        docId: doc.id,
+        userId: d.userId || '',
+        userName: d.userName || d.name || '미상',
+        email: d.email || '',
+        instructor: d.instructor || '-',
+        course: d.course || '',
+        type: d.type || '수강 인증',
+        fileName: d.fileName || '첨부파일',
+        fileUrl: d.fileUrl || '',
+        status: d.status || 'pending',
+        date: d.date || '',
+        note: d.note || ''
+      };
+    });
+    verificationsLoaded = true;
+    renderVerificationTable();
+    renderDashboardRecent();
+    updatePendingCount();
+  } catch(e) {
+    console.error('인증 요청 로드 실패:', e);
+  }
+}
+
 function renderAll() {
   renderDashboardRecent();
   renderVerificationTable();
@@ -1805,6 +1944,9 @@ function renderAll() {
   updatePendingCount();
   loadInstVerifyRequests();
   loadDashboardStats();
+  // Firestore 데이터 로드
+  loadFirestoreReviews();
+  loadFirestoreVerifications();
 }
 
 // ═══ MOBILE SIDEBAR ═══
@@ -1926,16 +2068,29 @@ function saveInstructorEdit(idx) {
   showToast(`✅ "${i.name}" 강사 정보가 수정되었습니다.`, 'success');
 }
 
-function blindReview(idx) {
-  recentReviews[idx].blinded = true;
+async function blindReview(idx) {
+  const r = recentReviews[idx];
+  r.blinded = true;
+  if (r.id) { try { await db.collection('reviews').doc(r.id).update({ blinded: true }); } catch(e) { console.error(e); } }
   renderReviewsTable();
   showToast('리뷰가 블라인드 처리되었습니다.', 'info');
 }
 
-function unblindReview(idx) {
-  recentReviews[idx].blinded = false;
+async function unblindReview(idx) {
+  const r = recentReviews[idx];
+  r.blinded = false;
+  if (r.id) { try { await db.collection('reviews').doc(r.id).update({ blinded: false }); } catch(e) { console.error(e); } }
   renderReviewsTable();
   showToast('리뷰 블라인드가 해제되었습니다.', 'success');
+}
+
+async function deleteReviewPerm(idx) {
+  if (!confirm('이 리뷰를 완전히 삭제하시겠습니까? 복구할 수 없습니다.')) return;
+  const r = recentReviews[idx];
+  if (r.id) { try { await db.collection('reviews').doc(r.id).delete(); } catch(e) { console.error(e); } }
+  recentReviews.splice(idx, 1);
+  renderReviewsTable();
+  showToast('리뷰가 삭제되었습니다.', 'info');
 }
 
 function handleReport(idx, result) {
