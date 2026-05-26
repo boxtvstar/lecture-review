@@ -2076,6 +2076,8 @@ async function loadFirestoreReviews() {
         date: d.date || '',
         blinded: d.blinded || false,
         platformRating: d.platformRating || 0,
+        platformRefund: d.platformRefund || 0,
+        platformSupport: d.platformSupport || 0,
         platformReview: d.platformReview || '',
         coursePrice: d.coursePrice || 0
       };
@@ -2298,6 +2300,14 @@ function openReviewDetail(idx) {
         <span style="color:var(--blue)">플랫폼 만족도</span>
         <span style="color:var(--gold);font-weight:800">${'★'.repeat(r.platformRating)}${'☆'.repeat(5-r.platformRating)}</span>
       </div>` : '') +
+      (r.platformRefund ? `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">
+        <span style="color:var(--blue)">환불 편의성</span>
+        <span style="color:var(--gold);font-weight:800">${'★'.repeat(r.platformRefund)}${'☆'.repeat(5-r.platformRefund)}</span>
+      </div>` : '') +
+      (r.platformSupport ? `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">
+        <span style="color:var(--blue)">고객응대</span>
+        <span style="color:var(--gold);font-weight:800">${'★'.repeat(r.platformSupport)}${'☆'.repeat(5-r.platformSupport)}</span>
+      </div>` : '') +
       (r.platformReview ? `<div style="font-size:13px;padding:6px 0;border-top:1px solid var(--gray-200);margin-top:4px;padding-top:6px">
         <span style="color:var(--blue);font-weight:700">플랫폼 한줄평:</span>
         <span style="color:var(--gray-600);margin-left:6px">${r.platformReview}</span>
@@ -2359,6 +2369,18 @@ function openReviewDetail(idx) {
             `<span class="admin-edit-star" data-label="platformRating" data-val="${s}" onclick="setAdminStar(this,'platformRating',${s})" style="cursor:pointer;font-size:18px;color:${s <= (r.platformRating || 0) ? 'var(--blue)' : '#D1D5DB'}">${s <= (r.platformRating || 0) ? '★' : '☆'}</span>`
           ).join('')}</div>
         </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <span style="font-size:12px;color:var(--blue);width:100px;flex-shrink:0;font-weight:700">환불 편의성</span>
+          <div style="display:flex;gap:2px">${[1,2,3,4,5].map(s =>
+            `<span class="admin-edit-star" data-label="platformRefund" data-val="${s}" onclick="setAdminStar(this,'platformRefund',${s})" style="cursor:pointer;font-size:18px;color:${s <= (r.platformRefund || 0) ? 'var(--blue)' : '#D1D5DB'}">${s <= (r.platformRefund || 0) ? '★' : '☆'}</span>`
+          ).join('')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <span style="font-size:12px;color:var(--blue);width:100px;flex-shrink:0;font-weight:700">고객응대</span>
+          <div style="display:flex;gap:2px">${[1,2,3,4,5].map(s =>
+            `<span class="admin-edit-star" data-label="platformSupport" data-val="${s}" onclick="setAdminStar(this,'platformSupport',${s})" style="cursor:pointer;font-size:18px;color:${s <= (r.platformSupport || 0) ? 'var(--blue)' : '#D1D5DB'}">${s <= (r.platformSupport || 0) ? '★' : '☆'}</span>`
+          ).join('')}</div>
+        </div>
         <div style="margin-top:8px">
           <span style="font-size:12px;color:var(--blue);font-weight:700">플랫폼 한줄평가</span>
           <input type="text" id="adminPlatformReview" value="${r.platformReview || ''}" placeholder="플랫폼에 대한 한줄 평가" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;margin-top:4px;box-sizing:border-box">
@@ -2408,12 +2430,18 @@ async function saveAdminRatings(idx) {
   if (!r || !r.id) { showToast('리뷰 ID가 없습니다.', 'error'); return; }
   const ratings = {};
   let platRating = 0;
+  let platRefund = 0;
+  let platSupport = 0;
   document.querySelectorAll('#adminRatingEdit .admin-edit-star').forEach(s => {
     const label = s.dataset.label;
     const val = parseInt(s.dataset.val);
     if (s.textContent === '★') {
       if (label === 'platformRating') {
         if (val > platRating) platRating = val;
+      } else if (label === 'platformRefund') {
+        if (val > platRefund) platRefund = val;
+      } else if (label === 'platformSupport') {
+        if (val > platSupport) platSupport = val;
       } else {
         if (!ratings[label] || val > ratings[label]) ratings[label] = val;
       }
@@ -2424,6 +2452,8 @@ async function saveAdminRatings(idx) {
   const score = Math.round(vals.reduce((a,b)=>a+b,0) / vals.length * 10) / 10;
   const updateData = { ratings, score };
   if (platRating > 0) updateData.platformRating = platRating;
+  if (platRefund > 0) updateData.platformRefund = platRefund;
+  if (platSupport > 0) updateData.platformSupport = platSupport;
   const platReviewText = document.getElementById('adminPlatformReview')?.value?.trim() || '';
   if (platReviewText) updateData.platformReview = platReviewText;
   const adminPrice = parseInt(document.getElementById('adminCoursePrice')?.value) || 0;
@@ -2433,6 +2463,8 @@ async function saveAdminRatings(idx) {
     r.ratings = ratings;
     r.score = score;
     if (platRating > 0) r.platformRating = platRating;
+    if (platRefund > 0) r.platformRefund = platRefund;
+    if (platSupport > 0) r.platformSupport = platSupport;
     if (platReviewText) r.platformReview = platReviewText;
     if (adminPrice > 0) r.coursePrice = adminPrice;
     showToast(`평점 저장 완료! (총점: ${score}${platRating > 0 ? ', 플랫폼: ★' + platRating : ''})`, 'success');

@@ -1465,6 +1465,26 @@ body {
               <span class="form-star" onclick="setPlatformStar(5)" data-pval="5">★</span>
             </div>
           </div>
+          <div class="form-rating-item">
+            <span class="form-rating-label">환불 편의성</span>
+            <div class="form-stars" id="platformRefundGroup">
+              <span class="form-star" onclick="setPlatformRefund(1)" data-prefund="1">★</span>
+              <span class="form-star" onclick="setPlatformRefund(2)" data-prefund="2">★</span>
+              <span class="form-star" onclick="setPlatformRefund(3)" data-prefund="3">★</span>
+              <span class="form-star" onclick="setPlatformRefund(4)" data-prefund="4">★</span>
+              <span class="form-star" onclick="setPlatformRefund(5)" data-prefund="5">★</span>
+            </div>
+          </div>
+          <div class="form-rating-item">
+            <span class="form-rating-label">고객응대</span>
+            <div class="form-stars" id="platformSupportGroup">
+              <span class="form-star" onclick="setPlatformSupport(1)" data-psupport="1">★</span>
+              <span class="form-star" onclick="setPlatformSupport(2)" data-psupport="2">★</span>
+              <span class="form-star" onclick="setPlatformSupport(3)" data-psupport="3">★</span>
+              <span class="form-star" onclick="setPlatformSupport(4)" data-psupport="4">★</span>
+              <span class="form-star" onclick="setPlatformSupport(5)" data-psupport="5">★</span>
+            </div>
+          </div>
         </div>
         <div style="margin-top:10px">
           <input class="form-input" placeholder="플랫폼에 대한 한줄 평가 (예: 환불이 편리하고 고객센터 응대가 빠름)" id="platformReviewText" style="font-size:13px">
@@ -2156,7 +2176,11 @@ function closeReviewModal() {
   // 별점 리셋
   document.querySelectorAll('.form-star').forEach(s => s.classList.remove('active'));
   platformRating = 0;
+  platformRefundRating = 0;
+  platformSupportRating = 0;
   document.querySelectorAll('[data-pval]').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('[data-prefund]').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('[data-psupport]').forEach(s => s.classList.remove('active'));
   document.getElementById('platformReviewText').value = '';
   document.getElementById('coursePriceInput').value = '';
   document.getElementById('coursePriceKorean').textContent = '';
@@ -2871,6 +2895,14 @@ async function submitReview() {
     if (platformRating > 0) {
       reviewData.platformRating = platformRating;
     }
+    // 환불 편의성 저장
+    if (platformRefundRating > 0) {
+      reviewData.platformRefund = platformRefundRating;
+    }
+    // 고객응대 저장
+    if (platformSupportRating > 0) {
+      reviewData.platformSupport = platformSupportRating;
+    }
     // 플랫폼 한줄평가 저장
     const platformReviewText = document.getElementById('platformReviewText').value.trim();
     if (platformReviewText) {
@@ -2922,7 +2954,11 @@ function closeSuccessPopup() {
   document.getElementById('customPlatform').value = '';
   document.getElementById('customPlatform').style.display = 'none';
   platformRating = 0;
+  platformRefundRating = 0;
+  platformSupportRating = 0;
   document.querySelectorAll('[data-pval]').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('[data-prefund]').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('[data-psupport]').forEach(s => s.classList.remove('active'));
   document.getElementById('platformReviewText').value = '';
   document.getElementById('coursePriceInput').value = '';
   document.getElementById('coursePriceKorean').textContent = '';
@@ -3006,8 +3042,7 @@ function renderPlatforms() {
       <div style="margin-top:12px;border-top:1px solid var(--gray-100);padding-top:10px">
         <div class="platform-detail-row"><span class="platform-detail-label">강사 평균</span><span class="platform-detail-val">${p.instAvg ? p.instAvg.toFixed(1) : '0.0'}</span></div>
         <div class="platform-detail-row"><span class="platform-detail-label">환불 편의성</span><span class="platform-detail-val">${p.refund.toFixed(1)}</span></div>
-        <div class="platform-detail-row"><span class="platform-detail-label">고객지원</span><span class="platform-detail-val">${p.support.toFixed(1)}</span></div>
-        <div class="platform-detail-row"><span class="platform-detail-label">콘텐츠 질</span><span class="platform-detail-val">${p.content.toFixed(1)}</span></div>
+        <div class="platform-detail-row"><span class="platform-detail-label">고객응대</span><span class="platform-detail-val">${p.support.toFixed(1)}</span></div>
       </div>
     </div>`;
   }).join('');
@@ -3041,10 +3076,24 @@ function updatePriceDisplay() {
 
 // ═══ PLATFORM STAR RATING ═══
 let platformRating = 0;
+let platformRefundRating = 0;
+let platformSupportRating = 0;
 function setPlatformStar(val) {
   platformRating = val;
   document.querySelectorAll('[data-pval]').forEach(s => {
     s.classList.toggle('active', parseInt(s.dataset.pval) <= val);
+  });
+}
+function setPlatformRefund(val) {
+  platformRefundRating = val;
+  document.querySelectorAll('[data-prefund]').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.prefund) <= val);
+  });
+}
+function setPlatformSupport(val) {
+  platformSupportRating = val;
+  document.querySelectorAll('[data-psupport]').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.psupport) <= val);
   });
 }
 
@@ -3207,12 +3256,29 @@ async function loadFirestoreReviews() {
         p.satisfaction = Math.round(satRatings.reduce((a, b) => a + b, 0) / satRatings.length * 10) / 10;
       }
 
+      // 환불 편의성 평균
+      const refundRatings = pRevs.filter(r => r.platformRefund > 0).map(r => r.platformRefund);
+      if (refundRatings.length > 0) {
+        p.refund = Math.round(refundRatings.reduce((a, b) => a + b, 0) / refundRatings.length * 10) / 10;
+      }
+
+      // 고객응대 평균
+      const supportRatings = pRevs.filter(r => r.platformSupport > 0).map(r => r.platformSupport);
+      if (supportRatings.length > 0) {
+        p.support = Math.round(supportRatings.reduce((a, b) => a + b, 0) / supportRatings.length * 10) / 10;
+      }
+
       // 강사 평균 점수 (상세 항목용)
       const scored = platInsts.filter(i => i.score > 0);
       p.instAvg = scored.length > 0 ? Math.round(scored.reduce((s, i) => s + i.score, 0) / scored.length * 10) / 10 : 0;
 
-      // 플랫폼 메인 점수: platformRating 평균 사용 (없으면 강사 평균 fallback)
-      p.score = satRatings.length > 0 ? p.satisfaction : p.instAvg;
+      // 플랫폼 메인 점수: 플랫폼 평가 3개 항목 평균 (없으면 강사 평균 fallback)
+      const allPlatRatings = [
+        ...(satRatings.length > 0 ? [p.satisfaction] : []),
+        ...(refundRatings.length > 0 ? [p.refund] : []),
+        ...(supportRatings.length > 0 ? [p.support] : [])
+      ];
+      p.score = allPlatRatings.length > 0 ? Math.round(allPlatRatings.reduce((a, b) => a + b, 0) / allPlatRatings.length * 10) / 10 : p.instAvg;
     });
 
     // 전체 렌더링 갱신
