@@ -1401,6 +1401,23 @@ body {
   </div>
 </div>
 
+<!-- ═══ PLATFORM DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="platformDetailModal" onclick="if(event.target===this)closePlatformModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-instructor">
+        <div class="modal-avatar" id="platModalAvatar"></div>
+        <div>
+          <div class="modal-name" id="platModalName"></div>
+          <div class="modal-sub" id="platModalSub"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closePlatformModal()">✕</button>
+    </div>
+    <div class="modal-body" id="platModalBody"></div>
+  </div>
+</div>
+
 <!-- ═══ REVIEW FORM MODAL ═══ -->
 <div class="modal-overlay" id="reviewModal" onclick="if(event.target===this)closeReviewModal()">
   <div class="modal">
@@ -3029,7 +3046,7 @@ function renderPlatforms() {
   grid.innerHTML = platformData.map(p => {
     const cls = p.score >= 4 ? 'good' : p.score >= 3 ? 'mid' : 'bad';
     return `
-    <div class="platform-card">
+    <div class="platform-card" style="cursor:pointer" onclick="openPlatformDetail('${p.name}')">
       <div class="platform-logo">
         <div class="platform-logo-icon" style="background:${p.color}">${p.icon.replace(/🟩|🟦|🟥|🟪|⬛|🟧/g, p.name[0])}</div>
         <span class="platform-name">${p.name}</span>
@@ -3046,6 +3063,307 @@ function renderPlatforms() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ═══ PLATFORM DETAIL MODAL ═══
+const platformCommentsData = {};
+
+function openPlatformDetail(name) {
+  const p = platformData.find(x => x.name === name);
+  if (!p) return;
+  const platKey = 'plat_' + name;
+
+  document.getElementById('platModalAvatar').style.background = p.color;
+  document.getElementById('platModalAvatar').textContent = p.name[0];
+  document.getElementById('platModalName').textContent = p.name;
+  document.getElementById('platModalSub').textContent = `플랫폼 · 리뷰 ${p.reviews}개`;
+
+  const cls = p.score >= 4 ? 'good' : p.score >= 3 ? 'mid' : 'bad';
+
+  // 이 플랫폼의 한줄평 모으기
+  const platReviewTexts = [];
+  try {
+    const allRevs = document.querySelectorAll ? null : null; // placeholder
+  } catch(e) {}
+
+  document.getElementById('platModalBody').innerHTML = `
+    <div class="modal-score-big">
+      <div class="modal-score-num ${cls}">${p.score.toFixed(1)}</div>
+      <div class="modal-score-stars">${generateStars(p.score, 24)}</div>
+      <div class="modal-score-count">전체 ${p.reviews}개 리뷰 기준</div>
+    </div>
+    <div class="rating-breakdown">
+      <div class="rating-row">
+        <span class="rating-label">플랫폼 만족도</span>
+        <div class="rating-bar-bg"><div class="rating-bar-fill" style="width:${(p.satisfaction/5)*100}%"></div></div>
+        <span class="rating-value">${p.satisfaction.toFixed(1)}</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">환불 편의성</span>
+        <div class="rating-bar-bg"><div class="rating-bar-fill" style="width:${(p.refund/5)*100}%"></div></div>
+        <span class="rating-value">${p.refund.toFixed(1)}</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">고객응대</span>
+        <div class="rating-bar-bg"><div class="rating-bar-fill" style="width:${(p.support/5)*100}%"></div></div>
+        <span class="rating-value">${p.support.toFixed(1)}</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">강사 평균</span>
+        <div class="rating-bar-bg"><div class="rating-bar-fill" style="width:${((p.instAvg||0)/5)*100}%"></div></div>
+        <span class="rating-value">${p.instAvg ? p.instAvg.toFixed(1) : '0.0'}</span>
+      </div>
+    </div>
+    <div class="modal-divider"></div>
+    <div style="margin-bottom:16px">
+      <span class="reviews-title">📋 플랫폼 한줄평</span>
+      <div id="platReviewTexts" style="margin-top:8px"></div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="comments-section">
+      <div class="comments-header">
+        <span class="comments-title">💬 의견 (미인증도 참여 가능)</span>
+        <span class="comments-count" id="platCommentCount"></span>
+      </div>
+      ${currentUser
+        ? '<div class="comment-input-area"><input class="comment-input" id="platCommentInput" placeholder="이 플랫폼에 대한 의견을 남겨주세요"><button class="comment-submit-btn" onclick="submitPlatformComment(\''+name.replace(/'/g,"\\'")+'\')">등록</button></div>'
+        : '<div class="comment-login-msg">의견을 남기려면 <a onclick="googleLogin()">로그인</a>이 필요합니다.</div>'
+      }
+      <div id="platCommentListContainer"></div>
+    </div>
+  `;
+
+  // 한줄평 로드
+  loadPlatformReviewTexts(name);
+  // 댓글 렌더
+  renderPlatformComments(platKey);
+
+  document.getElementById('platformDetailModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePlatformModal() {
+  document.getElementById('platformDetailModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// 플랫폼 한줄평 로드
+async function loadPlatformReviewTexts(platName) {
+  const el = document.getElementById('platReviewTexts');
+  if (!el) return;
+  try {
+    const snap = await firebase.firestore().collection('reviews').where('platform', '==', platName).get();
+    const texts = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (d.platformReview) {
+        texts.push({ author: d.author || '익명', text: d.platformReview, rating: d.platformRating || 0, date: d.date || '' });
+      }
+    });
+    if (texts.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:13px">아직 한줄평이 없습니다.</div>';
+      return;
+    }
+    el.innerHTML = texts.map(t => `
+      <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:700;color:var(--navy)">${t.author}</span>
+          <span style="font-size:11px;color:var(--gray-400)">${t.date} ${t.rating > 0 ? '· ★' + t.rating : ''}</span>
+        </div>
+        <div style="font-size:13px;color:var(--gray-700)">${t.text}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--gray-400);font-size:13px">한줄평 로드 실패</div>';
+  }
+}
+
+// 플랫폼 댓글 렌더링
+function renderPlatformComments(platKey) {
+  const comments = platformCommentsData[platKey] || [];
+  const container = document.getElementById('platCommentListContainer');
+  const countEl = document.getElementById('platCommentCount');
+  const totalCount = comments.reduce((s, c) => s + 1 + (c.replies || []).length, 0);
+  if (countEl) countEl.textContent = `${totalCount}개`;
+  if (!container) return;
+  if (comments.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:13px">아직 의견이 없습니다.</div>';
+    return;
+  }
+  container.innerHTML = comments.map((c, i) => {
+    const isMyCmt = currentUser && (c.authorUid === currentUser.uid);
+    const cmtActions = (isMyCmt || isAdmin) ? `<div class="comment-actions">
+      <button onclick="event.stopPropagation();editPlatComment('${platKey}',${i})">수정</button>
+      <button onclick="event.stopPropagation();deletePlatComment('${platKey}',${i})">삭제</button>
+    </div>` : '';
+    const replyBtn = currentUser ? `<button class="comment-reply-btn" onclick="event.stopPropagation();showPlatReplyInput('${platKey}',${i})">↩ 답글</button>` : '';
+    const cLiked = currentUser && (c.likedBy || []).includes(currentUser.uid);
+    const likeBtn = `<button class="comment-like-btn${cLiked ? ' liked' : ''}" onclick="event.stopPropagation();likePlatComment('${platKey}',${i})">❤️ ${c.likes || 0}</button>`;
+    const replies = (c.replies || []).map((r, ri) => {
+      const isMyReply = currentUser && (r.authorUid === currentUser.uid);
+      const replyActions = (isMyReply || isAdmin) ? `<div class="comment-actions"><button onclick="event.stopPropagation();deletePlatReply('${platKey}',${i},${ri})">삭제</button></div>` : '';
+      return `<div class="comment-item">
+        <div class="comment-top"><div><span class="comment-author">${r.author}</span></div><span class="comment-date">${r.date}</span>${replyActions}</div>
+        <div class="comment-text">${r.text}</div>
+      </div>`;
+    }).join('');
+    return `<div class="comment-item">
+      <div class="comment-top">
+        <div><span class="comment-author">${c.author}</span>${replyBtn}</div>
+        <span class="comment-date">${c.date}</span>${cmtActions}
+      </div>
+      <div class="comment-text">${c.text}</div>
+      ${likeBtn}
+      ${replies ? '<div class="comment-replies">' + replies + '</div>' : ''}
+      <div id="platReplyArea${i}"></div>
+    </div>`;
+  }).join('');
+}
+
+function submitPlatformComment(platName) {
+  const input = document.getElementById('platCommentInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) { alert('의견을 입력해주세요.'); return; }
+  if (!currentUser) { googleLogin(); return; }
+  const platKey = 'plat_' + platName;
+  if (!platformCommentsData[platKey]) platformCommentsData[platKey] = [];
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+  const commentObj = {
+    author: getDisplayName(),
+    authorUid: currentUser.uid,
+    email: currentUser.email || '',
+    date: dateStr,
+    text: text,
+    likes: 0,
+    likedBy: [],
+    replies: [],
+    platformName: platName,
+    type: 'platform'
+  };
+  platformCommentsData[platKey].unshift(commentObj);
+  input.value = '';
+  renderPlatformComments(platKey);
+  firebase.firestore().collection('platform_comments').add({
+    ...commentObj,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(ref => { commentObj._docId = ref.id; })
+    .catch(e => console.error('플랫폼 댓글 저장 실패:', e));
+  addPoints(currentUser.uid, 0.5, '플랫폼 댓글 작성');
+  showPointToast(0.5, '플랫폼 댓글 작성');
+}
+
+function showPlatReplyInput(platKey, i) {
+  const area = document.getElementById('platReplyArea' + i);
+  if (!area) return;
+  if (area.innerHTML) { area.innerHTML = ''; return; }
+  area.innerHTML = `<div class="comment-reply-input-area"><input id="platReplyInput${i}" placeholder="답글 입력..." onkeypress="if(event.key==='Enter')submitPlatReply('${platKey}',${i})"><button onclick="submitPlatReply('${platKey}',${i})">등록</button></div>`;
+  document.getElementById('platReplyInput' + i).focus();
+}
+
+function submitPlatReply(platKey, i) {
+  const input = document.getElementById('platReplyInput' + i);
+  if (!input || !input.value.trim()) return;
+  const comments = platformCommentsData[platKey];
+  if (!comments || !comments[i]) return;
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+  const reply = { author: getDisplayName(), authorUid: currentUser.uid, date: dateStr, text: input.value.trim(), likes: 0, likedBy: [] };
+  if (!comments[i].replies) comments[i].replies = [];
+  comments[i].replies.push(reply);
+  renderPlatformComments(platKey);
+  if (comments[i]._docId) {
+    firebase.firestore().collection('platform_comments').doc(comments[i]._docId).update({
+      replies: comments[i].replies
+    }).catch(e => console.error(e));
+  }
+}
+
+function likePlatComment(platKey, i) {
+  if (!currentUser) return;
+  const comments = platformCommentsData[platKey];
+  if (!comments || !comments[i]) return;
+  const c = comments[i];
+  if (!c.likedBy) c.likedBy = [];
+  const idx = c.likedBy.indexOf(currentUser.uid);
+  if (idx >= 0) { c.likedBy.splice(idx, 1); c.likes = Math.max(0, (c.likes || 1) - 1); }
+  else { c.likedBy.push(currentUser.uid); c.likes = (c.likes || 0) + 1; }
+  renderPlatformComments(platKey);
+  if (c._docId) {
+    firebase.firestore().collection('platform_comments').doc(c._docId).update({ likes: c.likes, likedBy: c.likedBy }).catch(e => console.error(e));
+  }
+}
+
+function editPlatComment(platKey, i) {
+  const comments = platformCommentsData[platKey];
+  if (!comments || !comments[i]) return;
+  const newText = prompt('수정할 내용:', comments[i].text);
+  if (newText === null || !newText.trim()) return;
+  comments[i].text = newText.trim();
+  renderPlatformComments(platKey);
+  if (comments[i]._docId) {
+    firebase.firestore().collection('platform_comments').doc(comments[i]._docId).update({ text: comments[i].text }).catch(e => console.error(e));
+  }
+}
+
+function deletePlatComment(platKey, i) {
+  if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+  const comments = platformCommentsData[platKey];
+  if (!comments || !comments[i]) return;
+  if (comments[i]._docId) {
+    firebase.firestore().collection('platform_comments').doc(comments[i]._docId).delete().catch(e => console.error(e));
+  }
+  comments.splice(i, 1);
+  renderPlatformComments(platKey);
+}
+
+function deletePlatReply(platKey, i, ri) {
+  if (!confirm('이 답글을 삭제하시겠습니까?')) return;
+  const comments = platformCommentsData[platKey];
+  if (!comments || !comments[i] || !comments[i].replies) return;
+  comments[i].replies.splice(ri, 1);
+  renderPlatformComments(platKey);
+  if (comments[i]._docId) {
+    firebase.firestore().collection('platform_comments').doc(comments[i]._docId).update({ replies: comments[i].replies }).catch(e => console.error(e));
+  }
+}
+
+// 플랫폼 댓글 Firestore 로드
+async function loadPlatformComments() {
+  try {
+    const snap = await firebase.firestore().collection('platform_comments').get();
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (d.deleted) return;
+      const platKey = 'plat_' + (d.platformName || '');
+      if (!platKey || platKey === 'plat_') return;
+      if (!platformCommentsData[platKey]) platformCommentsData[platKey] = [];
+      if (platformCommentsData[platKey].some(c => c._docId === doc.id)) return;
+      platformCommentsData[platKey].push({
+        _docId: doc.id,
+        author: d.author || '익명',
+        authorUid: d.authorUid || '',
+        email: d.email || '',
+        date: d.date || '',
+        text: d.text || '',
+        likes: d.likes || 0,
+        likedBy: d.likedBy || [],
+        replies: (d.replies || []).map(r => ({
+          author: r.author || '', authorUid: r.authorUid || '', date: r.date || '', text: r.text || '',
+          likes: r.likes || 0, likedBy: r.likedBy || []
+        })),
+        platformName: d.platformName || '',
+        type: 'platform'
+      });
+    });
+    Object.keys(platformCommentsData).forEach(k => {
+      platformCommentsData[k].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    });
+    console.log('플랫폼 댓글 로드 완료');
+  } catch(e) {
+    console.error('플랫폼 댓글 로드 실패:', e);
+  }
 }
 
 // ═══ 강의 금액 한글 변환 ═══
@@ -3347,6 +3665,7 @@ renderPlatforms();
 renderCommunityPreview();
 loadFirestoreReviews();
 loadFirestoreComments();
+loadPlatformComments();
 </script>
 </body>
 </html>
