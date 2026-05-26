@@ -2488,6 +2488,12 @@ function helpfulClick(instId, reviewIdx) {
     review.helpful++;
   }
   localStorage.setItem('helpfulVotes', JSON.stringify(helpfulVotes));
+  // Firestore에 도움됨 수 저장
+  if (review._docId) {
+    firebase.firestore().collection('reviews').doc(review._docId).update({
+      helpful: review.helpful
+    }).catch(e => console.error('도움됨 저장 실패:', e));
+  }
   openDetail(instId);
 }
 
@@ -2497,6 +2503,15 @@ function reportReview(btn) {
   btn.textContent = '✅ 신고 접수됨';
   btn.style.color = 'var(--green)';
   btn.style.cursor = 'default';
+  // Firestore에 신고 저장
+  if (currentUser) {
+    firebase.firestore().collection('reports').add({
+      reporter: getDisplayName(),
+      reporterUid: currentUser.uid,
+      date: new Date().toISOString(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(e => console.error('신고 저장 실패:', e));
+  }
 }
 
 // ═══ 리뷰 다중 파일 업로드 + 드래그앤드랍 ═══
@@ -2628,6 +2643,23 @@ function renderComments(instId) {
   }).join('');
 }
 
+// Firestore 댓글 동기화 헬퍼
+function syncCommentToFirestore(instId, i) {
+  const comments = commentsData[instId];
+  if (!comments || !comments[i] || !comments[i]._docId) return;
+  const c = comments[i];
+  firebase.firestore().collection('comments').doc(c._docId).update({
+    text: c.text,
+    likes: c.likes || 0,
+    likedBy: c.likedBy || [],
+    replies: (c.replies || []).map(r => ({
+      author: r.author || '', date: r.date || '', text: r.text || '',
+      likes: r.likes || 0, likedBy: r.likedBy || [],
+      isInstructor: r.isInstructor || false
+    }))
+  }).catch(e => console.error('댓글 동기화 실패:', e));
+}
+
 function submitComment(instId) {
   const input = document.getElementById('commentInput');
   if (!input) return;
@@ -2647,6 +2679,7 @@ function submitComment(instId) {
     date: dateStr,
     text: text,
     likes: 0,
+    likedBy: [],
     replies: [],
     instructor: inst ? inst.name : '',
     instructorId: instId
@@ -2654,11 +2687,12 @@ function submitComment(instId) {
   commentsData[instId].unshift(commentObj);
   input.value = '';
   renderComments(instId);
-  // Firestore에 댓글 저장
+  // Firestore에 댓글 저장 + docId 보관
   firebase.firestore().collection('comments').add({
     ...commentObj,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).catch(e => console.error('댓글 저장 실패:', e));
+  }).then(ref => { commentObj._docId = ref.id; })
+    .catch(e => console.error('댓글 저장 실패:', e));
   // 포인트 적립: 댓글 +0.5P
   addPoints(currentUser.uid, 0.5, '댓글 작성');
   showPointToast(0.5, '댓글 작성');
@@ -2680,10 +2714,11 @@ function submitInstReply(instId, i) {
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
   if (!comments[i].replies) comments[i].replies = [];
-  comments[i].replies.push({ author: getDisplayName(), date: dateStr, text: input.value.trim(), likes: 0, isInstructor: currentUser.isInstructor || false });
+  comments[i].replies.push({ author: getDisplayName(), date: dateStr, text: input.value.trim(), likes: 0, likedBy: [], isInstructor: currentUser.isInstructor || false });
   if (comments[i].author !== getDisplayName()) {
     addNotif(`↩ ${getDisplayName()}님이 회원님의 의견에 답글을 남겼습니다.`, instId, 'inst');
   }
+  syncCommentToFirestore(instId, i);
   renderComments(instId);
 }
 
@@ -2704,6 +2739,7 @@ function likeInstComment(instId, i) {
       addNotif(`❤️ ${getDisplayName()}님이 회원님의 의견을 좋아합니다.`, instId, 'inst');
     }
   }
+  syncCommentToFirestore(instId, i);
   renderComments(instId);
 }
 
@@ -2722,6 +2758,7 @@ function likeInstReply(instId, ci, ri) {
     r.likedBy.push(currentUser.uid);
     r.likes++;
   }
+  syncCommentToFirestore(instId, ci);
   renderComments(instId);
 }
 
@@ -2731,6 +2768,7 @@ function editInstComment(instId, i) {
   const newText = prompt('의견 수정:', comments[i].text);
   if (newText !== null && newText.trim()) {
     comments[i].text = newText.trim();
+    syncCommentToFirestore(instId, i);
     renderComments(instId);
   }
 }
@@ -2739,6 +2777,11 @@ function deleteInstComment(instId, i) {
   if (!confirm('의견을 삭제하시겠습니까?')) return;
   const comments = commentsData[instId];
   if (!comments) return;
+  const c = comments[i];
+  if (c && c._docId) {
+    firebase.firestore().collection('comments').doc(c._docId).delete()
+      .catch(e => console.error('댓글 삭제 실패:', e));
+  }
   comments.splice(i, 1);
   renderComments(instId);
 }
@@ -2748,6 +2791,7 @@ function deleteInstReply(instId, ci, ri) {
   const comments = commentsData[instId];
   if (!comments || !comments[ci] || !comments[ci].replies) return;
   comments[ci].replies.splice(ri, 1);
+  syncCommentToFirestore(instId, ci);
   renderComments(instId);
 }
 
@@ -3009,7 +3053,7 @@ async function loadFirestoreReviews() {
       if (!d.instructor) return;
       const name = d.instructor.trim();
       if (!grouped[name]) grouped[name] = [];
-      grouped[name].push(d);
+      grouped[name].push({ ...d, _docId: doc.id });
     });
     console.log('Firestore 리뷰 로드:', snap.size, '건, 강사:', Object.keys(grouped).join(', '));
 
@@ -3025,12 +3069,13 @@ async function loadFirestoreReviews() {
     // 리뷰를 강사에 병합
     function applyReviews(inst, reviews) {
       inst.reviewList = reviews.map(r => ({
+        _docId: r._docId || null,
         author: r.author || '익명',
         stars: r.score || 0,
         date: r.date || '',
         text: r.text || '',
         badge: r.verified ? 'verified' : 'unverified',
-        helpful: 0, rebuttal: ''
+        helpful: r.helpful || 0, rebuttal: ''
       }));
       inst.reviews = reviews.length;
 
@@ -3127,6 +3172,48 @@ async function loadFirestoreReviews() {
   }
 }
 
+// ═══ 댓글 Firestore 로드 ═══
+async function loadFirestoreComments() {
+  try {
+    const snap = await firebase.firestore().collection('comments').get();
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (d.deleted) return;
+      const instId = d.instructorId;
+      if (!instId && instId !== 0) return;
+      if (!commentsData[instId]) commentsData[instId] = [];
+      // 중복 방지 (같은 docId가 이미 있으면 스킵)
+      if (commentsData[instId].some(c => c._docId === doc.id)) return;
+      commentsData[instId].push({
+        _docId: doc.id,
+        author: d.author || '익명',
+        authorUid: d.authorUid || '',
+        email: d.email || '',
+        verified: d.verified || false,
+        isInstructor: d.isInstructor || false,
+        date: d.date || '',
+        text: d.text || '',
+        likes: d.likes || 0,
+        likedBy: d.likedBy || [],
+        replies: (d.replies || []).map(r => ({
+          author: r.author || '', date: r.date || '', text: r.text || '',
+          likes: r.likes || 0, likedBy: r.likedBy || [],
+          isInstructor: r.isInstructor || false
+        })),
+        instructor: d.instructor || '',
+        instructorId: instId
+      });
+    });
+    // 날짜순 정렬 (최신 먼저)
+    Object.keys(commentsData).forEach(k => {
+      commentsData[k].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    });
+    console.log('댓글 로드 완료');
+  } catch(e) {
+    console.error('댓글 로드 실패:', e);
+  }
+}
+
 // ═══ INIT ═══
 renderHeroStats();
 renderCategoryTabs();
@@ -3138,6 +3225,7 @@ renderRankings();
 renderPlatforms();
 renderCommunityPreview();
 loadFirestoreReviews();
+loadFirestoreComments();
 </script>
 </body>
 </html>
