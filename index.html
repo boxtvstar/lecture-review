@@ -2984,7 +2984,7 @@ function renderPlatforms() {
       </div>
       <div class="platform-reviews">인증 리뷰 ${p.verified}개 / 전체 ${p.reviews}개</div>
       <div style="margin-top:12px;border-top:1px solid var(--gray-100);padding-top:10px">
-        <div class="platform-detail-row"><span class="platform-detail-label">만족도</span><span class="platform-detail-val">${p.satisfaction.toFixed(1)}</span></div>
+        <div class="platform-detail-row"><span class="platform-detail-label">강사 평균</span><span class="platform-detail-val">${p.instAvg ? p.instAvg.toFixed(1) : '0.0'}</span></div>
         <div class="platform-detail-row"><span class="platform-detail-label">환불 편의성</span><span class="platform-detail-val">${p.refund.toFixed(1)}</span></div>
         <div class="platform-detail-row"><span class="platform-detail-label">고객지원</span><span class="platform-detail-val">${p.support.toFixed(1)}</span></div>
         <div class="platform-detail-row"><span class="platform-detail-label">콘텐츠 질</span><span class="platform-detail-val">${p.content.toFixed(1)}</span></div>
@@ -3149,8 +3149,6 @@ async function loadFirestoreReviews() {
       const platInsts = instructors.filter(i => i.platform === p.name && i.reviews > 0);
       if (platInsts.length === 0 && !platReviews[p.name]) return;
       p.reviews = platInsts.reduce((s, i) => s + i.reviews, 0);
-      const scored = platInsts.filter(i => i.score > 0);
-      p.score = scored.length > 0 ? Math.round(scored.reduce((s, i) => s + i.score, 0) / scored.length * 10) / 10 : 0;
 
       // 플랫폼 만족도: 리뷰의 platformRating 평균
       const pRevs = platReviews[p.name] || [];
@@ -3158,6 +3156,13 @@ async function loadFirestoreReviews() {
       if (satRatings.length > 0) {
         p.satisfaction = Math.round(satRatings.reduce((a, b) => a + b, 0) / satRatings.length * 10) / 10;
       }
+
+      // 강사 평균 점수 (상세 항목용)
+      const scored = platInsts.filter(i => i.score > 0);
+      p.instAvg = scored.length > 0 ? Math.round(scored.reduce((s, i) => s + i.score, 0) / scored.length * 10) / 10 : 0;
+
+      // 플랫폼 메인 점수: platformRating 평균 사용 (없으면 강사 평균 fallback)
+      p.score = satRatings.length > 0 ? p.satisfaction : p.instAvg;
     });
 
     // 전체 렌더링 갱신
