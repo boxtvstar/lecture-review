@@ -1037,9 +1037,9 @@ body {
           <div class="admin-table-header">
             <div class="admin-table-title">자료 목록</div>
             <div class="admin-table-actions">
-              <button class="admin-filter-btn active" onclick="filterResAdmin('pending',this)">대기 중</button>
+              <button class="admin-filter-btn active" onclick="filterResAdmin('all',this)">전체</button>
+              <button class="admin-filter-btn" onclick="filterResAdmin('pending',this)">대기 중</button>
               <button class="admin-filter-btn" onclick="filterResAdmin('approved',this)">승인됨</button>
-              <button class="admin-filter-btn" onclick="filterResAdmin('all',this)">전체</button>
               <button class="action-btn action-btn-view" onclick="loadAdminResources()">🔄 새로고침</button>
             </div>
           </div>
@@ -2778,7 +2778,7 @@ async function deleteCommunityPost(id) {
 
 // ═══ 자료 승인 관리 ═══
 let adminResources = [];
-let resAdminFilter = 'pending';
+let resAdminFilter = 'all';
 
 async function loadAdminResources() {
   try {
