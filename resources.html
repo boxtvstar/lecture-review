@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>팔이피플 — 자료열람</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --navy: #1B2A4A; --navy-light: #2A3F6A; --navy-dark: #111D35;
+  --orange: #FF6B35; --orange-hover: #E85A28; --orange-light: #FFF0E9;
+  --white: #FFFFFF;
+  --gray-50: #F8F9FB; --gray-100: #F1F3F7; --gray-200: #E2E6EE;
+  --gray-300: #C8CFDB; --gray-400: #9BA3B5; --gray-500: #6B7280;
+  --gray-600: #4B5563; --gray-700: #374151;
+  --green: #10B981; --green-light: #ECFDF5;
+  --red: #EF4444; --red-light: #FEF2F2;
+  --blue: #3B82F6; --blue-light: #EFF6FF;
+  --gold: #F59E0B;
+  --shadow-sm: 0 1px 3px rgba(27,42,74,0.06);
+  --shadow-md: 0 4px 16px rgba(27,42,74,0.08);
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  background: var(--gray-50); color: var(--gray-700);
+  line-height: 1.6; -webkit-font-smoothing: antialiased;
+}
+
+/* ═══ RESOURCES PAGE ═══ */
+.res-container {
+  max-width: 900px; margin: 90px auto 40px; padding: 0 20px;
+}
+.res-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+}
+.res-title { font-size: 24px; font-weight: 900; color: var(--navy); }
+.res-title span { color: var(--orange); }
+.res-subtitle { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
+.res-my-points {
+  background: linear-gradient(135deg, var(--orange), #FF8C5A);
+  color: white; padding: 10px 20px; border-radius: var(--radius-md);
+  font-size: 14px; font-weight: 700;
+}
+.res-my-points .pts { font-size: 20px; font-weight: 900; margin-left: 6px; }
+.res-toolbar {
+  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+}
+.res-filter-btn {
+  padding: 8px 16px; border-radius: 20px; border: 1px solid var(--gray-200);
+  background: white; font-size: 13px; font-weight: 600; color: var(--gray-500);
+  cursor: pointer; transition: all 0.2s;
+}
+.res-filter-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+.res-write-btn {
+  margin-left: auto; padding: 8px 20px; border-radius: 20px;
+  background: var(--orange); color: white; border: none;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.res-write-btn:hover { background: var(--orange-hover); }
+
+/* ── RESOURCE CARD ── */
+.res-list { display: flex; flex-direction: column; gap: 12px; }
+.res-card {
+  background: white; border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200); padding: 20px;
+  cursor: pointer; transition: all 0.2s;
+}
+.res-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.res-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.res-card-title { font-size: 16px; font-weight: 800; color: var(--navy); flex: 1; }
+.res-card-cost {
+  background: var(--orange-light); color: var(--orange);
+  padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 800;
+  white-space: nowrap; margin-left: 12px;
+}
+.res-card-cost.free { background: var(--green-light); color: var(--green); }
+.res-card-desc {
+  font-size: 13px; color: var(--gray-500); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  margin-bottom: 10px;
+}
+.res-card-meta {
+  display: flex; gap: 12px; font-size: 12px; color: var(--gray-400); align-items: center;
+}
+.res-card-meta .author { font-weight: 600; color: var(--gray-600); }
+.res-card-badge {
+  padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+}
+.res-card-badge.pending { background: #FEF3C7; color: #D97706; }
+.res-card-badge.approved { background: var(--green-light); color: var(--green); }
+.res-empty {
+  text-align: center; padding: 60px 20px; color: var(--gray-400); font-size: 14px;
+}
+
+/* ── DETAIL OVERLAY ── */
+.res-detail-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  z-index: 9000; display: none; align-items: center; justify-content: center;
+}
+.res-detail-overlay.open { display: flex; }
+.res-detail-box {
+  background: white; border-radius: var(--radius-lg);
+  max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto;
+  padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.res-detail-title { font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 8px; }
+.res-detail-meta { font-size: 13px; color: var(--gray-400); margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
+.res-detail-content {
+  font-size: 14px; color: var(--gray-700); line-height: 1.8;
+  white-space: pre-wrap; word-break: break-word;
+  border-top: 1px solid var(--gray-200); padding-top: 20px;
+}
+.res-detail-close {
+  float: right; background: none; border: none; font-size: 24px;
+  cursor: pointer; color: var(--gray-400); padding: 4px;
+}
+
+/* ── PAY CONFIRM OVERLAY ── */
+.res-pay-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  z-index: 9500; display: none; align-items: center; justify-content: center;
+}
+.res-pay-overlay.open { display: flex; }
+.res-pay-box {
+  background: white; border-radius: var(--radius-lg);
+  padding: 32px; text-align: center; max-width: 380px; width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.res-pay-icon { font-size: 48px; margin-bottom: 12px; }
+.res-pay-title { font-size: 18px; font-weight: 900; color: var(--navy); margin-bottom: 8px; }
+.res-pay-desc { font-size: 13px; color: var(--gray-500); margin-bottom: 20px; line-height: 1.6; }
+.res-pay-cost { font-size: 28px; font-weight: 900; color: var(--orange); margin-bottom: 4px; }
+.res-pay-balance { font-size: 12px; color: var(--gray-400); margin-bottom: 20px; }
+.res-pay-btns { display: flex; gap: 8px; justify-content: center; }
+.res-pay-btns button {
+  padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  cursor: pointer; border: none; transition: all 0.2s;
+}
+.res-pay-cancel { background: var(--gray-100); color: var(--gray-600); }
+.res-pay-confirm { background: var(--orange); color: white; }
+.res-pay-confirm:hover { background: var(--orange-hover); }
+
+/* ── WRITE MODAL ── */
+.res-write-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  z-index: 9000; display: none; align-items: center; justify-content: center;
+}
+.res-write-overlay.open { display: flex; }
+.res-write-box {
+  background: white; border-radius: var(--radius-lg);
+  max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto;
+  padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.res-write-box h2 { font-size: 20px; font-weight: 900; color: var(--navy); margin-bottom: 20px; }
+.res-write-field { margin-bottom: 16px; }
+.res-write-field label { display: block; font-size: 13px; font-weight: 700; color: var(--gray-600); margin-bottom: 6px; }
+.res-write-field input, .res-write-field textarea, .res-write-field select {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+  transition: border 0.2s;
+}
+.res-write-field input:focus, .res-write-field textarea:focus {
+  outline: none; border-color: var(--orange);
+}
+.res-write-field textarea { resize: vertical; min-height: 150px; }
+.res-write-cost-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.res-write-cost-row input { width: 80px; text-align: center; }
+.res-write-cost-row span { font-size: 13px; color: var(--gray-400); }
+.res-write-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.res-write-btns button {
+  padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  cursor: pointer; border: none;
+}
+.res-write-submit { background: var(--orange); color: white; }
+.res-write-submit:hover { background: var(--orange-hover); }
+
+/* ── LOGIN ── */
+.res-login-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 9500;
+  display: none; align-items: center; justify-content: center;
+}
+.res-login-overlay.open { display: flex; }
+.res-login-box {
+  background: white; border-radius: var(--radius-lg); padding: 32px;
+  text-align: center; max-width: 340px; width: 90%;
+}
+.res-login-box h3 { font-size: 18px; font-weight: 900; color: var(--navy); margin-bottom: 12px; }
+.res-login-box p { font-size: 13px; color: var(--gray-500); margin-bottom: 20px; }
+.res-login-box button {
+  padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  cursor: pointer; border: 1px solid var(--gray-200); background: white; color: var(--navy);
+  display: flex; align-items: center; gap: 8px; margin: 0 auto;
+}
+.res-login-box button svg { width: 18px; height: 18px; }
+
+@media (max-width: 640px) {
+  .res-container { margin-top: 70px; }
+  .res-header { flex-direction: column; align-items: flex-start; }
+  .res-card { padding: 16px; }
+  .res-detail-box, .res-write-box { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── PAY CONFIRM ── -->
+<div class="res-pay-overlay" id="payOverlay" onclick="if(event.target===this)closePayConfirm()">
+  <div class="res-pay-box">
+    <div class="res-pay-icon">🔓</div>
+    <div class="res-pay-title">자료 열람</div>
+    <div class="res-pay-desc" id="payDesc">이 자료를 열람하려면 포인트가 차감됩니다.</div>
+    <div class="res-pay-cost" id="payCost">0 P</div>
+    <div class="res-pay-balance" id="payBalance">보유 포인트: 0P</div>
+    <div class="res-pay-btns">
+      <button class="res-pay-cancel" onclick="closePayConfirm()">취소</button>
+      <button class="res-pay-confirm" onclick="confirmPay()">열람하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── WRITE MODAL ── -->
+<div class="res-write-overlay" id="writeOverlay" onclick="if(event.target===this)closeResWrite()">
+  <div class="res-write-box">
+    <h2>📂 자료 등록</h2>
+    <div class="res-write-field">
+      <label>제목</label>
+      <input type="text" id="resWriteTitle" placeholder="자료 제목을 입력하세요" maxlength="100">
+    </div>
+    <div class="res-write-field">
+      <label>카테고리</label>
+      <select id="resWriteCategory">
+        <option value="강의자료">강의자료</option>
+        <option value="분석리포트">분석리포트</option>
+        <option value="꿀팁모음">꿀팁모음</option>
+        <option value="비교분석">비교분석</option>
+        <option value="기타">기타</option>
+      </select>
+    </div>
+    <div class="res-write-field">
+      <label>설명 (미리보기)</label>
+      <input type="text" id="resWriteDesc" placeholder="이 자료에 대한 간단한 설명" maxlength="200">
+    </div>
+    <div class="res-write-field">
+      <label>본문 내용</label>
+      <textarea id="resWriteContent" placeholder="자료 내용을 작성해주세요 (최소 50자)"></textarea>
+    </div>
+    <div class="res-write-field">
+      <label>열람 비용 (포인트)</label>
+      <div class="res-write-cost-row">
+        <input type="number" id="resWriteCost" min="1" max="5" value="1">
+        <span>P (1~5 포인트)</span>
+      </div>
+    </div>
+    <div class="res-write-btns">
+      <button style="background:var(--gray-100);color:var(--gray-600)" onclick="closeResWrite()">취소</button>
+      <button class="res-write-submit" onclick="submitResource()">등록하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOGIN ── -->
+<div class="res-login-overlay" id="loginOverlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="res-login-box">
+    <h3>로그인이 필요합니다</h3>
+    <p>자료열람 기능을 이용하려면 로그인해주세요.</p>
+    <button onclick="navGoogleLogin(); document.getElementById('loginOverlay').classList.remove('open');">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Google 로그인
+    </button>
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="res-container">
+  <div class="res-header">
+    <div>
+      <div class="res-title">📂 <span>자료열람</span></div>
+      <div class="res-subtitle">유용한 자료를 공유하고, 포인트로 열람하세요</div>
+    </div>
+    <div class="res-my-points" id="myPointsDisplay" style="display:none">
+      보유 포인트 <span class="pts" id="myPointsValue">0</span>P
+    </div>
+  </div>
+
+  <div class="res-toolbar">
+    <button class="res-filter-btn active" onclick="filterRes('all',this)">전체</button>
+    <button class="res-filter-btn" onclick="filterRes('강의자료',this)">강의자료</button>
+    <button class="res-filter-btn" onclick="filterRes('분석리포트',this)">분석리포트</button>
+    <button class="res-filter-btn" onclick="filterRes('꿀팁모음',this)">꿀팁모음</button>
+    <button class="res-filter-btn" onclick="filterRes('비교분석',this)">비교분석</button>
+    <button class="res-write-btn" onclick="openResWrite()">📝 자료 등록</button>
+  </div>
+
+  <div class="res-list" id="resList">
+    <div class="res-empty">로딩 중...</div>
+  </div>
+</div>
+
+<!-- ── DETAIL OVERLAY ── -->
+<div class="res-detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="res-detail-box">
+    <button class="res-detail-close" onclick="closeDetail()">&times;</button>
+    <div class="res-detail-title" id="detailTitle"></div>
+    <div class="res-detail-meta" id="detailMeta"></div>
+    <div class="res-detail-content" id="detailContent"></div>
+  </div>
+</div>
+
+<script src="nav.js"></script>
+<script>
+// ═══ RESOURCES PAGE ═══
+const db = firebase.firestore();
+let resources = [];
+let currentFilter = 'all';
+let pendingPayRes = null;
+
+// ─── 로드 ───
+async function loadResources() {
+  try {
+    const snap = await db.collection('resources').orderBy('createdAt', 'desc').get();
+    resources = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch(e) {
+    console.error('자료 로드 실패:', e);
+    resources = [];
+  }
+  renderResources();
+}
+
+// ─── 렌더 ───
+function renderResources() {
+  let list = resources.filter(r => r.status === 'approved' || (currentUser && (r.authorUid === currentUser.uid || isAdmin)));
+  if (currentFilter !== 'all') list = list.filter(r => r.category === currentFilter);
+
+  const grid = document.getElementById('resList');
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="res-empty">아직 등록된 자료가 없습니다.<br>첫 번째 자료를 등록해보세요!</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(r => {
+    const isPending = r.status === 'pending';
+    const isOwn = currentUser && r.authorUid === currentUser.uid;
+    const alreadyRead = currentUser && r.readers && r.readers.includes(currentUser.uid);
+    const costLabel = alreadyRead ? '열람완료' : `${r.cost}P`;
+    const costClass = alreadyRead ? 'free' : '';
+    return `
+      <div class="res-card" onclick="openResource('${r.id}')">
+        <div class="res-card-top">
+          <div class="res-card-title">${r.title}</div>
+          ${isPending ? '<span class="res-card-badge pending">승인 대기</span>' : ''}
+          ${!isPending ? `<span class="res-card-cost ${costClass}">${costLabel}</span>` : ''}
+        </div>
+        <div class="res-card-desc">${r.description || ''}</div>
+        <div class="res-card-meta">
+          <span class="author">${r.author}</span>
+          <span>${r.category}</span>
+          <span>${r.date}</span>
+          <span>👁 ${r.viewCount || 0}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ─── 필터 ───
+function filterRes(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.res-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderResources();
+}
+
+// ─── 자료 열기 ───
+function openResource(id) {
+  if (!currentUser) {
+    document.getElementById('loginOverlay').classList.add('open');
+    return;
+  }
+  const r = resources.find(x => x.id === id);
+  if (!r) return;
+
+  // 승인 대기 상태: 작성자나 관리자만 볼 수 있음
+  if (r.status === 'pending' && r.authorUid !== currentUser.uid && !isAdmin) {
+    alert('이 자료는 아직 관리자 승인 대기 중입니다.');
+    return;
+  }
+
+  // 작성자 본인이거나, 이미 열람했거나, 관리자면 바로 보기
+  const alreadyRead = r.readers && r.readers.includes(currentUser.uid);
+  if (r.authorUid === currentUser.uid || alreadyRead || isAdmin) {
+    showDetail(r);
+    return;
+  }
+
+  // 포인트 차감 확인
+  pendingPayRes = r;
+  document.getElementById('payDesc').textContent = `"${r.title}" 자료를 열람하려면 포인트가 차감됩니다.`;
+  document.getElementById('payCost').textContent = r.cost + ' P';
+  document.getElementById('payBalance').textContent = `보유 포인트: ${(currentUser.points || 0).toFixed(1)}P`;
+  document.getElementById('payOverlay').classList.add('open');
+}
+
+function closePayConfirm() {
+  document.getElementById('payOverlay').classList.remove('open');
+  pendingPayRes = null;
+}
+
+async function confirmPay() {
+  if (!pendingPayRes || !currentUser) return;
+  const r = pendingPayRes;
+  const cost = r.cost || 1;
+
+  if ((currentUser.points || 0) < cost) {
+    alert(`포인트가 부족합니다.\n필요: ${cost}P / 보유: ${(currentUser.points || 0).toFixed(1)}P\n\n리뷰 작성(5P), 댓글(0.5P), 글 작성(1P) 등으로 포인트를 모아보세요!`);
+    closePayConfirm();
+    return;
+  }
+
+  try {
+    // 독자 포인트 차감
+    await addPoints(currentUser.uid, -cost, '자료 열람');
+    // 작성자 포인트 지급
+    await addPoints(r.authorUid, cost, '자료 열람 수익');
+    // readers 목록에 추가
+    await db.collection('resources').doc(r.id).update({
+      readers: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+      viewCount: firebase.firestore.FieldValue.increment(1)
+    });
+    // 로컬 업데이트
+    if (!r.readers) r.readers = [];
+    r.readers.push(currentUser.uid);
+    r.viewCount = (r.viewCount || 0) + 1;
+
+    showPointToast(-cost, '자료 열람');
+    closePayConfirm();
+    showDetail(r);
+    renderResources();
+    updatePointsDisplay();
+  } catch(e) {
+    console.error('결제 실패:', e);
+    alert('처리 중 오류가 발생했습니다.');
+  }
+}
+
+// ─── 상세 보기 ───
+function showDetail(r) {
+  document.getElementById('detailTitle').textContent = r.title;
+  document.getElementById('detailMeta').innerHTML = `
+    <span><strong>${r.author}</strong></span>
+    <span>${r.category}</span>
+    <span>${r.date}</span>
+    <span>열람 비용: ${r.cost}P</span>
+    <span>👁 ${r.viewCount || 0}명 열람</span>`;
+  document.getElementById('detailContent').textContent = r.content;
+  document.getElementById('detailOverlay').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+}
+
+// ─── 글쓰기 ───
+function openResWrite() {
+  if (!currentUser) {
+    document.getElementById('loginOverlay').classList.add('open');
+    return;
+  }
+  document.getElementById('writeOverlay').classList.add('open');
+}
+
+function closeResWrite() {
+  document.getElementById('writeOverlay').classList.remove('open');
+}
+
+async function submitResource() {
+  const title = document.getElementById('resWriteTitle').value.trim();
+  const category = document.getElementById('resWriteCategory').value;
+  const desc = document.getElementById('resWriteDesc').value.trim();
+  const content = document.getElementById('resWriteContent').value.trim();
+  let cost = parseInt(document.getElementById('resWriteCost').value) || 1;
+  cost = Math.max(1, Math.min(5, cost));
+
+  if (!title) { alert('제목을 입력해주세요.'); return; }
+  if (!desc) { alert('설명을 입력해주세요.'); return; }
+  if (content.length < 50) { alert('본문 내용을 50자 이상 작성해주세요.'); return; }
+  if (!currentUser) { document.getElementById('loginOverlay').classList.add('open'); return; }
+
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+
+  const resData = {
+    title, category, description: desc, content, cost,
+    author: getDisplayName(),
+    authorUid: currentUser.uid,
+    authorEmail: currentUser.email,
+    date: dateStr,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    status: isAdmin ? 'approved' : 'pending',
+    readers: [currentUser.uid],
+    viewCount: 0
+  };
+
+  try {
+    const docRef = await db.collection('resources').add(resData);
+    resources.unshift({ id: docRef.id, ...resData, createdAt: new Date() });
+    closeResWrite();
+    renderResources();
+    document.getElementById('resWriteTitle').value = '';
+    document.getElementById('resWriteDesc').value = '';
+    document.getElementById('resWriteContent').value = '';
+    document.getElementById('resWriteCost').value = '1';
+
+    if (isAdmin) {
+      alert('자료가 등록되었습니다!');
+    } else {
+      alert('자료가 등록 신청되었습니다.\n관리자 승인 후 공개됩니다.');
+    }
+    // 포인트 적립: 자료 등록 +1P
+    await addPoints(currentUser.uid, 1, '자료 등록');
+    showPointToast(1, '자료 등록');
+  } catch(e) {
+    console.error('자료 등록 실패:', e);
+    alert('등록 중 오류가 발생했습니다.');
+  }
+}
+
+// ─── 포인트 표시 ───
+function updatePointsDisplay() {
+  if (currentUser) {
+    document.getElementById('myPointsDisplay').style.display = '';
+    document.getElementById('myPointsValue').textContent = (currentUser.points || 0).toFixed(1);
+  } else {
+    document.getElementById('myPointsDisplay').style.display = 'none';
+  }
+}
+
+// ─── 로그인 후 콜백 ───
+window.onNavLogin = function() {
+  updatePointsDisplay();
+  loadResources();
+};
+window.onNavLogout = function() {
+  updatePointsDisplay();
+  renderResources();
+};
+
+// ─── INIT ───
+loadResources();
+updatePointsDisplay();
+</script>
+</body>
+</html>

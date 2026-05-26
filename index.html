@@ -2618,6 +2618,9 @@ function submitComment(instId) {
   });
   input.value = '';
   renderComments(instId);
+  // 포인트 적립: 댓글 +0.5P
+  addPoints(currentUser.uid, 0.5, '댓글 작성');
+  showPointToast(0.5, '댓글 작성');
 }
 
 function showInstReplyInput(instId, i) {
@@ -2762,6 +2765,9 @@ async function submitReview() {
       reviewData.ratings = ratings;
     }
     await db.collection('reviews').add(reviewData);
+    // 포인트 적립: 리뷰 작성 +5P
+    await addPoints(currentUser.uid, 5, '리뷰 작성');
+    showPointToast(5, '리뷰 작성');
   } catch(e) {
     console.error('리뷰 저장 실패:', e);
   }

@@ -6,6 +6,7 @@
 const currentPath = location.pathname;
 const isHome = currentPath === '/' || currentPath === '/index.html';
 const isCommunity = currentPath === '/community' || currentPath === '/community.html';
+const isResources = currentPath === '/resources' || currentPath === '/resources.html';
 
 // ─── CSS 주입 ───
 const navStyle = document.createElement('style');
@@ -263,6 +264,7 @@ const mobileWriteAction = isHome
 // ─── 메뉴 active 상태 ───
 function activeClass(path) {
   if (path === '/community') return isCommunity ? ' class="active"' : '';
+  if (path === '/resources') return isResources ? ' class="active"' : '';
   if (path === '#rankings') return isHome ? ' class="active"' : '';
   return '';
 }
@@ -286,6 +288,7 @@ const navHTML = `
       <a href="${platLink}">플랫폼</a>
       <a href="${detLink}">감별기</a>
       <a href="/community"${isCommunity ? ' class="active"' : ''}>커뮤니티</a>
+      <a href="/resources"${isResources ? ' class="active"' : ''}>자료열람</a>
       <a href="/admin" id="navAdminLink" style="font-size:12px;color:var(--gray-400);display:none">관리자</a>
       ${writeBtn}
       <button class="nav-login-btn" id="navLoginBtn" onclick="navGoogleLogin()">${googleSvg} 로그인</button>
@@ -299,6 +302,7 @@ const navHTML = `
             <div class="nav-profile-dropdown-info">
               <div class="nav-profile-dropdown-name" id="dropdownName"></div>
               <div class="nav-profile-dropdown-email" id="dropdownEmail"></div>
+              <div style="margin-top:4px;font-size:12px;font-weight:700;color:var(--orange)" id="dropdownPoints">0 P</div>
             </div>
           </div>
           <a href="#" onclick="openMyPage(); return false;"><span class="dropdown-icon">👤</span> 마이페이지</a>
@@ -330,6 +334,7 @@ const mobileHTML = `
     <a href="${platLink}" onclick="closeMobileNav()"><span class="nav-icon">🏢</span> 플랫폼 신뢰지수</a>
     <a href="${detLink}" onclick="closeMobileNav()"><span class="nav-icon">🚨</span> 강의팔이 감별기</a>
     <a href="/community"${isCommunity ? ' class="active"' : ''}><span class="nav-icon">💬</span> 커뮤니티</a>
+    <a href="/resources"${isResources ? ' class="active"' : ''}><span class="nav-icon">📂</span> 자료열람</a>
     <a href="/admin" id="mobileAdminLink" style="display:none"><span class="nav-icon">⚙️</span> 관리자</a>
   </div>
   <a href="#" class="mobile-nav-write" onclick="${mobileWriteAction}">${mobileWriteLabel}</a>
@@ -394,7 +399,7 @@ const ADMIN_EMAIL = 'boxtvstar@gmail.com';
 // ─── Auth ───
 firebase.auth().onAuthStateChanged(async user => {
   if (user) {
-    currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '', isInstructor: false, instructorName: '', instructorId: null };
+    currentUser = { uid: user.uid, name: user.displayName, email: user.email, picture: user.photoURL, nickname: '', isInstructor: false, instructorName: '', instructorId: null, points: 0 };
     isAdmin = (user.email === ADMIN_EMAIL);
     try {
       const doc = await db.collection('users').doc(user.uid).get();
@@ -402,6 +407,7 @@ firebase.auth().onAuthStateChanged(async user => {
         const d = doc.data();
         if (d.nickname) currentUser.nickname = d.nickname;
         if (d.role === 'admin') isAdmin = true;
+        if (d.points !== undefined) currentUser.points = d.points;
         if (d.isInstructor) {
           currentUser.isInstructor = true;
           currentUser.instructorName = d.instructorName || '';
@@ -451,6 +457,7 @@ window.showNavProfile = function() {
   document.getElementById('dropdownProfileImg').src = currentUser.picture;
   document.getElementById('dropdownName').textContent = getDisplayName();
   document.getElementById('dropdownEmail').textContent = currentUser.email;
+  document.getElementById('dropdownPoints').textContent = (currentUser.points || 0).toFixed(1) + ' P';
   el.classList.add('show');
   document.getElementById('navLoginBtn').style.display = 'none';
 };
@@ -529,6 +536,7 @@ window.openMyPage = function() {
     <div>
       <div class="mypage-user-name">${getDisplayName()}</div>
       <div class="mypage-user-email">${currentUser.email}${currentUser.nickname ? ' · 구글: ' + currentUser.name : ''}</div>
+      <div style="margin-top:6px;font-size:14px;font-weight:800;color:var(--orange)">💰 ${(currentUser.points || 0).toFixed(1)} 포인트</div>
     </div>`;
   document.getElementById('nicknameInput').value = currentUser.nickname || '';
   // 페이지별 마이페이지 콘텐츠 콜백
@@ -543,6 +551,31 @@ window.openMyPage = function() {
 
 window.closeMyPage = function() {
   document.getElementById('mypageOverlay').classList.remove('open');
+};
+
+// ─── 포인트 시스템 ───
+window.addPoints = async function(uid, amount, reason) {
+  if (!uid || amount === 0) return;
+  try {
+    await db.collection('users').doc(uid).set({
+      points: firebase.firestore.FieldValue.increment(amount)
+    }, { merge: true });
+    if (currentUser && currentUser.uid === uid) {
+      currentUser.points = (currentUser.points || 0) + amount;
+      const dp = document.getElementById('dropdownPoints');
+      if (dp) dp.textContent = currentUser.points.toFixed(1) + ' P';
+    }
+    console.log(`포인트 ${amount > 0 ? '+' : ''}${amount}: ${reason}`);
+  } catch(e) { console.error('포인트 처리 실패:', e); }
+};
+
+window.showPointToast = function(amount, reason) {
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:99999;opacity:0;transition:opacity 0.3s;';
+  toast.textContent = `${amount > 0 ? '+' : ''}${amount}P ${reason}`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.style.opacity = '1');
+  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
 };
 
 // ─── 알림 시스템 ───

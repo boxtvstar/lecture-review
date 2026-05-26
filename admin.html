@@ -600,6 +600,10 @@ body {
           <span class="icon">🪪</span> 강사 인증
           <span class="sidebar-badge red" id="instVerifyBadge" style="display:none">0</span>
         </div>
+        <div class="sidebar-item" onclick="showPage('resources', this)">
+          <span class="icon">📂</span> 자료 승인
+          <span class="sidebar-badge red" id="sidebarResources" style="display:none">0</span>
+        </div>
       </div>
     </div>
 
@@ -972,6 +976,41 @@ body {
             </thead>
             <tbody id="instVerifyTableBody">
               <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray-400)">로딩 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RESOURCES APPROVAL PAGE -->
+      <div class="admin-page" id="page-resources">
+        <div class="page-header">
+          <div class="page-title">자료 승인 관리</div>
+          <div class="page-subtitle">일반 사용자가 등록한 자료를 승인하거나 거부합니다</div>
+        </div>
+        <div class="admin-table-wrapper">
+          <div class="admin-table-header">
+            <div class="admin-table-title">자료 목록</div>
+            <div class="admin-table-actions">
+              <button class="admin-filter-btn active" onclick="filterResAdmin('pending',this)">대기 중</button>
+              <button class="admin-filter-btn" onclick="filterResAdmin('approved',this)">승인됨</button>
+              <button class="admin-filter-btn" onclick="filterResAdmin('all',this)">전체</button>
+              <button class="action-btn action-btn-view" onclick="loadAdminResources()">🔄 새로고침</button>
+            </div>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>제목</th>
+                <th>카테고리</th>
+                <th>작성자</th>
+                <th>비용</th>
+                <th>날짜</th>
+                <th>상태</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="resAdminTableBody">
+              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400)">로딩 중...</td></tr>
             </tbody>
           </table>
         </div>
@@ -2088,6 +2127,97 @@ async function deleteInstVerify(docId) {
 
 // 페이지 로드 시 강사 인증 요청 로드
 setTimeout(() => loadInstVerifyRequests(), 1000);
+
+// ═══ 자료 승인 관리 ═══
+let adminResources = [];
+let resAdminFilter = 'pending';
+
+async function loadAdminResources() {
+  try {
+    const snap = await db.collection('resources').orderBy('createdAt', 'desc').get();
+    adminResources = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const pendingCount = adminResources.filter(r => r.status === 'pending').length;
+    const badge = document.getElementById('sidebarResources');
+    if (badge) { badge.textContent = pendingCount; badge.style.display = pendingCount > 0 ? '' : 'none'; }
+    renderResAdminTable();
+  } catch(e) { console.error('자료 로드 실패:', e); }
+}
+
+function filterResAdmin(filter, btn) {
+  resAdminFilter = filter;
+  document.querySelectorAll('#page-resources .admin-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderResAdminTable();
+}
+
+function renderResAdminTable() {
+  let list = adminResources;
+  if (resAdminFilter !== 'all') list = list.filter(r => r.status === resAdminFilter);
+  const tbody = document.getElementById('resAdminTableBody');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray-400)">해당 자료가 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${r.title}</td>
+      <td>${r.category}</td>
+      <td>${r.author}<br><span style="font-size:11px;color:var(--gray-400)">${r.authorEmail || ''}</span></td>
+      <td style="font-weight:700;color:var(--orange)">${r.cost}P</td>
+      <td>${r.date || '-'}</td>
+      <td><span class="status-badge ${r.status === 'approved' ? 'status-active' : 'status-pending'}">${r.status === 'approved' ? '승인' : '대기'}</span></td>
+      <td>
+        ${r.status === 'pending' ? `
+          <button class="action-btn action-btn-approve" onclick="approveResource('${r.id}')">승인</button>
+          <button class="action-btn action-btn-delete" onclick="rejectResource('${r.id}')">거부</button>
+        ` : `
+          <button class="action-btn action-btn-delete" onclick="deleteResource('${r.id}')">삭제</button>
+        `}
+        <button class="action-btn action-btn-view" onclick="previewResource('${r.id}')">보기</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function approveResource(id) {
+  if (!confirm('이 자료를 승인하시겠습니까?')) return;
+  try {
+    await db.collection('resources').doc(id).update({ status: 'approved' });
+    const r = adminResources.find(x => x.id === id);
+    if (r) r.status = 'approved';
+    renderResAdminTable();
+    loadAdminResources();
+    showToast('자료가 승인되었습니다.');
+  } catch(e) { console.error(e); showToast('승인 실패', 'error'); }
+}
+
+async function rejectResource(id) {
+  if (!confirm('이 자료를 거부(삭제)하시겠습니까?')) return;
+  try {
+    await db.collection('resources').doc(id).delete();
+    adminResources = adminResources.filter(x => x.id !== id);
+    renderResAdminTable();
+    loadAdminResources();
+    showToast('자료가 거부되었습니다.');
+  } catch(e) { console.error(e); showToast('처리 실패', 'error'); }
+}
+
+async function deleteResource(id) {
+  if (!confirm('이 자료를 삭제하시겠습니까?')) return;
+  try {
+    await db.collection('resources').doc(id).delete();
+    adminResources = adminResources.filter(x => x.id !== id);
+    renderResAdminTable();
+    showToast('자료가 삭제되었습니다.');
+  } catch(e) { console.error(e); showToast('삭제 실패', 'error'); }
+}
+
+function previewResource(id) {
+  const r = adminResources.find(x => x.id === id);
+  if (!r) return;
+  alert(`제목: ${r.title}\n카테고리: ${r.category}\n비용: ${r.cost}P\n작성자: ${r.author}\n\n--- 내용 ---\n${r.content?.substring(0, 500) || '(내용 없음)'}`);
+}
+
+setTimeout(() => loadAdminResources(), 1500);
 </script>
 </body>
 </html>
