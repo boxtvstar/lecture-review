@@ -565,34 +565,36 @@ body {
         <div class="sidebar-section-title">인증 관리</div>
         <div class="sidebar-item" onclick="showPage('verification', this)">
           <span class="icon">🔐</span> 인증 요청
-          <span class="sidebar-badge red" id="pendingBadge">5</span>
+          <span class="sidebar-badge red" id="pendingBadge">-</span>
         </div>
         <div class="sidebar-item" onclick="showPage('verified', this)">
           <span class="icon">✅</span> 인증 완료
-          <span class="sidebar-badge green">12</span>
+          <span class="sidebar-badge green" id="sidebarVerified">-</span>
         </div>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-section-title">회원 관리</div>
         <div class="sidebar-item" onclick="showPage('users', this)">
           <span class="icon">👤</span> 전체 회원
-          <span class="sidebar-badge blue">48</span>
+          <span class="sidebar-badge blue" id="sidebarUsers">-</span>
         </div>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-section-title">콘텐츠 관리</div>
         <div class="sidebar-item" onclick="showPage('reviews', this)">
           <span class="icon">📝</span> 리뷰 관리
+          <span class="sidebar-badge blue" id="sidebarReviews">-</span>
         </div>
         <div class="sidebar-item" onclick="showPage('comments', this)">
           <span class="icon">💬</span> 댓글 관리
         </div>
         <div class="sidebar-item" onclick="showPage('reports', this)">
           <span class="icon">🚨</span> 신고 접수
-          <span class="sidebar-badge red">3</span>
+          <span class="sidebar-badge red" id="sidebarReports">0</span>
         </div>
         <div class="sidebar-item" onclick="showPage('instructors', this)">
           <span class="icon">🎓</span> 강사 관리
+          <span class="sidebar-badge blue" id="sidebarInstructors">-</span>
         </div>
         <div class="sidebar-item" onclick="showPage('instructor-verify', this)">
           <span class="icon">🪪</span> 강사 인증
@@ -1714,6 +1716,16 @@ async function loadDashboardStats() {
     document.getElementById('statInstVerify').textContent = instVerifySnap.size.toLocaleString();
     document.getElementById('statInstVerifyChange').textContent = instVerifyPending > 0 ? `${instVerifyPending}건 대기 중` : '없음';
     document.getElementById('statInstVerifyChange').style.color = instVerifyPending > 0 ? 'var(--orange)' : '';
+
+    // ─── 사이드바 숫자 업데이트 ───
+    document.getElementById('sidebarUsers').textContent = totalUsers;
+    document.getElementById('sidebarVerified').textContent = verifiedCount;
+    document.getElementById('pendingBadge').textContent = pendingCount;
+    document.getElementById('pendingBadge').style.display = pendingCount > 0 ? '' : 'none';
+    document.getElementById('sidebarReviews').textContent = reviewCount;
+    document.getElementById('sidebarInstructors').textContent = adminInstructors.length;
+    document.getElementById('sidebarReports').textContent = reportItems.filter(r => !r.resolved).length;
+    document.getElementById('sidebarReports').style.display = reportItems.filter(r => !r.resolved).length > 0 ? '' : 'none';
 
     // 인증 강사 수
     const instVerifiedSnap = await db.collection('users').where('isInstructor', '==', true).get();
