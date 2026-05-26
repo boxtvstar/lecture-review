@@ -1862,9 +1862,9 @@ function renderInstructors(filter = '전체', search = '', sort = currentSort) {
         </div>
       </div>
       <div class="card-rating-row">
-        <div class="card-score">${inst.score}</div>
+        <div class="card-score">${inst.score > 0 ? inst.score : (inst.reviews > 0 ? '—' : '0')}</div>
         <div>
-          <div class="card-stars">${generateStars(inst.score)}</div>
+          <div class="card-stars">${inst.score > 0 ? generateStars(inst.score) : (inst.reviews > 0 ? '<span style="font-size:11px;color:var(--gray-400)">미평가</span>' : generateStars(0))}</div>
           <div class="card-review-count">리뷰 ${inst.reviews}개</div>
         </div>
       </div>
