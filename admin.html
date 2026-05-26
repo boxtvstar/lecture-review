@@ -1179,6 +1179,97 @@ body {
   </div>
 </div>
 
+<!-- COMMUNITY PREVIEW/EDIT MODAL -->
+<div class="verify-modal-overlay" id="commPreviewModal" onclick="if(event.target===this)closeCommPreview()">
+  <div class="verify-modal" style="max-width:650px">
+    <div class="verify-modal-header">
+      <div>
+        <div class="verify-modal-title" id="cpTitle">게시글 상세</div>
+        <div class="verify-modal-sub" id="cpSub"></div>
+      </div>
+      <button class="detail-close" onclick="closeCommPreview()">✕</button>
+    </div>
+    <div class="verify-modal-body" id="cpBody" style="padding:20px"></div>
+    <div class="verify-modal-footer" id="cpFooter" style="padding:16px 20px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--gray-200)"></div>
+  </div>
+</div>
+
+<!-- COMMUNITY EDIT MODAL -->
+<div class="verify-modal-overlay" id="commEditModal" onclick="if(event.target===this)closeCommEdit()">
+  <div class="verify-modal" style="max-width:650px">
+    <div class="verify-modal-header">
+      <div>
+        <div class="verify-modal-title">게시글 수정 (관리자)</div>
+        <div class="verify-modal-sub" id="ceSubTitle"></div>
+      </div>
+      <button class="detail-close" onclick="closeCommEdit()">✕</button>
+    </div>
+    <div class="verify-modal-body" style="padding:20px">
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px;display:block">카테고리</label>
+        <select id="ceCategory" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;box-sizing:border-box">
+          <option value="자유">자유</option>
+          <option value="질문">질문</option>
+          <option value="후기">후기</option>
+          <option value="정보">정보</option>
+        </select>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px;display:block">제목</label>
+        <input type="text" id="ceTitle" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px;display:block">내용</label>
+        <textarea id="ceContent" rows="8" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="verify-modal-footer" style="padding:16px 20px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--gray-200)">
+      <button class="action-btn" onclick="closeCommEdit()" style="padding:8px 20px;font-size:13px;border-radius:8px">취소</button>
+      <button class="action-btn action-btn-approve" onclick="saveCommEdit()" style="padding:8px 20px;font-size:13px;font-weight:700;border-radius:8px">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESOURCE EDIT MODAL -->
+<div class="verify-modal-overlay" id="resEditModal" onclick="if(event.target===this)closeResEdit()">
+  <div class="verify-modal" style="max-width:650px">
+    <div class="verify-modal-header">
+      <div>
+        <div class="verify-modal-title">자료 수정 (관리자)</div>
+        <div class="verify-modal-sub" id="reSubTitle"></div>
+      </div>
+      <button class="detail-close" onclick="closeResEdit()">✕</button>
+    </div>
+    <div class="verify-modal-body" style="padding:20px">
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px;display:block">카테고리</label>
+        <select id="reCategory" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;box-sizing:border-box">
+          <option value="강의자료">강의자료</option>
+          <option value="요약정리">요약정리</option>
+          <option value="팁/노하우">팁/노하우</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px;display:block">제목</label>
+        <input type="text" id="reTitle" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px;display:block">열람 비용 (P)</label>
+        <input type="number" id="reCost" min="0" style="width:120px;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px;display:block">내용</label>
+        <textarea id="reContent" rows="8" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="verify-modal-footer" style="padding:16px 20px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--gray-200)">
+      <button class="action-btn" onclick="closeResEdit()" style="padding:8px 20px;font-size:13px;border-radius:8px">취소</button>
+      <button class="action-btn action-btn-approve" onclick="saveResEdit()" style="padding:8px 20px;font-size:13px;font-weight:700;border-radius:8px">💾 저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- RESOURCE PREVIEW MODAL -->
 <div class="verify-modal-overlay" id="resPreviewModal" onclick="if(event.target===this)closeResPreview()">
   <div class="verify-modal" style="max-width:650px">
@@ -2771,6 +2862,8 @@ function renderCommunityTable() {
       <td><span style="font-size:12px">${p.date || '-'}</span></td>
       <td>
         <div class="action-btn-group">
+          <button class="action-btn action-btn-view" onclick="previewCommunityPost('${p.id}')">보기</button>
+          <button class="action-btn action-btn-approve" onclick="editCommunityPost('${p.id}')">수정</button>
           <button class="action-btn action-btn-delete" onclick="deleteCommunityPost('${p.id}')">삭제</button>
         </div>
       </td>
@@ -2788,6 +2881,126 @@ async function deleteCommunityPost(id) {
   } catch(e) {
     console.error(e);
     showToast('삭제 실패', 'error');
+  }
+}
+
+// ═══ 커뮤니티 보기/수정 ═══
+function previewCommunityPost(id) {
+  const p = communityPosts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('cpTitle').textContent = p.title || '(제목없음)';
+  document.getElementById('cpSub').textContent = `${p.category || '-'} · ${p.author || '-'} · ${p.date || '-'}`;
+
+  const imgs = p.images || (p.imageUrl ? [p.imageUrl] : []);
+  const imgHtml = imgs.length > 0 ? `
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+      ${imgs.map(url => `<img src="${url}" style="max-width:200px;max-height:150px;border-radius:8px;object-fit:cover;border:1px solid var(--gray-200)" alt="첨부">`).join('')}
+    </div>` : '';
+
+  const commentsHtml = (p.comments && p.comments.length > 0) ? `
+    <div style="margin-top:16px;padding:12px;background:var(--gray-50);border-radius:8px">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">💬 댓글 (${p.comments.length}개)</div>
+      ${p.comments.slice(0, 10).map(c => `<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--gray-100)"><strong>${c.author}</strong> <span style="color:var(--gray-400);font-size:11px">${c.date}</span><br><span style="color:var(--gray-600)">${c.text}</span></div>`).join('')}
+      ${p.comments.length > 10 ? `<div style="font-size:12px;color:var(--gray-400);margin-top:6px">... 외 ${p.comments.length - 10}개</div>` : ''}
+    </div>` : '';
+
+  document.getElementById('cpBody').innerHTML = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      <span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:var(--blue-light);color:var(--blue)">${p.category || '-'}</span>
+      <span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--gray-100);color:var(--gray-600)">❤️ ${p.likes || 0} · 💬 ${(p.comments || []).length} · 조회 ${p.views || 0}</span>
+      ${p.isNotice ? '<span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:var(--red-light);color:var(--red)">📌 공지</span>' : ''}
+    </div>
+    <div style="font-size:11px;color:var(--gray-400);margin-bottom:12px">작성자 UID: ${p.authorUid || '-'}</div>
+    <div style="padding:16px;background:var(--gray-50);border-radius:10px;font-size:14px;line-height:1.7;color:var(--gray-700);white-space:pre-wrap;max-height:300px;overflow-y:auto">${(p.content || '(내용 없음)').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    ${imgHtml}
+    ${commentsHtml}
+  `;
+
+  document.getElementById('cpFooter').innerHTML = `
+    <button class="action-btn action-btn-approve" onclick="closeCommPreview();editCommunityPost('${id}')" style="padding:8px 20px;font-size:13px;font-weight:700;border-radius:8px">✏️ 수정</button>
+    <button class="action-btn action-btn-delete" onclick="closeCommPreview();deleteCommunityPost('${id}')" style="padding:8px 20px;font-size:13px;font-weight:700;border-radius:8px">🗑 삭제</button>
+  `;
+
+  document.getElementById('commPreviewModal').classList.add('open');
+}
+
+function closeCommPreview() {
+  document.getElementById('commPreviewModal').classList.remove('open');
+}
+
+let editingCommId = null;
+function editCommunityPost(id) {
+  const p = communityPosts.find(x => x.id === id);
+  if (!p) return;
+  editingCommId = id;
+  document.getElementById('ceSubTitle').textContent = `${p.author || '-'} · ${p.date || '-'}`;
+  document.getElementById('ceCategory').value = p.category || '자유';
+  document.getElementById('ceTitle').value = p.title || '';
+  document.getElementById('ceContent').value = p.content || '';
+  document.getElementById('commEditModal').classList.add('open');
+}
+
+function closeCommEdit() {
+  document.getElementById('commEditModal').classList.remove('open');
+  editingCommId = null;
+}
+
+async function saveCommEdit() {
+  if (!editingCommId) return;
+  const title = document.getElementById('ceTitle').value.trim();
+  const content = document.getElementById('ceContent').value.trim();
+  const category = document.getElementById('ceCategory').value;
+  if (!title) { showToast('제목을 입력해주세요.', 'error'); return; }
+  if (!content) { showToast('내용을 입력해주세요.', 'error'); return; }
+  try {
+    await db.collection('community_posts').doc(editingCommId).update({ title, content, category });
+    const p = communityPosts.find(x => x.id === editingCommId);
+    if (p) { p.title = title; p.content = content; p.category = category; }
+    closeCommEdit();
+    renderCommunityTable();
+    showToast('게시글이 수정되었습니다.');
+  } catch(e) {
+    console.error(e);
+    showToast('수정 실패: ' + e.message, 'error');
+  }
+}
+
+// ═══ 자료 수정 ═══
+let editingResId = null;
+function editResource(id) {
+  const r = adminResources.find(x => x.id === id);
+  if (!r) return;
+  editingResId = id;
+  document.getElementById('reSubTitle').textContent = `${r.author || '-'} · ${r.date || '-'}`;
+  document.getElementById('reCategory').value = r.category || '기타';
+  document.getElementById('reTitle').value = r.title || '';
+  document.getElementById('reCost').value = r.cost || 0;
+  document.getElementById('reContent').value = r.content || '';
+  document.getElementById('resEditModal').classList.add('open');
+}
+
+function closeResEdit() {
+  document.getElementById('resEditModal').classList.remove('open');
+  editingResId = null;
+}
+
+async function saveResEdit() {
+  if (!editingResId) return;
+  const title = document.getElementById('reTitle').value.trim();
+  const content = document.getElementById('reContent').value.trim();
+  const category = document.getElementById('reCategory').value;
+  const cost = parseInt(document.getElementById('reCost').value) || 0;
+  if (!title) { showToast('제목을 입력해주세요.', 'error'); return; }
+  try {
+    await db.collection('resources').doc(editingResId).update({ title, content, category, cost });
+    const r = adminResources.find(x => x.id === editingResId);
+    if (r) { r.title = title; r.content = content; r.category = category; r.cost = cost; }
+    closeResEdit();
+    renderResAdminTable();
+    showToast('자료가 수정되었습니다.');
+  } catch(e) {
+    console.error(e);
+    showToast('수정 실패: ' + e.message, 'error');
   }
 }
 
@@ -2830,13 +3043,14 @@ function renderResAdminTable() {
       <td>${r.date || '-'}</td>
       <td><span class="status-badge ${r.status === 'approved' ? 'status-active' : 'status-pending'}">${r.status === 'approved' ? '승인' : '대기'}</span></td>
       <td>
+        <button class="action-btn action-btn-view" onclick="previewResource('${r.id}')">보기</button>
+        <button class="action-btn action-btn-approve" onclick="editResource('${r.id}')">수정</button>
         ${r.status === 'pending' ? `
-          <button class="action-btn action-btn-approve" onclick="approveResource('${r.id}')">승인</button>
+          <button class="action-btn action-btn-approve" onclick="approveResource('${r.id}')" style="background:var(--green-light);color:var(--green)">승인</button>
           <button class="action-btn action-btn-delete" onclick="rejectResource('${r.id}')">거부</button>
         ` : `
           <button class="action-btn action-btn-delete" onclick="deleteResource('${r.id}')">삭제</button>
         `}
-        <button class="action-btn action-btn-view" onclick="previewResource('${r.id}')">보기</button>
       </td>
     </tr>`).join('');
 }
