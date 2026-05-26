@@ -1179,6 +1179,21 @@ body {
   </div>
 </div>
 
+<!-- RESOURCE PREVIEW MODAL -->
+<div class="verify-modal-overlay" id="resPreviewModal" onclick="if(event.target===this)closeResPreview()">
+  <div class="verify-modal" style="max-width:650px">
+    <div class="verify-modal-header">
+      <div>
+        <div class="verify-modal-title" id="rpTitle">자료 미리보기</div>
+        <div class="verify-modal-sub" id="rpSub"></div>
+      </div>
+      <button class="detail-close" onclick="closeResPreview()">✕</button>
+    </div>
+    <div class="verify-modal-body" id="rpBody" style="padding:20px"></div>
+    <div class="verify-modal-footer" id="rpFooter" style="padding:16px 20px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--gray-200)"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -2860,7 +2875,42 @@ async function deleteResource(id) {
 function previewResource(id) {
   const r = adminResources.find(x => x.id === id);
   if (!r) return;
-  alert(`제목: ${r.title}\n카테고리: ${r.category}\n비용: ${r.cost}P\n작성자: ${r.author}\n\n--- 내용 ---\n${r.content?.substring(0, 500) || '(내용 없음)'}`);
+  document.getElementById('rpTitle').textContent = r.title || '(제목 없음)';
+  document.getElementById('rpSub').textContent = `${r.category || '-'} · ${r.author || '-'} · ${r.date || '-'}`;
+
+  const statusBadge = r.status === 'approved'
+    ? '<span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:var(--green-light);color:var(--green)">승인됨</span>'
+    : '<span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:var(--orange-light);color:var(--orange)">대기 중</span>';
+
+  const filesHtml = (r.files && r.files.length > 0) ? `
+    <div style="margin-top:16px;padding:12px;background:var(--gray-50);border-radius:8px">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">📎 첨부 파일 (${r.files.length}개)</div>
+      ${r.files.map(f => `<div style="font-size:13px;color:var(--blue);margin:4px 0"><a href="${f.url}" target="_blank" style="color:var(--blue);text-decoration:underline">${f.name}</a></div>`).join('')}
+    </div>` : '';
+
+  document.getElementById('rpBody').innerHTML = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      ${statusBadge}
+      <span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:var(--orange-light);color:var(--orange)">💰 열람 비용: ${r.cost}P</span>
+      <span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--gray-100);color:var(--gray-600)">조회 ${r.viewCount || 0}회</span>
+    </div>
+    <div style="font-size:11px;color:var(--gray-400);margin-bottom:12px">작성자 UID: ${r.authorUid || '-'} · 이메일: ${r.authorEmail || '-'}</div>
+    <div style="padding:16px;background:var(--gray-50);border-radius:10px;font-size:14px;line-height:1.7;color:var(--gray-700);white-space:pre-wrap;max-height:300px;overflow-y:auto">${(r.contentHtml || r.content || '(내용 없음)').substring(0, 2000)}</div>
+    ${filesHtml}
+  `;
+
+  document.getElementById('rpFooter').innerHTML = r.status === 'pending' ? `
+    <button class="action-btn action-btn-approve" onclick="approveResource('${r.id}');closeResPreview();" style="padding:8px 20px;font-size:13px;font-weight:700;border-radius:8px">✅ 승인</button>
+    <button class="action-btn action-btn-delete" onclick="rejectResource('${r.id}');closeResPreview();" style="padding:8px 20px;font-size:13px;font-weight:700;border-radius:8px">❌ 거부</button>
+  ` : `
+    <button class="action-btn action-btn-delete" onclick="deleteResource('${r.id}');closeResPreview();" style="padding:8px 20px;font-size:13px;font-weight:700;border-radius:8px">🗑 삭제</button>
+  `;
+
+  document.getElementById('resPreviewModal').classList.add('open');
+}
+
+function closeResPreview() {
+  document.getElementById('resPreviewModal').classList.remove('open');
 }
 
 setTimeout(() => loadAdminResources(), 1500);

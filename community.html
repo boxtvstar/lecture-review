@@ -720,8 +720,8 @@ function openPost(id) {
     </div>` : '';
   document.getElementById('detailActions').innerHTML = `
     <button class="action-btn${currentUser && (p.likedBy || []).includes(currentUser.uid) ? ' liked' : ''}" id="likeBtn" onclick="toggleLike(${id})">❤️ 좋아요 ${p.likes}</button>
-    <button class="action-btn">🔗 공유</button>
-    <button class="action-btn">🚩 신고</button>
+    <button class="action-btn" onclick="sharePost(${id})">🔗 공유</button>
+    <button class="action-btn" onclick="reportPost(${id}, this)">🚩 신고</button>
     ${manageBtns}
   `;
   renderDetailComments(p);
@@ -917,6 +917,44 @@ function toggleLike(id) {
 function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+// ═══ 공유/신고 ═══
+function sharePost(id) {
+  const url = location.origin + location.pathname + '?notif=' + id;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('게시글 링크가 클립보드에 복사되었습니다!');
+    }).catch(() => {
+      prompt('아래 링크를 복사하세요:', url);
+    });
+  } else {
+    prompt('아래 링크를 복사하세요:', url);
+  }
+}
+
+function reportPost(id, btn) {
+  if (!currentUser) {
+    document.getElementById('loginOverlay').classList.add('open');
+    return;
+  }
+  if (btn.classList.contains('reported')) return;
+  if (!confirm('이 게시글을 신고하시겠습니까?')) return;
+  btn.classList.add('reported');
+  btn.innerHTML = '✅ 신고 접수됨';
+  btn.style.color = 'var(--green)';
+  btn.style.cursor = 'default';
+  // Firestore에 신고 저장
+  if (window.db) {
+    db.collection('reports').add({
+      type: 'community_post',
+      targetId: id,
+      reporter: getDisplayName(),
+      reporterUid: currentUser.uid,
+      date: new Date().toISOString(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(e => console.error('신고 저장 실패:', e));
+  }
 }
 
 // ═══ 글 수정/삭제 ═══
