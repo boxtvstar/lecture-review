@@ -938,7 +938,10 @@ body {
         <div class="admin-table-wrapper">
           <div class="admin-table-header">
             <div class="admin-table-title">강사 목록</div>
-            <button class="action-btn action-btn-approve" onclick="openAddInstructorModal()" style="padding:8px 16px;font-size:13px">+ 강사 추가</button>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" id="instructorSearchInput" placeholder="강사명/분야/플랫폼 검색" oninput="filterAdminInstructors()" style="padding:8px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;width:200px">
+              <button class="action-btn action-btn-approve" onclick="openAddInstructorModal()" style="padding:8px 16px;font-size:13px">+ 강사 추가</button>
+            </div>
           </div>
           <table class="admin-table">
             <thead>
@@ -1359,21 +1362,25 @@ function renderDashboardRecent() {
 
 function renderVerifiedTable() {
   const verified = allUsers.filter(u => u.verified);
+  if (verified.length === 0) {
+    document.getElementById('verifiedTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400)">인증 완료된 회원이 없습니다.</td></tr>';
+    return;
+  }
   document.getElementById('verifiedTableBody').innerHTML = verified.map(u => `
     <tr>
       <td>
         <div class="user-cell">
-          <div class="user-avatar-sm" style="background:var(--green-light);color:#059669">${u.name[0]}</div>
+          <div class="user-avatar-sm" style="background:var(--green-light);color:#059669">${(u.name||'?')[0]}</div>
           <div>
             <div class="user-name">${u.name} ${u.tier === 'expert' ? '<span style="color:var(--gold);font-size:12px">⭐</span>' : '<span style="color:var(--green);font-size:12px">✓</span>'}</div>
             <div class="user-email">${u.email}</div>
           </div>
         </div>
       </td>
-      <td>${u.verifiedCourses.join(', ') || '-'}</td>
+      <td>${(u.verifiedCourses || []).join(', ') || '-'}</td>
       <td>${getTierBadge(u.tier)}</td>
-      <td>${u.reviews}개</td>
-      <td>${u.verifiedDate || '-'}</td>
+      <td>${u.reviews || 0}개</td>
+      <td>${u.verifiedDate || u.joined || '-'}</td>
       <td>
         <div class="action-btn-group">
           <button class="action-btn action-btn-view" onclick="openUserDetail('${u.id}')">상세</button>
@@ -1450,7 +1457,7 @@ function renderReviewsTable() {
     const preview = r.text.length > 40 ? r.text.substring(0, 40) + '...' : r.text;
     return `
     <tr id="reviewRow${idx}" ${r.blinded ? 'style="opacity:0.4"' : ''}>
-      <td><span class="user-name">${r.author}</span></td>
+      <td><div><span class="user-name">${r.author}</span>${r.author === '익명' && r.email ? `<div style="font-size:11px;color:var(--gray-400)">${r.email}</div>` : (r.email && r.email !== r.author ? `<div style="font-size:11px;color:var(--gray-400)">${r.email}</div>` : '')}</div></td>
       <td>${r.instructor}</td>
       <td><span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score ? r.score + ' ★' : '-'}</span></td>
       <td style="max-width:250px;cursor:pointer" onclick="openReviewDetail(${idx})">
@@ -1502,21 +1509,40 @@ function renderReportsTable() {
 }
 
 function renderInstructorsTable() {
-  document.getElementById('instructorsTableBody').innerHTML = adminInstructors.map((i, idx) => `
-    <tr>
-      <td><strong>${i.name}</strong></td>
-      <td>${i.category}</td>
-      <td>${i.platform}</td>
-      <td style="font-size:12px;color:var(--gray-500)">${i.course || '-'}</td>
-      <td><span style="color:${i.score >= 4 ? 'var(--green)' : i.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${i.score} ★</span></td>
-      <td>${i.reviews}개</td>
-      <td><span style="color:${i.hype > 70 ? 'var(--red)' : i.hype > 40 ? 'var(--gold)' : 'var(--green)'};font-weight:700">${i.hype}%</span></td>
-      <td>
-        <button class="action-btn action-btn-view" onclick="showInstructorDetail(${idx})">관리</button>
-        <button class="action-btn action-btn-delete" onclick="deleteInstructor(${idx})">삭제</button>
-      </td>
-    </tr>
-  `).join('');
+  let list = adminInstructors;
+  const searchEl = document.getElementById('instructorSearchInput');
+  if (searchEl && searchEl.value.trim()) {
+    const s = searchEl.value.trim().toLowerCase().replace(/\s/g, '');
+    list = list.filter(i =>
+      i.name.toLowerCase().replace(/\s/g, '').includes(s) ||
+      i.category.toLowerCase().replace(/\s/g, '').includes(s) ||
+      i.platform.toLowerCase().replace(/\s/g, '').includes(s) ||
+      (i.course || '').toLowerCase().replace(/\s/g, '').includes(s)
+    );
+  }
+  document.getElementById('instructorsTableBody').innerHTML = list.length === 0
+    ? '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--gray-400)">검색 결과가 없습니다.</td></tr>'
+    : list.map((i, idx) => {
+      const origIdx = adminInstructors.indexOf(i);
+      return `
+      <tr>
+        <td><strong>${i.name}</strong></td>
+        <td>${i.category}</td>
+        <td>${i.platform}</td>
+        <td style="font-size:12px;color:var(--gray-500)">${i.course || '-'}</td>
+        <td><span style="color:${i.score >= 4 ? 'var(--green)' : i.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${i.score} ★</span></td>
+        <td>${i.reviews}개</td>
+        <td><span style="color:${i.hype > 70 ? 'var(--red)' : i.hype > 40 ? 'var(--gold)' : 'var(--green)'};font-weight:700">${i.hype}%</span></td>
+        <td>
+          <button class="action-btn action-btn-view" onclick="showInstructorDetail(${origIdx})">관리</button>
+          <button class="action-btn action-btn-delete" onclick="deleteInstructor(${origIdx})">삭제</button>
+        </td>
+      </tr>`;
+    }).join('');
+}
+
+function filterAdminInstructors() {
+  renderInstructorsTable();
 }
 
 // ═══ ACTIONS ═══
@@ -2043,11 +2069,11 @@ async function loadFirestoreVerifications() {
   }
 }
 
-function renderAll() {
+async function renderAll() {
   renderDashboardRecent();
   renderVerificationTable();
+  await renderUsersTable();
   renderVerifiedTable();
-  renderUsersTable();
   renderReviewsTable();
   renderReportsTable();
   renderInstructorsTable();

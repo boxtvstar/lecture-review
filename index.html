@@ -1836,12 +1836,12 @@ function renderInstructors(filter = '전체', search = '', sort = currentSort) {
   if (filter !== '전체') filtered = filtered.filter(i => i.category === filter);
   if (currentPlatformFilter !== '전체') filtered = filtered.filter(i => i.platform === currentPlatformFilter);
   if (search) {
-    const s = search.toLowerCase();
+    const s = search.toLowerCase().replace(/\s/g, '');
     filtered = filtered.filter(i =>
-      i.name.toLowerCase().includes(s) ||
-      i.tags.some(t => t.toLowerCase().includes(s)) ||
-      i.category.toLowerCase().includes(s) ||
-      i.platform.toLowerCase().includes(s)
+      i.name.toLowerCase().replace(/\s/g, '').includes(s) ||
+      i.tags.some(t => t.toLowerCase().replace(/\s/g, '').includes(s)) ||
+      i.category.toLowerCase().replace(/\s/g, '').includes(s) ||
+      i.platform.toLowerCase().replace(/\s/g, '').includes(s)
     );
   }
   if (sort === 'popular') filtered.sort((a, b) => b.reviews - a.reviews || b.score - a.score);
