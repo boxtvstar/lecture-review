@@ -204,6 +204,44 @@ navStyle.textContent = `
   .mypage-modal { margin: 16px; max-height: 85vh; }
   .mypage-overlay { padding-top: 20px; align-items: center; }
 }
+/* ═══ WELCOME POPUP ═══ */
+.welcome-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+  z-index: 10000; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.welcome-overlay.open { opacity: 1; pointer-events: auto; }
+.welcome-box {
+  background: white; border-radius: 20px; padding: 36px 32px 28px;
+  max-width: 440px; width: calc(100% - 32px); box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  text-align: center; animation: welcomePop 0.35s ease;
+}
+@keyframes welcomePop { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+.welcome-icon { font-size: 48px; margin-bottom: 12px; }
+.welcome-title { font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 16px; line-height: 1.4; }
+.welcome-desc { font-size: 14px; color: var(--gray-600); line-height: 1.8; margin-bottom: 8px; text-align: left; }
+.welcome-highlight {
+  background: linear-gradient(135deg, #FFF7ED, #FEF3C7); border-radius: 12px;
+  padding: 16px; margin: 16px 0; text-align: left;
+}
+.welcome-highlight p { font-size: 13px; color: var(--gray-700); margin: 6px 0; line-height: 1.6; }
+.welcome-highlight p:first-child { font-weight: 700; color: var(--navy); font-size: 14px; margin-bottom: 10px; }
+.welcome-noshow {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 18px 0 14px; cursor: pointer; font-size: 13px; color: var(--gray-500);
+}
+.welcome-noshow input { cursor: pointer; accent-color: var(--orange); width: 16px; height: 16px; }
+.welcome-btn {
+  width: 100%; padding: 14px; border: none; border-radius: 12px;
+  background: var(--navy); color: white; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: background 0.2s;
+}
+.welcome-btn:hover { background: #0F172A; }
+@media (max-width: 768px) {
+  .welcome-box { padding: 28px 20px 24px; }
+  .welcome-title { font-size: 18px; }
+}
 `;
 document.head.appendChild(navStyle);
 
@@ -381,6 +419,8 @@ firebase.auth().onAuthStateChanged(async user => {
     // 강사 인증 신청 링크: 이미 인증된 강사면 숨김
     const ivLink = document.getElementById('instructorVerifyLink');
     if (ivLink) ivLink.style.display = currentUser.isInstructor ? 'none' : '';
+    // 환영 팝업
+    if (!localStorage.getItem('welcomeDismissed')) showWelcomePopup();
     // 페이지별 로그인 후 콜백
     if (typeof window.onNavLogin === 'function') window.onNavLogin();
   } else {
@@ -595,5 +635,46 @@ if (!window.openInstructorVerifyModal) {
     location.href = '/?instructor-verify=1';
   };
 }
+
+// ─── 환영 팝업 ───
+window.showWelcomePopup = function() {
+  if (document.getElementById('welcomeOverlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'welcomeOverlay';
+  overlay.className = 'welcome-overlay';
+  overlay.innerHTML = `
+    <div class="welcome-box">
+      <div class="welcome-icon">&#x1F91D;</div>
+      <div class="welcome-title">팔이피플에 오신 것을<br>환영합니다!</div>
+      <div class="welcome-desc">
+        팔이피플은 온라인 강의 수강생들의 <strong>솔직한 경험</strong>을 공유하고,<br>
+        <strong>합리적인 수강 결정</strong>을 돕기 위해 만들어진 플랫폼입니다.
+      </div>
+      <div class="welcome-highlight">
+        <p>&#x1F4CC; 운영 원칙</p>
+        <p>&#x2705; 특정 강사를 비방하거나 명예를 훼손하는 것이 아닌, <strong>소비자 보호와 공공의 이익</strong>을 목적으로 운영됩니다.</p>
+        <p>&#x2705; 모든 리뷰는 <strong>실제 수강 경험</strong>에 기반하여 작성해주세요.</p>
+        <p>&#x2705; 근거 없는 비난이나 허위 정보는 삭제될 수 있습니다.</p>
+        <p>&#x2705; 건전한 비평 문화로 <strong>강의 생태계 발전</strong>에 함께해주세요.</p>
+      </div>
+      <label class="welcome-noshow">
+        <input type="checkbox" id="welcomeNoShow"> 다시 보지 않기
+      </label>
+      <button class="welcome-btn" onclick="closeWelcomePopup()">확인했습니다</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+};
+
+window.closeWelcomePopup = function() {
+  const overlay = document.getElementById('welcomeOverlay');
+  if (!overlay) return;
+  if (document.getElementById('welcomeNoShow')?.checked) {
+    localStorage.setItem('welcomeDismissed', '1');
+  }
+  overlay.classList.remove('open');
+  setTimeout(() => overlay.remove(), 300);
+};
 
 })();
