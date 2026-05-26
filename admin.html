@@ -1156,6 +1156,21 @@ body {
   </div>
 </div>
 
+<!-- REVIEW DETAIL MODAL -->
+<div class="verify-modal-overlay" id="reviewDetailModal" onclick="if(event.target===this)closeReviewDetail()">
+  <div class="verify-modal" style="max-width:650px">
+    <div class="verify-modal-header">
+      <div>
+        <div class="verify-modal-title" id="rdTitle">리뷰 상세</div>
+        <div class="verify-modal-sub" id="rdSub"></div>
+      </div>
+      <button class="detail-close" onclick="closeReviewDetail()">✕</button>
+    </div>
+    <div class="verify-modal-body" id="rdBody" style="padding:20px"></div>
+    <div class="verify-modal-footer" id="rdFooter" style="padding:16px 20px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--gray-200)"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1425,19 +1440,27 @@ function renderReviewsTable() {
     document.getElementById('reviewsTableBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400)">등록된 리뷰가 없습니다.</td></tr>';
     return;
   }
-  document.getElementById('reviewsTableBody').innerHTML = recentReviews.map((r, idx) => `
+  document.getElementById('reviewsTableBody').innerHTML = recentReviews.map((r, idx) => {
+    const hasImg = r.files && r.files.length > 0;
+    const preview = r.text.length > 40 ? r.text.substring(0, 40) + '...' : r.text;
+    return `
     <tr id="reviewRow${idx}" ${r.blinded ? 'style="opacity:0.4"' : ''}>
       <td><span class="user-name">${r.author}</span></td>
       <td>${r.instructor}</td>
       <td><span style="color:${r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--gold)' : 'var(--red)'};font-weight:800">${r.score ? r.score + ' ★' : '-'}</span></td>
-      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.blinded ? '<span style="color:var(--gray-400)">🚫 블라인드 처리된 리뷰</span>' : r.text}</td>
+      <td style="max-width:250px;cursor:pointer" onclick="openReviewDetail(${idx})">
+        ${r.blinded ? '<span style="color:var(--gray-400)">🚫 블라인드</span>' :
+          `<span style="color:var(--blue);text-decoration:underline">${hasImg ? '🖼 ' : ''}${preview}</span>`
+        }
+      </td>
       <td>${r.verified
-        ? '<span class="status-badge status-approved" style="cursor:pointer" onclick="unverifyReview(' + idx + ')" title="클릭하면 인증 해제">✅ 인증</span>'
-        : '<span class="status-badge status-unverified" style="cursor:pointer" onclick="verifyReview(' + idx + ')" title="클릭하면 수강생 인증">비인증</span>'
+        ? '<span class="status-badge status-approved" style="cursor:pointer" onclick="event.stopPropagation();unverifyReview(' + idx + ')" title="클릭하면 인증 해제">✅ 인증</span>'
+        : '<span class="status-badge status-unverified" style="cursor:pointer" onclick="event.stopPropagation();verifyReview(' + idx + ')" title="클릭하면 수강생 인증">비인증</span>'
       }</td>
       <td>${r.date}</td>
       <td>
         <div class="action-btn-group">
+          <button class="action-btn action-btn-view" onclick="openReviewDetail(${idx})">상세</button>
           ${r.verified
             ? ''
             : `<button class="action-btn action-btn-approve" onclick="verifyReview(${idx})">✅ 인증</button>`
@@ -1449,8 +1472,8 @@ function renderReviewsTable() {
           <button class="action-btn action-btn-delete" onclick="deleteReviewPerm(${idx})">삭제</button>
         </div>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 function renderReportsTable() {
@@ -1929,10 +1952,14 @@ async function loadFirestoreReviews() {
         id: doc.id,
         author: d.author || '익명',
         authorUid: d.authorUid || '',
+        email: d.email || '',
         instructor: d.instructor || '-',
         course: d.course || '',
+        platform: d.platform || '',
         score: d.score || 0,
+        ratings: d.ratings || {},
         text: d.text || '',
+        files: d.files || [],
         verified: d.verified || false,
         date: d.date || '',
         blinded: d.blinded || false
@@ -2129,6 +2156,83 @@ async function unblindReview(idx) {
   if (r.id) { try { await db.collection('reviews').doc(r.id).update({ blinded: false }); } catch(e) { console.error(e); } }
   renderReviewsTable();
   showToast('리뷰 블라인드가 해제되었습니다.', 'success');
+}
+
+let currentReviewIdx = null;
+function openReviewDetail(idx) {
+  const r = recentReviews[idx];
+  if (!r) return;
+  currentReviewIdx = idx;
+  document.getElementById('rdTitle').textContent = `${r.instructor} 리뷰`;
+  document.getElementById('rdSub').textContent = `${r.author} · ${r.date}`;
+
+  // 평점 표시
+  let ratingsHtml = '';
+  if (r.ratings && Object.keys(r.ratings).length > 0) {
+    ratingsHtml = '<div style="margin-bottom:16px;padding:12px;background:var(--gray-50);border-radius:8px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">세부 평점</div>' +
+      Object.entries(r.ratings).map(([k, v]) =>
+        `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">
+          <span style="color:var(--gray-600)">${k}</span>
+          <span style="color:var(--gold);font-weight:800">${'★'.repeat(v)}${'☆'.repeat(5-v)}</span>
+        </div>`
+      ).join('') + '</div>';
+  }
+
+  // 이미지 표시
+  let imagesHtml = '';
+  if (r.files && r.files.length > 0) {
+    imagesHtml = '<div style="margin-bottom:16px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">📷 첨부 이미지</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      r.files.map(f =>
+        `<img src="${f}" style="max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--gray-200);cursor:pointer" onclick="window.open(this.src,'_blank')">`
+      ).join('') + '</div></div>';
+  }
+
+  document.getElementById('rdBody').innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      <div style="padding:6px 14px;background:var(--orange-light);border-radius:20px;font-size:13px;font-weight:700;color:var(--orange)">
+        총점: ${r.score ? r.score + ' ★' : '미평가'}
+      </div>
+      <div style="padding:6px 14px;background:var(--blue-light);border-radius:20px;font-size:13px;font-weight:600;color:var(--blue)">
+        강의: ${r.course || '-'}
+      </div>
+      <div style="padding:6px 14px;background:var(--gray-100);border-radius:20px;font-size:13px;font-weight:600;color:var(--gray-600)">
+        플랫폼: ${r.platform || '-'}
+      </div>
+      <div style="padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;${r.verified ? 'background:var(--green-light);color:var(--green)' : 'background:var(--red-light);color:var(--red)'}">
+        ${r.verified ? '✅ 인증된 수강생' : '비인증'}
+      </div>
+    </div>
+    ${ratingsHtml}
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">리뷰 내용</div>
+      <div style="padding:16px;background:var(--gray-50);border-radius:8px;font-size:14px;line-height:1.8;color:var(--gray-700);white-space:pre-wrap">${r.blinded ? '🚫 블라인드 처리된 리뷰입니다.' : r.text}</div>
+    </div>
+    ${imagesHtml}
+    <div style="font-size:11px;color:var(--gray-400)">작성자 UID: ${r.authorUid || '-'} · 이메일: ${r.email || '-'}</div>
+  `;
+
+  // 하단 버튼
+  document.getElementById('rdFooter').innerHTML = `
+    ${r.verified
+      ? `<button class="action-btn action-btn-delete" onclick="unverifyReview(${idx});closeReviewDetail()">인증 해제</button>`
+      : `<button class="action-btn action-btn-approve" onclick="verifyReview(${idx});closeReviewDetail()">✅ 수강생 인증</button>`
+    }
+    ${r.blinded
+      ? `<button class="action-btn action-btn-approve" onclick="unblindReview(${idx});closeReviewDetail()">블라인드 해제</button>`
+      : `<button class="action-btn action-btn-delete" onclick="blindReview(${idx});closeReviewDetail()">블라인드</button>`
+    }
+    <button class="action-btn action-btn-delete" onclick="deleteReviewPerm(${idx});closeReviewDetail()">삭제</button>
+  `;
+
+  document.getElementById('reviewDetailModal').style.display = 'flex';
+}
+
+function closeReviewDetail() {
+  document.getElementById('reviewDetailModal').style.display = 'none';
+  currentReviewIdx = null;
 }
 
 async function verifyReview(idx) {
