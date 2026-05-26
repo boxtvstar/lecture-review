@@ -1611,9 +1611,10 @@ async function manualVerify(userId) {
 function openUserDetail(userId) {
   const user = allUsers.find(u => u.id === userId);
   if (!user) return;
-  const userReviews = recentReviews.filter(r => r.author === user.name);
+  const userReviews = recentReviews.filter(r => r.authorUid === userId || r.email === user.email);
   const userVerifyReqs = verificationRequests.filter(v => v.userId === userId);
-  const userComments = adminComments.filter(c => c.author === user.name);
+  const userComments = adminComments.filter(c => c.authorUid === userId || c.email === user.email);
+  const userPosts = communityPosts.filter(p => p.authorUid === userId);
 
   document.getElementById('vmTitle').textContent = `${user.name} 회원 상세`;
   document.getElementById('vmSub').textContent = `${user.email} · 가입일 ${user.joined}`;
@@ -1700,6 +1701,20 @@ function openUserDetail(userId) {
           ${c.deleted ? '<div style="margin-top:4px;font-size:11px;color:var(--red)">🚫 삭제됨</div>' : ''}
         </div>
       `).join('') : '<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:13px">작성한 댓글 없음</div>'}
+    </div>
+
+    <div style="margin-top:16px">
+      <div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px">📢 커뮤니티 글 (${userPosts.length}건)</div>
+      ${userPosts.length > 0 ? userPosts.map(p => `
+        <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-weight:700">${p.title || '(제목없음)'}</span>
+            <span style="color:var(--gray-400);font-size:11px">${p.category || ''}</span>
+          </div>
+          <div style="color:var(--gray-500)">${(p.content || '').substring(0, 100)}${(p.content || '').length > 100 ? '...' : ''}</div>
+          <div style="margin-top:4px;font-size:11px;color:var(--gray-400)">${p.date || ''} · 좋아요 ${p.likes || 0}</div>
+        </div>
+      `).join('') : '<div style="text-align:center;padding:12px;color:var(--gray-400);font-size:13px">작성한 글 없음</div>'}
     </div>
 
     <div class="verify-modal-actions" style="margin-top:16px">
@@ -1820,8 +1835,33 @@ function renderWeeklyChart() {
 }
 
 // ═══ ADMIN COMMENTS DATA & RENDER ═══
-const adminComments = [];
-// 실제 댓글은 Firestore에서 로드됩니다.
+let adminComments = [];
+
+async function loadAdminComments() {
+  try {
+    const snap = await db.collection('comments').orderBy('createdAt', 'desc').get();
+    adminComments = snap.docs.map(doc => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        author: d.author || '익명',
+        authorUid: d.authorUid || '',
+        email: d.email || '',
+        instructor: d.instructor || '',
+        instructorId: d.instructorId || 0,
+        text: d.text || '',
+        date: d.date || '',
+        deleted: d.deleted || false,
+        verified: d.verified || false,
+        isInstructor: d.isInstructor || false,
+        likes: d.likes || 0
+      };
+    });
+    renderCommentsTable();
+  } catch(e) {
+    console.error('댓글 로드 실패:', e);
+  }
+}
 
 function renderCommentsTable() {
   document.getElementById('commentsTableBody').innerHTML = adminComments.map((c, idx) => {
@@ -1846,8 +1886,14 @@ function renderCommentsTable() {
   }).join('');
 }
 
-function deleteComment(idx) {
+async function deleteComment(idx) {
   if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+  const c = adminComments[idx];
+  if (c && c.id) {
+    try {
+      await db.collection('comments').doc(c.id).update({ deleted: true });
+    } catch(e) { console.error('댓글 삭제 실패:', e); }
+  }
   adminComments[idx].deleted = true;
   renderCommentsTable();
   showToast('댓글이 삭제되었습니다.');
@@ -2089,6 +2135,7 @@ async function renderAll() {
   loadFirestoreReviews();
   loadFirestoreVerifications();
   loadCommunityPosts();
+  loadAdminComments();
 }
 
 // ═══ MOBILE SIDEBAR ═══

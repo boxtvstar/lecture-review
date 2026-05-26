@@ -2636,18 +2636,29 @@ function submitComment(instId) {
   if (!currentUser) { googleLogin(); return; }
   if (!commentsData[instId]) commentsData[instId] = [];
   const today = new Date();
-  commentsData[instId].unshift({
+  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+  const inst = instructors.find(i => i.id === instId) || worstInstructors.find(i => i.id === instId);
+  const commentObj = {
     author: getDisplayName(),
     authorUid: currentUser.uid,
+    email: currentUser.email || '',
     verified: false,
     isInstructor: currentUser.isInstructor || false,
-    date: `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`,
+    date: dateStr,
     text: text,
     likes: 0,
-    replies: []
-  });
+    replies: [],
+    instructor: inst ? inst.name : '',
+    instructorId: instId
+  };
+  commentsData[instId].unshift(commentObj);
   input.value = '';
   renderComments(instId);
+  // Firestore에 댓글 저장
+  firebase.firestore().collection('comments').add({
+    ...commentObj,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(e => console.error('댓글 저장 실패:', e));
   // 포인트 적립: 댓글 +0.5P
   addPoints(currentUser.uid, 0.5, '댓글 작성');
   showPointToast(0.5, '댓글 작성');
