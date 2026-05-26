@@ -398,7 +398,7 @@ body {
         <div class="sep"></div>
         <button type="button" onclick="editorInsertImage()" title="이미지 삽입">📷 이미지</button>
       </div>
-      <div class="res-editor-area" id="resWriteContent" contenteditable="true" data-placeholder="자료 내용을 작성해주세요 (최소 50자)"></div>
+      <div class="res-editor-area" id="resWriteContent" contenteditable="true" data-placeholder="자료 내용을 작성해주세요 (최소 10자)"></div>
       <input type="file" id="editorImgInput" accept="image/*" style="display:none" onchange="editorImgSelected(this)">
     </div>
     <div class="res-write-field">
@@ -768,7 +768,7 @@ async function submitResource() {
   cost = Math.max(1, Math.min(5, cost));
 
   if (!title) { alert('제목을 입력해주세요.'); return; }
-  if (contentText.length < 50) { alert('본문 내용을 50자 이상 작성해주세요.'); return; }
+  if (contentText.length < 10) { alert('본문 내용을 10자 이상 작성해주세요.'); return; }
   if (!currentUser) { document.getElementById('loginOverlay').classList.add('open'); return; }
 
   // 자료 등록 시 5P 차감 확인

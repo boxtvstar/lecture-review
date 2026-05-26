@@ -1545,7 +1545,7 @@ async function renderUsersTable(filter = 'all') {
       <td>${getTierBadge(u.tier)}</td>
       <td>
         <div class="action-btn-group">
-          <button class="action-btn action-btn-view" onclick="openPointModal('${u.id}','${u.name.replace(/'/g,'\\&#39;')}')">💰 포인트</button>
+          <button class="action-btn action-btn-view" onclick="openPointModal('${u.id}','${encodeURIComponent(u.name)}')">💰 포인트</button>
           ${u.role !== 'admin' ? `<button class="action-btn action-btn-approve" onclick="setAdmin('${u.id}')">관리자</button>` : ''}
           ${!u.verified ? `<button class="action-btn action-btn-approve" onclick="manualVerify('${u.id}')">수동 인증</button>` : ''}
         </div>
@@ -2094,8 +2094,9 @@ async function loadDashboardStats() {
 // ═══ 포인트 수동 지급 ═══
 let pointTargetUid = null;
 let pointTargetName = '';
-async function openPointModal(uid, name) {
+async function openPointModal(uid, encodedName) {
   pointTargetUid = uid;
+  const name = decodeURIComponent(encodedName);
   pointTargetName = name;
   document.getElementById('pointModalUser').textContent = name;
   document.getElementById('pointAmount').value = '';
@@ -2154,8 +2155,8 @@ async function submitPointGrant() {
     renderUsersTable();
     showToast(`${amount > 0 ? '+' : ''}${amount}P ${reason}`, 'success');
   } catch(e) {
-    console.error(e);
-    showToast('포인트 지급 실패', 'error');
+    console.error('포인트 지급 오류:', e);
+    showToast('포인트 지급 실패: ' + (e.message || e), 'error');
   }
 }
 
