@@ -2076,7 +2076,8 @@ async function loadFirestoreReviews() {
         date: d.date || '',
         blinded: d.blinded || false,
         platformRating: d.platformRating || 0,
-        platformReview: d.platformReview || ''
+        platformReview: d.platformReview || '',
+        coursePrice: d.coursePrice || 0
       };
     });
     reviewsLoaded = true;
@@ -2136,6 +2137,7 @@ async function renderAll() {
   loadFirestoreVerifications();
   loadCommunityPosts();
   loadAdminComments();
+  loadAdminResources();
 }
 
 // ═══ MOBILE SIDEBAR ═══
@@ -2325,6 +2327,9 @@ function openReviewDetail(idx) {
       <div style="padding:6px 14px;background:var(--gray-100);border-radius:20px;font-size:13px;font-weight:600;color:var(--gray-600)">
         플랫폼: ${r.platform || '-'}
       </div>
+      ${r.coursePrice > 0 ? `<div style="padding:6px 14px;background:var(--orange-light);border-radius:20px;font-size:13px;font-weight:700;color:var(--orange)">
+        💰 강의 금액: ${r.coursePrice}만원
+      </div>` : ''}
       <div style="padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;${r.verified ? 'background:var(--green-light);color:var(--green)' : 'background:var(--red-light);color:var(--red)'}">
         ${r.verified ? '✅ 인증된 수강생' : '비인증'}
       </div>
@@ -2357,6 +2362,11 @@ function openReviewDetail(idx) {
         <div style="margin-top:8px">
           <span style="font-size:12px;color:var(--blue);font-weight:700">플랫폼 한줄평가</span>
           <input type="text" id="adminPlatformReview" value="${r.platformReview || ''}" placeholder="플랫폼에 대한 한줄 평가" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;margin-top:4px;box-sizing:border-box">
+        </div>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--orange);font-weight:700">강의 금액</span>
+          <input type="number" id="adminCoursePrice" value="${r.coursePrice || ''}" placeholder="만원" min="0" style="width:100px;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;box-sizing:border-box">
+          <span style="font-size:12px;color:var(--gray-400)">만원</span>
         </div>
       </div>
       <button onclick="saveAdminRatings(${idx})" style="margin-top:10px;padding:8px 20px;background:var(--orange);color:white;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">평점 저장</button>
@@ -2416,12 +2426,15 @@ async function saveAdminRatings(idx) {
   if (platRating > 0) updateData.platformRating = platRating;
   const platReviewText = document.getElementById('adminPlatformReview')?.value?.trim() || '';
   if (platReviewText) updateData.platformReview = platReviewText;
+  const adminPrice = parseInt(document.getElementById('adminCoursePrice')?.value) || 0;
+  if (adminPrice > 0) updateData.coursePrice = adminPrice;
   try {
     await db.collection('reviews').doc(r.id).update(updateData);
     r.ratings = ratings;
     r.score = score;
     if (platRating > 0) r.platformRating = platRating;
     if (platReviewText) r.platformReview = platReviewText;
+    if (adminPrice > 0) r.coursePrice = adminPrice;
     showToast(`평점 저장 완료! (총점: ${score}${platRating > 0 ? ', 플랫폼: ★' + platRating : ''})`, 'success');
     renderReviewsTable();
   } catch(e) {
