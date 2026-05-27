@@ -3313,6 +3313,18 @@ setTimeout(() => loadAdminResources(), 1500);
 let adminPlatforms = [];
 let editingPlatformId = null;
 
+const defaultPlatforms = [
+  { name: '인프런', color: '#00C471' },
+  { name: '클래스101', color: '#1A6DFF' },
+  { name: '패스트캠퍼스', color: '#E4002B' },
+  { name: '유데미', color: '#A435F0' },
+  { name: '콜로소', color: '#222222' },
+  { name: '탈잉', color: '#FF6F00' },
+  { name: '타이탄클래스', color: '#2563EB' },
+  { name: '디하클', color: '#EAB308' },
+  { name: '핏크닉', color: '#16A34A' }
+];
+
 async function loadAdminPlatforms() {
   const db = firebase.firestore();
   const tbody = document.getElementById('platformAdminTableBody');
@@ -3321,6 +3333,15 @@ async function loadAdminPlatforms() {
     const snap = await db.collection('platform_settings').get();
     adminPlatforms = [];
     snap.forEach(doc => adminPlatforms.push({ id: doc.id, ...doc.data() }));
+
+    // 기본 플랫폼 중 Firestore에 없는 것 자동 등록
+    const existingNames = adminPlatforms.map(p => p.name);
+    for (const dp of defaultPlatforms) {
+      if (!existingNames.includes(dp.name)) {
+        await db.collection('platform_settings').doc(dp.name).set({ name: dp.name, link: '', color: dp.color });
+        adminPlatforms.push({ id: dp.name, name: dp.name, link: '', color: dp.color });
+      }
+    }
     renderPlatformTable();
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--red)">로드 실패</td></tr>';
