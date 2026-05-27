@@ -3195,10 +3195,17 @@ function closeSuccessPopup() {
 // ═══ SCROLL EFFECTS ═══
 // nav scroll shadow는 nav.js에서 관리
 
+const isMobile = window.innerWidth <= 768;
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.section').forEach(s => { s.classList.add('fade-in'); observer.observe(s); });
+}, { threshold: isMobile ? 0.01 : 0.1, rootMargin: isMobile ? '200px 0px' : '0px' });
+document.querySelectorAll('.section, .platform-section, .community-preview').forEach(s => { s.classList.add('fade-in'); observer.observe(s); });
+// 모바일에서 1초 후에도 안 보이면 강제로 표시
+if (isMobile) {
+  setTimeout(() => {
+    document.querySelectorAll('.fade-in:not(.visible)').forEach(el => el.classList.add('visible'));
+  }, 1200);
+}
 
 // ═══ MOBILE NAV ═══
 // openMobileNav, closeMobileNav는 nav.js에서 관리
