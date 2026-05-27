@@ -1106,57 +1106,61 @@ body {
   .nav-logo { font-size: 17px; }
   .nav-logo .logo-icon { width: 30px; height: 30px; font-size: 13px; border-radius: 8px; }
   .hero { margin-top: 56px; }
-  .hero-slide { padding: 48px 16px 36px; }
+  .hero-slide { padding: 40px 16px 28px; }
   .hero-slide h2 { font-size: 22px; letter-spacing: -0.5px; line-height: 1.35; }
   .hero-slide p { font-size: 13px; }
-  .hero-slide-icon { font-size: 36px; margin-bottom: 14px; }
+  .hero-slide-icon { font-size: 32px; margin-bottom: 10px; }
   .slide-tags { gap: 6px; }
   .slide-tag { font-size: 11px; padding: 4px 10px; }
-  .hero-search-bar { padding: 0 16px 24px; }
+  .hero-search-bar { padding: 0 16px 20px; }
   .search-box input { padding: 14px 48px 14px 44px; font-size: 14px; border-radius: 12px; }
   .search-icon { left: 14px; font-size: 18px; }
   .search-btn { width: 34px; height: 34px; border-radius: 10px; font-size: 16px; right: 6px; }
-  .hero-stats { gap: 16px; padding: 0 16px 24px; }
+  .hero-stats { gap: 16px; padding: 0 16px 20px; }
   .hero-stat .num { font-size: 20px; }
   .hero-stat .label { font-size: 11px; }
-  .platform-section { padding: 28px 16px; }
-  .platform-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .platform-card { padding: 16px; }
-  .platform-logo-icon { width: 32px; height: 32px; font-size: 16px; }
-  .platform-name { font-size: 14px; }
-  .platform-score { font-size: 22px; }
-  .platform-reviews { font-size: 11px; }
-  .platform-detail-row { font-size: 12px; }
-  .disclaimer-bar { font-size: 11px; padding: 12px 16px; }
-  .community-preview { padding: 28px 16px; }
-  .community-grid { grid-template-columns: 1fr; gap: 10px; }
-  .community-card { padding: 16px; }
-  .community-card-title { font-size: 14px; }
-  .categories { padding: 0 16px; gap: 6px; margin-top: -12px; }
-  .cat-pill { padding: 7px 12px; font-size: 12px; border-width: 1.5px; }
+  .hero-dots { padding-bottom: 16px; }
+  .categories { padding: 0 16px; gap: 6px; margin-top: -12px; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .categories::-webkit-scrollbar { display: none; }
+  .cat-pill { padding: 7px 12px; font-size: 12px; border-width: 1.5px; flex-shrink: 0; white-space: nowrap; }
   .cat-pill .cat-count { font-size: 10px; padding: 1px 6px; margin-left: 4px; }
-  .section { padding: 28px 16px; }
+  .section { padding: 24px 16px; }
   .section-title { font-size: 19px; gap: 8px; }
   .section-title .icon { font-size: 18px; }
   .section-link { font-size: 13px; }
-  .sort-tabs { gap: 4px; }
-  .sort-tab { padding: 5px 10px; font-size: 11px; }
+  .sort-tabs { gap: 4px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .sort-tabs::-webkit-scrollbar { display: none; }
+  .sort-tab { padding: 5px 10px; font-size: 11px; flex-shrink: 0; white-space: nowrap; }
   .section-header { flex-wrap: wrap; gap: 8px; }
-  .instructor-grid { grid-template-columns: 1fr; gap: 14px; }
-  .instructor-card { padding: 18px; }
+  .instructor-grid { grid-template-columns: 1fr; gap: 12px; }
+  .instructor-card { padding: 16px; }
   .card-score { font-size: 28px; }
   .card-name { font-size: 15px; }
   .card-hype { padding: 8px 12px; font-size: 12px; }
   .card-tag { font-size: 11px; padding: 3px 8px; }
-  .detector-section { padding: 20px; margin: 12px 0; border-radius: 14px; }
-  .detector-grid { grid-template-columns: 1fr; gap: 12px; }
-  .detector-card { padding: 16px; }
+  .platform-section { padding: 24px 16px; }
+  .platform-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .platform-card { padding: 14px; }
+  .platform-logo-icon { width: 30px; height: 30px; font-size: 14px; }
+  .platform-name { font-size: 13px; }
+  .platform-score { font-size: 20px; }
+  .platform-reviews { font-size: 10px; }
+  .platform-detail-row { font-size: 11px; }
+  .disclaimer-bar { font-size: 11px; padding: 12px 16px; }
+  .community-preview { padding: 24px 16px; }
+  .community-grid { grid-template-columns: 1fr; gap: 10px; }
+  .community-card { padding: 14px; }
+  .community-card-title { font-size: 14px; }
+  .detector-section { padding: 18px; margin: 12px 0; border-radius: 14px; }
+  .detector-grid { grid-template-columns: 1fr; gap: 10px; }
+  .detector-card { padding: 14px; }
   .detector-course { font-size: 14px; }
   .detector-reason { font-size: 12px; padding: 8px; }
   .vote-btn { padding: 8px; font-size: 12px; }
-  .worst-section { padding: 20px; border-radius: 14px; }
-  .worst-tabs { gap: 6px; margin-bottom: 14px; }
-  .worst-tab { padding: 6px 12px; font-size: 12px; }
+  .worst-section { padding: 18px; border-radius: 14px; }
+  .worst-tabs { gap: 6px; margin-bottom: 14px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .worst-tabs::-webkit-scrollbar { display: none; }
+  .worst-tab { padding: 6px 12px; font-size: 12px; flex-shrink: 0; }
   .worst-item { padding: 12px 14px; gap: 10px; }
   .worst-name { font-size: 13px; }
   .worst-meta { font-size: 11px; }
@@ -1164,8 +1168,9 @@ body {
   .worst-hype { font-size: 10px; }
   .worst-warning { padding: 10px 12px; }
   .worst-warning-text { font-size: 11px; }
-  .ranking-tabs { gap: 6px; margin-bottom: 14px; }
-  .ranking-tab { padding: 6px 12px; font-size: 12px; }
+  .ranking-tabs { gap: 6px; margin-bottom: 14px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .ranking-tabs::-webkit-scrollbar { display: none; }
+  .ranking-tab { padding: 6px 12px; font-size: 12px; flex-shrink: 0; }
   .ranking-item { padding: 12px 14px; gap: 10px; }
   .rank-name { font-size: 14px; }
   .rank-meta { font-size: 11px; }
@@ -1173,11 +1178,11 @@ body {
   .modal-overlay { padding: 0; }
   .modal { margin: 0; border-radius: 0; min-height: 100vh; max-width: 100%; }
   .modal-header { padding: 16px 18px; }
-  .modal-body { padding: 18px; }
+  .modal-body { padding: 16px; }
   .modal-name { font-size: 18px; }
-  .modal-avatar { width: 48px; height: 48px; font-size: 20px; border-radius: 12px; }
-  .modal-score-num { font-size: 44px; }
-  .modal-score-big { padding: 18px; }
+  .modal-avatar { width: 44px; height: 44px; font-size: 18px; border-radius: 10px; }
+  .modal-score-num { font-size: 40px; }
+  .modal-score-big { padding: 16px; }
   .rating-label { width: 80px; font-size: 12px; }
   .rating-value { font-size: 13px; }
   .review-item { padding: 14px; }
@@ -1185,22 +1190,25 @@ body {
   .form-rating-label { width: 90px; font-size: 12px; }
   .form-star { font-size: 20px; }
   .form-input, .form-textarea { font-size: 16px; }
-  .upload-area { padding: 20px; }
+  .upload-area { padding: 18px; }
   .upload-icon { font-size: 24px; }
   .upload-text { font-size: 13px; }
-  .footer { padding: 32px 16px 24px; margin-top: 20px; }
-  .footer-inner { flex-direction: column; gap: 24px; }
-  .footer-links { gap: 24px; flex-wrap: wrap; }
+  .footer { padding: 28px 16px 20px; margin-top: 16px; }
+  .footer-inner { flex-direction: column; gap: 20px; }
+  .footer-links { gap: 20px; flex-wrap: wrap; }
   .footer-bottom { flex-direction: column; gap: 6px; text-align: center; font-size: 11px; }
+  /* 플랫폼 필터 탭 가로 스크롤 */
+  .platform-filter-tabs { overflow-x: auto !important; flex-wrap: nowrap !important; scrollbar-width: none; padding-bottom: 6px; }
+  .platform-filter-tabs::-webkit-scrollbar { display: none; }
+  .plat-tab { flex-shrink: 0; }
 }
 
 @media (max-width: 380px) {
   .hero-slide h2 { font-size: 19px; }
+  .hero-slide { padding: 32px 16px 24px; }
   .hero-stats { flex-wrap: wrap; gap: 12px; }
   .hero-stat { flex: 1; min-width: 80px; }
   .platform-grid { grid-template-columns: 1fr; }
-  .categories { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
-  .cat-pill { flex-shrink: 0; }
   .card-score { font-size: 24px; }
 }
 </style>
