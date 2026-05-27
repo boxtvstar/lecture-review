@@ -1354,6 +1354,21 @@ body {
   </div>
 </div>
 
+<!-- COMMENT DETAIL MODAL -->
+<div class="verify-modal-overlay" id="commentDetailModal" onclick="if(event.target===this)closeCommentDetail()">
+  <div class="verify-modal" style="max-width:550px">
+    <div class="verify-modal-header">
+      <div>
+        <div class="verify-modal-title">댓글 상세</div>
+        <div class="verify-modal-sub" id="cdSub"></div>
+      </div>
+      <button class="detail-close" onclick="closeCommentDetail()">✕</button>
+    </div>
+    <div class="verify-modal-body" id="cdBody" style="padding:20px"></div>
+    <div style="padding:12px 20px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--gray-200)" id="cdFooter"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -2052,12 +2067,13 @@ function renderCommentsTable() {
     return `
       <tr>
         <td><strong>${c.author}</strong></td>
-        <td>${c.instructor}</td>
-        <td><span style="color:var(--gray-400);font-size:12px;font-weight:700">${c.verified ? '✓ 인증' : '미인증'}</span></td>
-        <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="cmtText${idx}">${c.text}</td>
+        <td>${c.instructor || '-'}</td>
+        <td><span style="color:${c.verified ? 'var(--green)' : 'var(--gray-400)'};font-size:12px;font-weight:700">${c.verified ? '✓ 인증' : '미인증'}</span></td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;color:var(--blue)" onclick="openCommentDetail(${idx})" title="클릭하여 상세보기">${c.text}</td>
         <td>${c.date}</td>
         <td>
           <div style="display:flex;gap:4px">
+            <button class="action-btn action-btn-approve" onclick="openCommentDetail(${idx})">상세</button>
             <button class="action-btn action-btn-view" onclick="editComment(${idx})">수정</button>
             <button class="action-btn action-btn-delete" onclick="deleteComment(${idx})">삭제</button>
           </div>
@@ -2093,6 +2109,46 @@ async function editComment(idx) {
       alert('수정 실패: ' + e.message);
     }
   }
+}
+
+function openCommentDetail(idx) {
+  const c = adminComments[idx];
+  document.getElementById('cdSub').textContent = `작성일: ${c.date}`;
+  document.getElementById('cdBody').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;gap:12px;align-items:center;padding:14px;background:var(--gray-50);border-radius:10px">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--orange);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:16px">${(c.author||'?')[0]}</div>
+        <div>
+          <div style="font-weight:700;color:var(--navy);font-size:14px">${c.author}</div>
+          <div style="font-size:12px;color:var(--gray-400)">${c.email || '이메일 없음'} · ${c.verified ? '✓ 인증 수강생' : '미인증'}</div>
+        </div>
+      </div>
+      <div style="padding:14px;background:#F8FAFF;border-radius:10px;border-left:3px solid var(--blue)">
+        <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">📌 댓글 대상</div>
+        <div style="font-size:15px;font-weight:800;color:var(--navy)">${c.instructor || '(대상 강사 미지정)'}</div>
+        ${c.instructorId ? `<div style="font-size:11px;color:var(--gray-400);margin-top:2px">강사 ID: ${c.instructorId}</div>` : ''}
+      </div>
+      <div style="padding:14px;background:var(--gray-50);border-radius:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--gray-500);margin-bottom:8px">💬 댓글 내용</div>
+        <div style="font-size:14px;line-height:1.7;color:var(--navy);white-space:pre-wrap">${c.text}</div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--gray-400)">
+        <span>👍 좋아요 ${c.likes || 0}개</span>
+        <span>${c.isInstructor ? '🎓 강사 댓글' : '👤 수강생 댓글'}</span>
+        <span>상태: ${c.deleted ? '🗑 삭제됨' : '✅ 활성'}</span>
+      </div>
+    </div>
+  `;
+  document.getElementById('cdFooter').innerHTML = `
+    <button class="action-btn action-btn-view" onclick="editComment(${idx});closeCommentDetail()">수정</button>
+    <button class="action-btn action-btn-delete" onclick="deleteComment(${idx});closeCommentDetail()">삭제</button>
+    <button class="action-btn action-btn-view" onclick="closeCommentDetail()">닫기</button>
+  `;
+  document.getElementById('commentDetailModal').classList.add('open');
+}
+
+function closeCommentDetail() {
+  document.getElementById('commentDetailModal').classList.remove('open');
 }
 
 // ═══ Firestore 대시보드 실시간 통계 ═══
