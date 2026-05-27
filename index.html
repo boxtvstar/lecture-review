@@ -3260,11 +3260,15 @@ function renderPlatforms() {
   const grid = document.getElementById('platformGrid');
   grid.innerHTML = platformData.filter(p => p.reviews > 0 || p.score > 0).map(p => {
     const cls = p.score >= 4 ? 'good' : p.score >= 3 ? 'mid' : 'bad';
+    const linkHtml = p.link ? `<a href="${p.link}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;opacity:0.8">🔗 ${p.link.replace(/^https?:\/\/(www\.)?/,'').split('/')[0]}</a>` : '';
     return `
     <div class="platform-card" style="cursor:pointer" onclick="openPlatformDetail('${p.name}')">
       <div class="platform-logo">
         <div class="platform-logo-icon" style="background:${p.color}">${p.icon.replace(/🟩|🟦|🟥|🟪|⬛|🟧/g, p.name[0])}</div>
-        <span class="platform-name">${p.name}</span>
+        <div>
+          <span class="platform-name">${p.name}</span>
+          ${linkHtml ? '<br>' + linkHtml : ''}
+        </div>
       </div>
       <div class="platform-score-row">
         <span class="platform-score ${cls}">${p.score.toFixed(1)}</span>
@@ -3291,7 +3295,7 @@ function openPlatformDetail(name) {
   document.getElementById('platModalAvatar').style.background = p.color;
   document.getElementById('platModalAvatar').textContent = p.name[0];
   document.getElementById('platModalName').textContent = p.name;
-  document.getElementById('platModalSub').textContent = `플랫폼 · 리뷰 ${p.reviews}개`;
+  document.getElementById('platModalSub').innerHTML = `플랫폼 · 리뷰 ${p.reviews}개` + (p.link ? ` · <a href="${p.link}" target="_blank" style="color:var(--blue);text-decoration:none">🔗 사이트 방문</a>` : '');
 
   const cls = p.score >= 4 ? 'good' : p.score >= 3 ? 'mid' : 'bad';
 
@@ -3854,6 +3858,19 @@ async function loadFirestoreReviews() {
       ];
       p.score = allPlatRatings.length > 0 ? Math.round(allPlatRatings.reduce((a, b) => a + b, 0) / allPlatRatings.length * 10) / 10 : p.instAvg;
     });
+
+    // Firestore에서 플랫폼 설정(링크, 색상) 병합
+    try {
+      const platSnap = await firebase.firestore().collection('platform_settings').get();
+      platSnap.forEach(doc => {
+        const ps = doc.data();
+        const target = platformData.find(p => p.name === ps.name);
+        if (target) {
+          if (ps.link) target.link = ps.link;
+          if (ps.color) target.color = ps.color;
+        }
+      });
+    } catch(e) { console.log('플랫폼 설정 로드 실패:', e); }
 
     // 전체 렌더링 갱신
     renderHeroStats();
