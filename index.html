@@ -1040,8 +1040,11 @@ body {
 @keyframes fadeInDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-.fade-in { opacity: 0; transform: translateY(20px); transition: all 0.5s ease; }
+.fade-in { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s ease; }
 .fade-in.visible { opacity: 1; transform: translateY(0); }
+@media (max-width: 768px) {
+  .fade-in { opacity: 1 !important; transform: none !important; }
+}
 
 /* ═══ MOBILE NAV MENU ═══ */
 .mobile-menu-btn {
@@ -3196,15 +3199,11 @@ function closeSuccessPopup() {
 // nav scroll shadow는 nav.js에서 관리
 
 const isMobile = window.innerWidth <= 768;
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: isMobile ? 0.01 : 0.1, rootMargin: isMobile ? '200px 0px' : '0px' });
-document.querySelectorAll('.section, .platform-section, .community-preview').forEach(s => { s.classList.add('fade-in'); observer.observe(s); });
-// 모바일에서 1초 후에도 안 보이면 강제로 표시
-if (isMobile) {
-  setTimeout(() => {
-    document.querySelectorAll('.fade-in:not(.visible)').forEach(el => el.classList.add('visible'));
-  }, 1200);
+if (!isMobile) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.05, rootMargin: '100px 0px' });
+  document.querySelectorAll('.section, .platform-section, .community-preview').forEach(s => { s.classList.add('fade-in'); observer.observe(s); });
 }
 
 // ═══ MOBILE NAV ═══
