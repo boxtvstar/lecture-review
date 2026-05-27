@@ -2208,7 +2208,7 @@ function openDetail(id) {
           ` : ''}
           <div class="review-helpful">
             <button class="helpful-btn${hVoted ? ' voted-yes' : ''}" ${hVoted ? 'style="background:var(--orange-light);color:var(--orange)"' : ''} onclick="event.stopPropagation(); helpfulClick(${inst.id},${ri})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
-            <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this)">🚩 신고</button>
+            <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this,'${inst.name}',${ri})">🚩 신고</button>
             ${currentUser && r.authorUid === currentUser.uid && !r.verified ? `<button class="helpful-btn" style="background:var(--blue-light);color:var(--blue)" onclick="event.stopPropagation(); openEditReview(${inst.id},${ri})">✏️ 수정</button>` : ''}
           </div>
         </div>`;
@@ -2574,7 +2574,7 @@ function filterReviews(filter, instId) {
       ${r.rebuttal ? `<div class="rebuttal"><div class="rebuttal-label">💬 강사 답변</div><div class="rebuttal-text">${r.rebuttal}</div></div>` : ''}
       <div class="review-helpful">
         <button class="helpful-btn${hVoted2 ? ' voted-yes' : ''}" ${hVoted2 ? 'style="background:var(--orange-light);color:var(--orange)"' : ''} onclick="event.stopPropagation(); helpfulClick(${instId},${origIdx})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
-        <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this)">🚩 신고</button>
+        <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this,'${inst.name}',${origIdx})">🚩 신고</button>
       </div>
     </div>`;
     }).join('');
@@ -2618,21 +2618,32 @@ function helpfulClick(instId, reviewIdx) {
   openDetail(instId);
 }
 
-function reportReview(btn) {
+function reportReview(btn, instName, reviewIdx) {
   if (btn.classList.contains('reported')) return;
+  if (!currentUser) { alert('로그인 후 신고할 수 있습니다.'); return; }
+  const reason = prompt('신고 사유를 입력해주세요:');
+  if (!reason || !reason.trim()) return;
   btn.classList.add('reported');
   btn.textContent = '✅ 신고 접수됨';
   btn.style.color = 'var(--green)';
   btn.style.cursor = 'default';
-  // Firestore에 신고 저장
-  if (currentUser) {
-    firebase.firestore().collection('reports').add({
-      reporter: getDisplayName(),
-      reporterUid: currentUser.uid,
-      date: new Date().toISOString(),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).catch(e => console.error('신고 저장 실패:', e));
-  }
+  // 신고 대상 리뷰 정보
+  const inst = instructors.find(i => i.name === instName) || worstInstructors.find(i => i.name === instName);
+  const review = inst && inst.reviewList ? inst.reviewList[reviewIdx] : null;
+  firebase.firestore().collection('reports').add({
+    type: '리뷰 신고',
+    target: instName || '알수없음',
+    reviewText: review ? review.text.substring(0, 100) : '',
+    reviewAuthor: review ? review.author : '',
+    reason: reason.trim(),
+    reporter: getDisplayName(),
+    reporterUid: currentUser.uid,
+    date: new Date().toISOString(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    handled: false
+  }).then(() => {
+    alert('신고가 접수되었습니다.');
+  }).catch(e => console.error('신고 저장 실패:', e));
 }
 
 // ═══ 리뷰 다중 파일 업로드 + 드래그앤드랍 ═══

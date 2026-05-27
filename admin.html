@@ -889,6 +889,9 @@ body {
         <div class="admin-table-wrapper">
           <div class="admin-table-header">
             <div class="admin-table-title">최근 댓글</div>
+            <div class="admin-table-actions">
+              <button class="action-btn action-btn-view" onclick="loadAdminComments()">🔄 새로고침</button>
+            </div>
           </div>
           <table class="admin-table">
             <thead>
@@ -915,6 +918,9 @@ body {
         <div class="admin-table-wrapper">
           <div class="admin-table-header">
             <div class="admin-table-title">신고 내역</div>
+            <div class="admin-table-actions">
+              <button class="action-btn action-btn-view" onclick="loadFirestoreReports()">🔄 새로고침</button>
+            </div>
           </div>
           <table class="admin-table">
             <thead>
@@ -2047,10 +2053,15 @@ function renderCommentsTable() {
       <tr>
         <td><strong>${c.author}</strong></td>
         <td>${c.instructor}</td>
-        <td><span style="color:var(--gray-400);font-size:12px;font-weight:700">미인증</span></td>
-        <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.text}</td>
+        <td><span style="color:var(--gray-400);font-size:12px;font-weight:700">${c.verified ? '✓ 인증' : '미인증'}</span></td>
+        <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="cmtText${idx}">${c.text}</td>
         <td>${c.date}</td>
-        <td><button class="admin-btn admin-btn-danger" onclick="deleteComment(${idx})">삭제</button></td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <button class="action-btn action-btn-view" onclick="editComment(${idx})">수정</button>
+            <button class="action-btn action-btn-delete" onclick="deleteComment(${idx})">삭제</button>
+          </div>
+        </td>
       </tr>`;
   }).join('');
 }
@@ -2066,6 +2077,22 @@ async function deleteComment(idx) {
   adminComments[idx].deleted = true;
   renderCommentsTable();
   showToast('댓글이 삭제되었습니다.');
+}
+
+async function editComment(idx) {
+  const c = adminComments[idx];
+  const newText = prompt('댓글 내용을 수정하세요:', c.text);
+  if (newText === null || newText.trim() === '' || newText.trim() === c.text) return;
+  if (c.id) {
+    try {
+      await db.collection('comments').doc(c.id).update({ text: newText.trim() });
+      adminComments[idx].text = newText.trim();
+      renderCommentsTable();
+      showToast('댓글이 수정되었습니다.', 'success');
+    } catch(e) {
+      alert('수정 실패: ' + e.message);
+    }
+  }
 }
 
 // ═══ Firestore 대시보드 실시간 통계 ═══
@@ -2310,6 +2337,7 @@ async function renderAll() {
   loadCommunityPosts();
   loadAdminComments();
   loadAdminResources();
+  loadFirestoreReports();
 }
 
 // ═══ MOBILE SIDEBAR ═══
@@ -2694,12 +2722,44 @@ async function deleteReviewPerm(idx) {
   showToast('리뷰가 삭제되었습니다.', 'info');
 }
 
-function handleReport(idx, result) {
-  reportItems[idx].handled = true;
-  reportItems[idx].result = result;
+async function handleReport(idx, result) {
+  const r = reportItems[idx];
+  r.handled = true;
+  r.result = result;
+  if (r._docId) {
+    try {
+      await db.collection('reports').doc(r._docId).update({ handled: true, result });
+    } catch(e) { console.error('신고 처리 실패:', e); }
+  }
   renderReportsTable();
   if (result === 'done') showToast('신고가 처리 완료되었습니다.', 'success');
   else showToast('신고가 반려되었습니다.', 'error');
+}
+
+async function loadFirestoreReports() {
+  try {
+    const snap = await db.collection('reports').get();
+    reportItems.length = 0;
+    snap.forEach(doc => {
+      const d = doc.data();
+      reportItems.push({
+        _docId: doc.id,
+        type: d.type || '리뷰 신고',
+        target: d.target || '-',
+        reason: d.reason || d.reviewText || '',
+        reporter: d.reporter || '익명',
+        date: d.date ? d.date.substring(0, 10) : '',
+        handled: d.handled || false,
+        result: d.result || '',
+        reviewAuthor: d.reviewAuthor || '',
+        reviewText: d.reviewText || ''
+      });
+    });
+    reportItems.sort((a, b) => (a.handled ? 1 : 0) - (b.handled ? 1 : 0));
+    renderReportsTable();
+    document.getElementById('sidebarReports').textContent = reportItems.filter(r => !r.handled).length;
+    document.getElementById('sidebarReports').style.display = reportItems.filter(r => !r.handled).length > 0 ? '' : 'none';
+  } catch(e) { console.error('신고 로드 실패:', e); }
 }
 
 // ═══ FIREBASE 실제 가입 회원 ═══
