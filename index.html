@@ -3244,7 +3244,7 @@ resetSlideInterval();
 // ═══ PLATFORM RENDER ═══
 function renderPlatforms() {
   const grid = document.getElementById('platformGrid');
-  grid.innerHTML = platformData.map(p => {
+  grid.innerHTML = platformData.filter(p => p.reviews > 0 || p.score > 0).map(p => {
     const cls = p.score >= 4 ? 'good' : p.score >= 3 ? 'mid' : 'bad';
     return `
     <div class="platform-card" style="cursor:pointer" onclick="openPlatformDetail('${p.name}')">
@@ -3774,13 +3774,43 @@ async function loadFirestoreReviews() {
       platReviews[pName].push(d);
     });
 
+    // 새 플랫폼 자동 추가 (리뷰에서 발견된 플랫폼이 platformData에 없으면 추가)
+    const defaultColors = ['#6366F1','#EC4899','#14B8A6','#F59E0B','#8B5CF6','#06B6D4','#EF4444','#84CC16','#F97316'];
+    const defaultIcons = ['🔵','🟣','🟠','🔴','🟤','⚪','🔶','🟡','🟢'];
+    Object.keys(platReviews).forEach(pName => {
+      if (!platformData.find(p => p.name === pName)) {
+        const idx = platformData.length;
+        platformData.push({
+          name: pName,
+          icon: defaultIcons[idx % defaultIcons.length],
+          color: defaultColors[idx % defaultColors.length],
+          score: 0, reviews: 0, verified: 0,
+          satisfaction: 0, refund: 0, support: 0, content: 0
+        });
+      }
+    });
+    // 강사 데이터에만 있는 플랫폼도 추가
+    instructors.forEach(i => {
+      if (i.platform && i.reviews > 0 && !platformData.find(p => p.name === i.platform)) {
+        const idx = platformData.length;
+        platformData.push({
+          name: i.platform,
+          icon: defaultIcons[idx % defaultIcons.length],
+          color: defaultColors[idx % defaultColors.length],
+          score: 0, reviews: 0, verified: 0,
+          satisfaction: 0, refund: 0, support: 0, content: 0
+        });
+      }
+    });
+
     platformData.forEach(p => {
       const platInsts = instructors.filter(i => i.platform === p.name && i.reviews > 0);
       if (platInsts.length === 0 && !platReviews[p.name]) return;
-      p.reviews = platInsts.reduce((s, i) => s + i.reviews, 0);
+      const pRevs = platReviews[p.name] || [];
+      p.reviews = pRevs.length || platInsts.reduce((s, i) => s + i.reviews, 0);
+      p.verified = pRevs.filter(r => r.verified).length;
 
       // 플랫폼 만족도: 리뷰의 platformRating 평균
-      const pRevs = platReviews[p.name] || [];
       const satRatings = pRevs.filter(r => r.platformRating > 0).map(r => r.platformRating);
       if (satRatings.length > 0) {
         p.satisfaction = Math.round(satRatings.reduce((a, b) => a + b, 0) / satRatings.length * 10) / 10;
