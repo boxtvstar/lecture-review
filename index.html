@@ -1401,6 +1401,60 @@ body {
   </div>
 </div>
 
+<!-- ═══ REVIEW EDIT MODAL ═══ -->
+<div class="modal-overlay" id="editReviewModal" onclick="if(event.target===this)closeEditReview()">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-instructor">
+        <div><div class="modal-name">리뷰 수정</div>
+        <div class="modal-sub" id="editReviewSub">승인 전 리뷰만 수정 가능합니다</div></div>
+      </div>
+      <button class="modal-close" onclick="closeEditReview()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px">
+      <div style="margin-bottom:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--gray-600)">리뷰 내용</label>
+        <textarea id="editReviewText" style="width:100%;min-height:120px;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;font-family:inherit;margin-top:4px;resize:vertical;line-height:1.7;box-sizing:border-box"></textarea>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--gray-600)">강사 평점</label>
+        <div id="editFormRatings" style="margin-top:6px"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--gray-600)">플랫폼 평점</label>
+        <div style="margin-top:6px">
+          <div class="form-rating-item"><span class="form-rating-label">플랫폼 만족도</span>
+            <div class="form-stars" id="editPlatStarGroup">${[1,2,3,4,5].map(s => `<span class="form-star" onclick="setEditPlatStar(${s})" data-epval="${s}">★</span>`).join('')}</div>
+          </div>
+          <div class="form-rating-item"><span class="form-rating-label">수강 편의성</span>
+            <div class="form-stars" id="editPlatRefundGroup">${[1,2,3,4,5].map(s => `<span class="form-star" onclick="setEditPlatRefund(${s})" data-erefund="${s}">★</span>`).join('')}</div>
+          </div>
+          <div class="form-rating-item"><span class="form-rating-label">고객응대</span>
+            <div class="form-stars" id="editPlatSupportGroup">${[1,2,3,4,5].map(s => `<span class="form-star" onclick="setEditPlatSupport(${s})" data-esupport="${s}">★</span>`).join('')}</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--gray-600)">플랫폼 한줄평</label>
+        <input id="editPlatReviewText" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;margin-top:4px;box-sizing:border-box" placeholder="플랫폼에 대한 한줄 평가">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--gray-600)">강의 금액 (만원)</label>
+        <input type="number" id="editCoursePrice" min="0" style="width:120px;padding:10px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;margin-top:4px">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--gray-600)">파일 첨부</label>
+        <div id="editReviewFilesArea" style="margin-top:6px"></div>
+        <input type="file" id="editReviewFileInput" accept="image/*" multiple style="margin-top:6px;font-size:12px" onchange="handleEditReviewFiles(event)">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--gray-100)">
+        <button onclick="closeEditReview()" style="padding:10px 20px;border-radius:8px;background:var(--gray-100);color:var(--gray-600);border:none;cursor:pointer;font-weight:700">취소</button>
+        <button onclick="submitEditReview()" style="padding:10px 24px;border-radius:8px;background:var(--orange);color:white;border:none;cursor:pointer;font-weight:700">수정 완료</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ PLATFORM DETAIL MODAL ═══ -->
 <div class="modal-overlay" id="platformDetailModal" onclick="if(event.target===this)closePlatformModal()">
   <div class="modal">
@@ -2143,6 +2197,7 @@ function openDetail(id) {
           <div class="review-helpful">
             <button class="helpful-btn${hVoted ? ' voted-yes' : ''}" ${hVoted ? 'style="background:var(--orange-light);color:var(--orange)"' : ''} onclick="event.stopPropagation(); helpfulClick(${inst.id},${ri})">👍 도움이 됐어요 <span>${r.helpful}</span></button>
             <button class="helpful-btn" onclick="event.stopPropagation(); reportReview(this)">🚩 신고</button>
+            ${currentUser && r.authorUid === currentUser.uid && !r.verified ? `<button class="helpful-btn" style="background:var(--blue-light);color:var(--blue)" onclick="event.stopPropagation(); openEditReview(${inst.id},${ri})">✏️ 수정</button>` : ''}
           </div>
         </div>`;
       }).join('')}
@@ -2855,6 +2910,130 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('#courseAcWrapper')) document.getElementById('courseDropdown').classList.remove('open');
 });
 
+// ═══ 리뷰 수정 기능 ═══
+let editReviewInstId = null;
+let editReviewIdx = null;
+let editPlatStar = 0, editPlatRefund = 0, editPlatSupport = 0;
+let editReviewNewFiles = [];
+
+function setEditPlatStar(val) { editPlatStar = val; document.querySelectorAll('[data-epval]').forEach(s => s.classList.toggle('active', parseInt(s.dataset.epval) <= val)); }
+function setEditPlatRefund(val) { editPlatRefund = val; document.querySelectorAll('[data-erefund]').forEach(s => s.classList.toggle('active', parseInt(s.dataset.erefund) <= val)); }
+function setEditPlatSupport(val) { editPlatSupport = val; document.querySelectorAll('[data-esupport]').forEach(s => s.classList.toggle('active', parseInt(s.dataset.esupport) <= val)); }
+
+function setEditFormStar(group, val) {
+  document.querySelectorAll(`[data-egroup="${group}"]`).forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.eval) <= val);
+  });
+}
+
+function openEditReview(instId, ri) {
+  const inst = instructors.find(i => i.id === instId) || worstInstructors.find(i => i.id === instId);
+  if (!inst) return;
+  const r = inst.reviewList[ri];
+  if (!r || !r._docId) { alert('수정할 수 없는 리뷰입니다.'); return; }
+  if (r.verified) { alert('관리자 승인된 리뷰는 수정할 수 없습니다.'); return; }
+
+  editReviewInstId = instId;
+  editReviewIdx = ri;
+  editReviewNewFiles = [];
+
+  document.getElementById('editReviewSub').textContent = `${inst.name} · ${r.course || ''} · ${r.date}`;
+  document.getElementById('editReviewText').value = r.text;
+  document.getElementById('editPlatReviewText').value = r.platformReview || '';
+  document.getElementById('editCoursePrice').value = r.coursePrice || '';
+
+  // 강사 평점 렌더
+  const ratingLabelsArr = ['강의 퀄리티', '가성비', '강사 전문성', '광고 신뢰도', '실력 향상도', 'AS/답변 만족도', '수익화 전환 지수'];
+  document.getElementById('editFormRatings').innerHTML = ratingLabelsArr.map((label, idx) => {
+    const val = r.ratings[label] || 0;
+    return `<div class="form-rating-item"><span class="form-rating-label">${label}</span>
+      <div class="form-stars">${[1,2,3,4,5].map(s => `<span class="form-star${s <= val ? ' active' : ''}" onclick="setEditFormStar(${idx},${s})" data-egroup="${idx}" data-eval="${s}">★</span>`).join('')}</div></div>`;
+  }).join('');
+
+  // 플랫폼 평점 복원
+  setEditPlatStar(r.platformRating || 0);
+  setEditPlatRefund(r.platformRefund || 0);
+  setEditPlatSupport(r.platformSupport || 0);
+
+  // 기존 파일 표시
+  const filesArea = document.getElementById('editReviewFilesArea');
+  if (r.files && r.files.length > 0) {
+    filesArea.innerHTML = r.files.map((f, i) => `<img src="${f}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin:2px">`).join('') + '<div style="font-size:11px;color:var(--gray-400);margin-top:4px">기존 첨부 파일</div>';
+  } else {
+    filesArea.innerHTML = '<span style="font-size:12px;color:var(--gray-400)">첨부 파일 없음</span>';
+  }
+  document.getElementById('editReviewFileInput').value = '';
+
+  document.getElementById('editReviewModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditReview() {
+  document.getElementById('editReviewModal').classList.remove('open');
+  document.body.style.overflow = '';
+  editReviewInstId = null;
+  editReviewIdx = null;
+}
+
+function handleEditReviewFiles(e) {
+  editReviewNewFiles = [];
+  for (const file of e.target.files) {
+    if (file.size > 5 * 1024 * 1024) { alert(`${file.name}: 5MB 이하만 가능합니다.`); continue; }
+    if (!file.type.startsWith('image/')) continue;
+    const reader = new FileReader();
+    reader.onload = ev => editReviewNewFiles.push(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+}
+
+async function submitEditReview() {
+  if (editReviewInstId === null || editReviewIdx === null) return;
+  const inst = instructors.find(i => i.id === editReviewInstId) || worstInstructors.find(i => i.id === editReviewInstId);
+  if (!inst) return;
+  const r = inst.reviewList[editReviewIdx];
+  if (!r || !r._docId) return;
+
+  const newText = document.getElementById('editReviewText').value.trim();
+  if (newText.length < 30) { alert('리뷰는 최소 30자 이상 작성해주세요.'); return; }
+
+  // 강사 평점 수집
+  const ratingLabelsArr = ['강의 퀄리티', '가성비', '강사 전문성', '광고 신뢰도', '실력 향상도', 'AS/답변 만족도', '수익화 전환 지수'];
+  const newRatings = {};
+  ratingLabelsArr.forEach((label, idx) => {
+    const active = document.querySelectorAll(`[data-egroup="${idx}"].active`).length;
+    if (active > 0) newRatings[label] = active;
+  });
+  const vals = Object.values(newRatings);
+  const newScore = vals.length > 0 ? Math.round(vals.reduce((a,b) => a+b, 0) / vals.length * 10) / 10 : 0;
+
+  // 파일: 새 파일 있으면 교체, 없으면 기존 유지
+  const files = editReviewNewFiles.length > 0 ? editReviewNewFiles.slice(0, 3) : (r.files || []);
+
+  const updateData = {
+    text: newText,
+    score: newScore,
+    ratings: newRatings,
+    platformRating: editPlatStar,
+    platformRefund: editPlatRefund,
+    platformSupport: editPlatSupport,
+    platformReview: document.getElementById('editPlatReviewText').value.trim(),
+    files: files
+  };
+  const price = parseInt(document.getElementById('editCoursePrice').value);
+  if (price > 0) updateData.coursePrice = price;
+
+  try {
+    await firebase.firestore().collection('reviews').doc(r._docId).update(updateData);
+    closeEditReview();
+    closeModal();
+    alert('리뷰가 수정되었습니다!');
+    loadFirestoreReviews();
+  } catch(e) {
+    console.error('리뷰 수정 실패:', e);
+    alert('수정 중 오류가 발생했습니다: ' + (e.message || e));
+  }
+}
+
 async function submitReview() {
   const instName = selectedInstructor?.name || document.getElementById('reviewInstructor').value.trim();
   const courseName = selectedCourse?.name || document.getElementById('reviewCourse').value.trim();
@@ -3502,12 +3681,23 @@ async function loadFirestoreReviews() {
     function applyReviews(inst, reviews) {
       inst.reviewList = reviews.map(r => ({
         _docId: r._docId || null,
+        authorUid: r.authorUid || '',
         author: r.author || '익명',
         stars: r.score || 0,
         date: r.date || '',
         text: r.text || '',
         badge: r.verified ? 'verified' : 'unverified',
-        helpful: r.helpful || 0, rebuttal: ''
+        verified: r.verified || false,
+        helpful: r.helpful || 0, rebuttal: '',
+        ratings: r.ratings || {},
+        course: r.course || '',
+        platform: r.platform || '',
+        platformRating: r.platformRating || 0,
+        platformRefund: r.platformRefund || 0,
+        platformSupport: r.platformSupport || 0,
+        platformReview: r.platformReview || '',
+        coursePrice: r.coursePrice || 0,
+        files: r.files || []
       }));
       inst.reviews = reviews.length;
 
