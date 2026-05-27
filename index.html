@@ -1483,7 +1483,7 @@ body {
             </div>
           </div>
           <div class="form-rating-item">
-            <span class="form-rating-label">환불 편의성</span>
+            <span class="form-rating-label">수강 편의성</span>
             <div class="form-stars" id="platformRefundGroup">
               <span class="form-star" onclick="setPlatformRefund(1)" data-prefund="1">★</span>
               <span class="form-star" onclick="setPlatformRefund(2)" data-prefund="2">★</span>
@@ -1504,7 +1504,7 @@ body {
           </div>
         </div>
         <div style="margin-top:10px">
-          <input class="form-input" placeholder="플랫폼에 대한 한줄 평가 (예: 환불이 편리하고 고객센터 응대가 빠름)" id="platformReviewText" style="font-size:13px">
+          <input class="form-input" placeholder="플랫폼에 대한 한줄 평가 (예: 영상 퀄리티가 좋고 고객센터 응대가 빠름)" id="platformReviewText" style="font-size:13px">
         </div>
       </div>
       <div class="form-section">
@@ -2865,6 +2865,25 @@ async function submitReview() {
   if (!courseName) { alert('강의명을 선택하거나 입력해주세요.'); return; }
   if (!platform) { alert('수강 플랫폼을 선택하거나 입력해주세요.'); return; }
   if (text.length < 30) { alert('리뷰는 최소 30자 이상 작성해주세요.'); return; }
+
+  // ═══ 모든 평점 필수 검증 ═══
+  // 강사 평점 7개 항목 체크
+  const ratingItems = document.querySelectorAll('#formRatings .form-rating-item');
+  let missingRatings = [];
+  ratingItems.forEach(item => {
+    const label = item.querySelector('.form-rating-label')?.textContent?.trim();
+    const selected = item.querySelectorAll('.form-star.active').length;
+    if (selected === 0 && label) missingRatings.push(label);
+  });
+  if (missingRatings.length > 0) {
+    alert(`다음 평점을 모두 선택해주세요:\n• ${missingRatings.join('\n• ')}`);
+    return;
+  }
+  // 플랫폼 평점 체크
+  if (platformRating === 0) { alert('플랫폼 만족도를 선택해주세요.'); return; }
+  if (platformRefundRating === 0) { alert('수강 편의성을 선택해주세요.'); return; }
+  if (platformSupportRating === 0) { alert('고객응대를 선택해주세요.'); return; }
+
   if (!currentUser) {
     document.getElementById('loginPopup').classList.add('open');
     return;
@@ -2912,7 +2931,7 @@ async function submitReview() {
     if (platformRating > 0) {
       reviewData.platformRating = platformRating;
     }
-    // 환불 편의성 저장
+    // 수강 편의성 저장
     if (platformRefundRating > 0) {
       reviewData.platformRefund = platformRefundRating;
     }
@@ -3058,7 +3077,7 @@ function renderPlatforms() {
       <div class="platform-reviews">인증 리뷰 ${p.verified}개 / 전체 ${p.reviews}개</div>
       <div style="margin-top:12px;border-top:1px solid var(--gray-100);padding-top:10px">
         <div class="platform-detail-row"><span class="platform-detail-label">강사 평균</span><span class="platform-detail-val">${p.instAvg ? p.instAvg.toFixed(1) : '0.0'}</span></div>
-        <div class="platform-detail-row"><span class="platform-detail-label">환불 편의성</span><span class="platform-detail-val">${p.refund.toFixed(1)}</span></div>
+        <div class="platform-detail-row"><span class="platform-detail-label">수강 편의성</span><span class="platform-detail-val">${p.refund.toFixed(1)}</span></div>
         <div class="platform-detail-row"><span class="platform-detail-label">고객응대</span><span class="platform-detail-val">${p.support.toFixed(1)}</span></div>
       </div>
     </div>`;
@@ -3099,7 +3118,7 @@ function openPlatformDetail(name) {
         <span class="rating-value">${p.satisfaction.toFixed(1)}</span>
       </div>
       <div class="rating-row">
-        <span class="rating-label">환불 편의성</span>
+        <span class="rating-label">수강 편의성</span>
         <div class="rating-bar-bg"><div class="rating-bar-fill" style="width:${(p.refund/5)*100}%"></div></div>
         <span class="rating-value">${p.refund.toFixed(1)}</span>
       </div>
@@ -3574,7 +3593,7 @@ async function loadFirestoreReviews() {
         p.satisfaction = Math.round(satRatings.reduce((a, b) => a + b, 0) / satRatings.length * 10) / 10;
       }
 
-      // 환불 편의성 평균
+      // 수강 편의성 평균
       const refundRatings = pRevs.filter(r => r.platformRefund > 0).map(r => r.platformRefund);
       if (refundRatings.length > 0) {
         p.refund = Math.round(refundRatings.reduce((a, b) => a + b, 0) / refundRatings.length * 10) / 10;

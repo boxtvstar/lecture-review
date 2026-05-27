@@ -2408,7 +2408,7 @@ function openReviewDetail(idx) {
         <span style="color:var(--gold);font-weight:800">${'★'.repeat(r.platformRating)}${'☆'.repeat(5-r.platformRating)}</span>
       </div>` : '') +
       (r.platformRefund ? `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">
-        <span style="color:var(--blue)">환불 편의성</span>
+        <span style="color:var(--blue)">수강 편의성</span>
         <span style="color:var(--gold);font-weight:800">${'★'.repeat(r.platformRefund)}${'☆'.repeat(5-r.platformRefund)}</span>
       </div>` : '') +
       (r.platformSupport ? `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">
@@ -2477,7 +2477,7 @@ function openReviewDetail(idx) {
           ).join('')}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <span style="font-size:12px;color:var(--blue);width:100px;flex-shrink:0;font-weight:700">환불 편의성</span>
+          <span style="font-size:12px;color:var(--blue);width:100px;flex-shrink:0;font-weight:700">수강 편의성</span>
           <div style="display:flex;gap:2px">${[1,2,3,4,5].map(s =>
             `<span class="admin-edit-star" data-label="platformRefund" data-val="${s}" onclick="setAdminStar(this,'platformRefund',${s})" style="cursor:pointer;font-size:18px;color:${s <= (r.platformRefund || 0) ? 'var(--blue)' : '#D1D5DB'}">${s <= (r.platformRefund || 0) ? '★' : '☆'}</span>`
           ).join('')}</div>
