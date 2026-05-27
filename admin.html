@@ -949,6 +949,7 @@ body {
             <div class="admin-table-title">강사 목록</div>
             <div style="display:flex;gap:8px;align-items:center">
               <input type="text" id="instructorSearchInput" placeholder="강사명/분야/플랫폼 검색" oninput="filterAdminInstructors()" style="padding:8px 14px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;width:200px">
+              <button class="action-btn action-btn-view" onclick="loadAdminInstructors()">🔄 새로고침</button>
               <button class="action-btn action-btn-approve" onclick="openAddInstructorModal()" style="padding:8px 16px;font-size:13px">+ 강사 추가</button>
             </div>
           </div>
@@ -1387,76 +1388,143 @@ let reviewsLoaded = false;
 const reportItems = [];
 // 실제 신고는 Firestore에서 로드됩니다.
 
-const adminInstructors = [
-  // ── 인프런 ──
-  { name: '김영한', category: '개발', platform: '인프런', course: '스프링 완전 정복 로드맵', score: 0, reviews: 0, hype: 0 },
-  { name: '캡틴판교 (장기효)', category: '개발', platform: '인프런', course: 'Vue.js + TypeScript 완벽 가이드', score: 0, reviews: 0, hype: 0 },
-  { name: '제로초 (조현영)', category: '개발', platform: '인프런', course: 'Node.js 교과서 / JS 입문', score: 0, reviews: 0, hype: 0 },
-  { name: '이정환 (Winterlood)', category: '개발', platform: '인프런', course: '한 입 크기로 잘라먹는 React', score: 0, reviews: 0, hype: 0 },
-  // ── 콜로소 ──
-  { name: '김락희', category: '일러스트', platform: '콜로소', course: '인체 드로잉 마스터클래스', score: 0, reviews: 0, hype: 0 },
-  { name: '수줍', category: '일러스트', platform: '콜로소', course: '빛의 연출과 레퍼런스 활용법', score: 0, reviews: 0, hype: 0 },
-  { name: '샤가무', category: '일러스트', platform: '콜로소', course: '실전 해법 중심 일러스트 독학 솔루션', score: 0, reviews: 0, hype: 0 },
-  { name: '감자만세', category: '영상/애니메이션', platform: '콜로소', course: '100강으로 완성하는 애니메이션 제작', score: 0, reviews: 0, hype: 0 },
-  // ── 클래스101 ──
-  { name: '시현하다', category: '사진', platform: '클래스101', course: '감성 사진 촬영법', score: 0, reviews: 0, hype: 0 },
-  { name: '리아킴', category: '댄스', platform: '클래스101', course: '1MILLION 댄스 클래스', score: 0, reviews: 0, hype: 0 },
-  // ── 타이탄클래스 ──
-  { name: '새벽인간', category: '이커머스/구매대행', platform: '타이탄클래스', course: '구매대행 실전 부업', score: 0, reviews: 0, hype: 0 },
-  { name: '구타바리', category: '유튜브 수익화', platform: '타이탄클래스', course: '영화·드라마 기반 유튜브 채널 운영', score: 0, reviews: 0, hype: 0 },
-  { name: '어비 (송태민)', category: '유튜브 수익화', platform: '타이탄클래스', course: '유튜브 알고리즘 성장 전략', score: 0, reviews: 0, hype: 0 },
-  { name: '자생법', category: '유튜브/이커머스', platform: '타이탄클래스', course: '유튜브 수익화 실전 노하우', score: 0, reviews: 0, hype: 0 },
-  // ── 디하클 (디지털노마드 하이클래스) ──
-  { name: '노마드림 (최주원)', category: '디지털노마드/부업', platform: '디하클', course: '디지털노마드 하이클래스 종합', score: 0, reviews: 0, hype: 0 },
-  { name: '타로', category: '쇼츠/유튜브', platform: '디하클', course: '데시벨쇼츠 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '솔라리움', category: '쇼츠/유튜브', platform: '디하클', course: '탑티어쇼츠 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '데헷이', category: '쇼츠/유튜브', platform: '디하클', course: '초효율쇼츠 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '링밥', category: '이커머스/쿠팡', platform: '디하클', course: '폰편집월천쿠팡 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '유쾌한케로로', category: 'AI/자동화', platform: '디하클', course: 'AI 뮤직자동화 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '레민', category: '이커머스/쇼핑', platform: '디하클', course: '쇼핑업 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '유랑', category: '디지털노마드/부업', platform: '디하클', course: '시크릿 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '꿍디순디', category: '유튜브 수익화', platform: '디하클', course: '셀럽팬튜브 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '크리스타스', category: 'AI/자동화', platform: '디하클', course: 'AI 마스터즈 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '위숑', category: '이커머스/이베이', platform: '디하클', course: '이스타터 수강생 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '쇼츠대폭발', category: 'AI/쇼츠', platform: '디하클', course: 'AI스위칭쇼츠 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '개발남 노씨', category: '자동화/개발', platform: '디하클', course: '오토워커 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '엘라', category: 'AI/타로', platform: '디하클', course: '바이브타로 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '민이당웅', category: '유튜브/정치', platform: '디하클', course: '정치 1황 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '이동영 마케터', category: '마케팅/스레드', platform: '디하클', course: '3분 스레드 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '아모르', category: '영상/드라마', platform: '디하클', course: '천상계영드 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '땡모반', category: '쇼츠/유튜브', platform: '디하클', course: '역수출쇼츠 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '그라운드', category: '유튜브 수익화', platform: '디하클', course: '실버버튼 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '월억남', category: '수익화/유튜브', platform: '디하클', course: '월억로드 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '김히잉', category: '유튜브/롱폼', platform: '디하클', course: '트리거롱폼 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '카라반', category: 'AI/자동화', platform: '디하클', course: '사알못사주자동화 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '은근쥬', category: 'AI/쇼츠', platform: '디하클', course: '프리쇼츠자동화 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '마라하기', category: '쇼츠/유튜브', platform: '디하클', course: '쇼츠학개론 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '동동아빠', category: '영상/유튜브', platform: '디하클', course: '무비마스터 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '다린다윤', category: '유튜브/롱폼', platform: '디하클', course: '실버인포롱폼 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '테일러', category: '쇼츠/수익화', platform: '디하클', course: '월억쇼츠 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '레오96', category: '쇼츠/유튜브', platform: '디하클', course: '쇼츠포뮬러 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '텍사스홀X', category: '수익화/전략', platform: '디하클', course: '1황의 사고 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '롤루랄라릴리', category: '쇼츠/수익화', platform: '디하클', course: '쇼츠투벤츠 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '꿈꾸는곰팅이', category: '이커머스/쇼핑', platform: '디하클', course: '쿼드러플쇼핑 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '라옴', category: '유튜브/롱폼', platform: '디하클', course: '금광롱폼 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '한다해', category: '유튜브/롱폼', platform: '디하클', course: '이지롱폼 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '더퓨처', category: '이커머스/공구', platform: '디하클', course: '제로공구 챌린지', score: 0, reviews: 0, hype: 0 },
-  { name: '빠대', category: '이커머스/쿠팡', platform: '디하클', course: '탑클래스쿠팡 챌린지', score: 0, reviews: 0, hype: 0 },
-  // ── 핏크닉 ──
-  { name: '윙스', category: 'AI/수익화', platform: '핏크닉', course: 'AI 시니어 라디오 월 300 클래스', score: 0, reviews: 0, hype: 0 },
-  { name: '디선제압', category: 'AI/이커머스', platform: '핏크닉', course: '월 300 AI 상세페이지 프로젝트', score: 0, reviews: 0, hype: 0 },
-  { name: '머니테이커', category: '수익화/투자', platform: '핏크닉', course: '파이널 VIP', score: 0, reviews: 0, hype: 0 },
-  { name: '셀팜', category: 'AI/유튜브', platform: '핏크닉', course: 'AI 유튜브 연금 클래스', score: 0, reviews: 0, hype: 0 },
-  { name: '셀링남', category: '이커머스/쿠팡', platform: '핏크닉', course: '로켓그로스 AI 올인원 클래스', score: 0, reviews: 0, hype: 0 },
-  { name: '정쌤', category: '이커머스/쿠팡', platform: '핏크닉', course: '로켓그로스 안전마진 로드맵', score: 0, reviews: 0, hype: 0 },
-  { name: '민대표', category: '이커머스', platform: '핏크닉', course: '버티컬 커머스 프로젝트', score: 0, reviews: 0, hype: 0 },
-  { name: '온백', category: 'AI/브랜딩', platform: '핏크닉', course: 'AI 브랜드 커넥터 실전 클래스', score: 0, reviews: 0, hype: 0 },
-  { name: '부자꿈틀', category: 'AI/숏폼', platform: '핏크닉', course: 'AI숏폼 월급 3배 프로젝트', score: 0, reviews: 0, hype: 0 },
-  { name: '김놀부', category: 'SNS/인스타', platform: '핏크닉', course: '월 1000 왕초보 인스타 푸드릴스', score: 0, reviews: 0, hype: 0 },
-  { name: '제이온리 & 렛츠윤', category: 'SNS/수익화', platform: '핏크닉', course: '월급 5배 SNS 수익화', score: 0, reviews: 0, hype: 0 },
-  { name: '이지디자인', category: 'AI/디자인', platform: '핏크닉', course: 'AI 상세페이지 클래스', score: 0, reviews: 0, hype: 0 },
-  { name: '온물주', category: 'AI/이커머스', platform: '핏크닉', course: 'AI 쿠팡 끝판왕 클래스', score: 0, reviews: 0, hype: 0 },
+let adminInstructors = [];
+// Firestore reviews에서 실시간 로드
+
+// 기본 강사 목록 (Firestore에 리뷰가 없어도 표시)
+const defaultInstructors = [
+  { name: '김영한', category: '개발', platform: '인프런', course: '스프링 완전 정복 로드맵' },
+  { name: '캡틴판교 (장기효)', category: '개발', platform: '인프런', course: 'Vue.js + TypeScript 완벽 가이드' },
+  { name: '제로초 (조현영)', category: '개발', platform: '인프런', course: 'Node.js 교과서 / JS 입문' },
+  { name: '이정환 (Winterlood)', category: '개발', platform: '인프런', course: '한 입 크기로 잘라먹는 React' },
+  { name: '김락희', category: '일러스트', platform: '콜로소', course: '인체 드로잉 마스터클래스' },
+  { name: '수줍', category: '일러스트', platform: '콜로소', course: '빛의 연출과 레퍼런스 활용법' },
+  { name: '샤가무', category: '일러스트', platform: '콜로소', course: '실전 해법 중심 일러스트 독학 솔루션' },
+  { name: '감자만세', category: '영상/애니메이션', platform: '콜로소', course: '100강으로 완성하는 애니메이션 제작' },
+  { name: '시현하다', category: '사진', platform: '클래스101', course: '감성 사진 촬영법' },
+  { name: '리아킴', category: '댄스', platform: '클래스101', course: '1MILLION 댄스 클래스' },
+  { name: '새벽인간', category: '이커머스/구매대행', platform: '타이탄클래스', course: '구매대행 실전 부업' },
+  { name: '구타바리', category: '유튜브 수익화', platform: '타이탄클래스', course: '영화·드라마 기반 유튜브 채널 운영' },
+  { name: '어비 (송태민)', category: '유튜브 수익화', platform: '타이탄클래스', course: '유튜브 알고리즘 성장 전략' },
+  { name: '자생법', category: '유튜브/이커머스', platform: '타이탄클래스', course: '유튜브 수익화 실전 노하우' },
+  { name: '노마드림 (최주원)', category: '디지털노마드/부업', platform: '디하클', course: '디지털노마드 하이클래스 종합' },
+  { name: '타로', category: '쇼츠/유튜브', platform: '디하클', course: '데시벨쇼츠 챌린지' },
+  { name: '솔라리움', category: '쇼츠/유튜브', platform: '디하클', course: '탑티어쇼츠 챌린지' },
+  { name: '데헷이', category: '쇼츠/유튜브', platform: '디하클', course: '초효율쇼츠 챌린지' },
+  { name: '링밥', category: '이커머스/쿠팡', platform: '디하클', course: '폰편집월천쿠팡 챌린지' },
+  { name: '유쾌한케로로', category: 'AI/자동화', platform: '디하클', course: 'AI 뮤직자동화 챌린지' },
+  { name: '레민', category: '이커머스/쇼핑', platform: '디하클', course: '쇼핑업 챌린지' },
+  { name: '유랑', category: '디지털노마드/부업', platform: '디하클', course: '시크릿 챌린지' },
+  { name: '꿍디순디', category: '유튜브 수익화', platform: '디하클', course: '셀럽팬튜브 챌린지' },
+  { name: '크리스타스', category: 'AI/자동화', platform: '디하클', course: 'AI 마스터즈 챌린지' },
+  { name: '위숑', category: '이커머스/이베이', platform: '디하클', course: '이스타터 수강생 챌린지' },
+  { name: '쇼츠대폭발', category: 'AI/쇼츠', platform: '디하클', course: 'AI스위칭쇼츠 챌린지' },
+  { name: '개발남 노씨', category: '자동화/개발', platform: '디하클', course: '오토워커 챌린지' },
+  { name: '엘라', category: 'AI/타로', platform: '디하클', course: '바이브타로 챌린지' },
+  { name: '민이당웅', category: '유튜브/정치', platform: '디하클', course: '정치 1황 챌린지' },
+  { name: '이동영 마케터', category: '마케팅/스레드', platform: '디하클', course: '3분 스레드 챌린지' },
+  { name: '아모르', category: '영상/드라마', platform: '디하클', course: '천상계영드 챌린지' },
+  { name: '땡모반', category: '쇼츠/유튜브', platform: '디하클', course: '역수출쇼츠 챌린지' },
+  { name: '그라운드', category: '유튜브 수익화', platform: '디하클', course: '실버버튼 챌린지' },
+  { name: '월억남', category: '수익화/유튜브', platform: '디하클', course: '월억로드 챌린지' },
+  { name: '김히잉', category: '유튜브/롱폼', platform: '디하클', course: '트리거롱폼 챌린지' },
+  { name: '카라반', category: 'AI/자동화', platform: '디하클', course: '사알못사주자동화 챌린지' },
+  { name: '은근쥬', category: 'AI/쇼츠', platform: '디하클', course: '프리쇼츠자동화 챌린지' },
+  { name: '마라하기', category: '쇼츠/유튜브', platform: '디하클', course: '쇼츠학개론 챌린지' },
+  { name: '동동아빠', category: '영상/유튜브', platform: '디하클', course: '무비마스터 챌린지' },
+  { name: '다린다윤', category: '유튜브/롱폼', platform: '디하클', course: '실버인포롱폼 챌린지' },
+  { name: '테일러', category: '쇼츠/수익화', platform: '디하클', course: '월억쇼츠 챌린지' },
+  { name: '레오96', category: '쇼츠/유튜브', platform: '디하클', course: '쇼츠포뮬러 챌린지' },
+  { name: '텍사스홀X', category: '수익화/전략', platform: '디하클', course: '1황의 사고 챌린지' },
+  { name: '롤루랄라릴리', category: '쇼츠/수익화', platform: '디하클', course: '쇼츠투벤츠 챌린지' },
+  { name: '꿈꾸는곰팅이', category: '이커머스/쇼핑', platform: '디하클', course: '쿼드러플쇼핑 챌린지' },
+  { name: '라옴', category: '유튜브/롱폼', platform: '디하클', course: '금광롱폼 챌린지' },
+  { name: '한다해', category: '유튜브/롱폼', platform: '디하클', course: '이지롱폼 챌린지' },
+  { name: '더퓨처', category: '이커머스/공구', platform: '디하클', course: '제로공구 챌린지' },
+  { name: '빠대', category: '이커머스/쿠팡', platform: '디하클', course: '탑클래스쿠팡 챌린지' },
+  { name: '윙스', category: 'AI/수익화', platform: '핏크닉', course: 'AI 시니어 라디오 월 300 클래스' },
+  { name: '디선제압', category: 'AI/이커머스', platform: '핏크닉', course: '월 300 AI 상세페이지 프로젝트' },
+  { name: '머니테이커', category: '수익화/투자', platform: '핏크닉', course: '파이널 VIP' },
+  { name: '셀팜', category: 'AI/유튜브', platform: '핏크닉', course: 'AI 유튜브 연금 클래스' },
+  { name: '셀링남', category: '이커머스/쿠팡', platform: '핏크닉', course: '로켓그로스 AI 올인원 클래스' },
+  { name: '정쌤', category: '이커머스/쿠팡', platform: '핏크닉', course: '로켓그로스 안전마진 로드맵' },
+  { name: '민대표', category: '이커머스', platform: '핏크닉', course: '버티컬 커머스 프로젝트' },
+  { name: '온백', category: 'AI/브랜딩', platform: '핏크닉', course: 'AI 브랜드 커넥터 실전 클래스' },
+  { name: '부자꿈틀', category: 'AI/숏폼', platform: '핏크닉', course: 'AI숏폼 월급 3배 프로젝트' },
+  { name: '김놀부', category: 'SNS/인스타', platform: '핏크닉', course: '월 1000 왕초보 인스타 푸드릴스' },
+  { name: '제이온리 & 렛츠윤', category: 'SNS/수익화', platform: '핏크닉', course: '월급 5배 SNS 수익화' },
+  { name: '이지디자인', category: 'AI/디자인', platform: '핏크닉', course: 'AI 상세페이지 클래스' },
+  { name: '온물주', category: 'AI/이커머스', platform: '핏크닉', course: 'AI 쿠팡 끝판왕 클래스' },
 ];
+
+async function loadAdminInstructors() {
+  try {
+    // 1. Firestore 리뷰 로드
+    const snap = await db.collection('reviews').get();
+    const grouped = {};
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (!d.instructor) return;
+      const name = d.instructor.trim();
+      if (!grouped[name]) grouped[name] = [];
+      grouped[name].push(d);
+    });
+
+    // 2. Firestore 관리자 추가 강사 로드
+    let customInstructors = [];
+    try {
+      const instSnap = await db.collection('instructor_settings').get();
+      instSnap.forEach(doc => customInstructors.push(doc.data()));
+    } catch(e) { console.log('instructor_settings 로드 실패:', e); }
+
+    // 3. 기본 강사 목록 복사
+    adminInstructors = defaultInstructors.map(di => ({
+      name: di.name, category: di.category, platform: di.platform, course: di.course,
+      score: 0, reviews: 0, hype: 0
+    }));
+
+    // 4. 관리자 추가 강사 병합
+    customInstructors.forEach(ci => {
+      if (!adminInstructors.find(i => i.name === ci.name)) {
+        adminInstructors.push({ name: ci.name, category: ci.category || '기타', platform: ci.platform || '기타', course: ci.course || '', score: 0, reviews: 0, hype: 0 });
+      }
+    });
+
+    // 5. 리뷰 데이터 병합
+    Object.entries(grouped).forEach(([name, reviews]) => {
+      let inst = adminInstructors.find(i => i.name === name);
+      if (!inst) {
+        const r0 = reviews[0];
+        inst = { name, category: r0.category || '기타', platform: r0.platform || '기타', course: r0.course || '', score: 0, reviews: 0, hype: 0 };
+        adminInstructors.push(inst);
+      }
+      inst.reviews = reviews.length;
+      const scores = reviews.filter(r => r.score > 0).map(r => r.score);
+      inst.score = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length * 10) / 10 : 0;
+      const hypeScores = reviews.filter(r => r.ratings && r.ratings['광고 대비 실제 만족도']).map(r => r.ratings['광고 대비 실제 만족도']);
+      if (hypeScores.length > 0) {
+        inst.hype = Math.round((hypeScores.reduce((a,b) => a+b, 0) / hypeScores.length) / 5 * 100);
+      }
+      if (!inst.course || inst.course === '') {
+        const courses = reviews.filter(r => r.course).map(r => r.course);
+        if (courses.length > 0) inst.course = courses[0];
+      }
+    });
+
+    // 대시보드 통계 업데이트
+    const statEl = document.getElementById('statInstructors');
+    if (statEl) statEl.textContent = adminInstructors.length.toLocaleString();
+    const statChEl = document.getElementById('statInstructorsChange');
+    if (statChEl) { statChEl.textContent = `${adminInstructors.length}명 등록`; statChEl.className = 'stat-card-change up'; }
+    const sideEl = document.getElementById('sidebarInstructors');
+    if (sideEl) sideEl.textContent = adminInstructors.length;
+
+    renderInstructorsTable();
+    console.log('강사 로드 완료:', adminInstructors.length, '명');
+  } catch(e) {
+    console.error('강사 로드 실패:', e);
+  }
+}
 
 // ═══ AUTH ═══
 function adminLogin() {
@@ -2381,13 +2449,13 @@ async function renderAll() {
   renderVerifiedTable();
   renderReviewsTable();
   renderReportsTable();
-  renderInstructorsTable();
   renderCommentsTable();
   renderWeeklyChart();
   updatePendingCount();
   loadInstVerifyRequests();
   loadDashboardStats();
   // Firestore 데이터 로드
+  loadAdminInstructors();
   loadFirestoreReviews();
   loadFirestoreVerifications();
   loadCommunityPosts();
@@ -2431,7 +2499,7 @@ function toggleAddCustom(field) {
   }
 }
 
-function addInstructor() {
+async function addInstructor() {
   const name = document.getElementById('addName').value.trim();
   const catSel = document.getElementById('addCategory').value;
   const category = catSel === '__custom__' ? document.getElementById('addCategoryCustom').value.trim() : catSel;
@@ -2441,9 +2509,10 @@ function addInstructor() {
   if (!name) { showToast('강사명을 입력해주세요.', 'error'); return; }
   if (!category) { showToast('분야를 입력해주세요.', 'error'); return; }
   if (!platform) { showToast('플랫폼을 입력해주세요.', 'error'); return; }
-  adminInstructors.push({
-    name, category, platform, course: course || '', score: 0, reviews: 0, hype: 0
-  });
+  const newInst = { name, category, platform, course: course || '', score: 0, reviews: 0, hype: 0 };
+  adminInstructors.push(newInst);
+  // Firestore에 강사 설정 저장
+  try { await db.collection('instructor_settings').doc(name).set({ name, category, platform, course: course || '' }); } catch(e) { console.error(e); }
   renderInstructorsTable();
   closeAddInstructorModal();
   document.getElementById('addName').value = '';
@@ -2456,8 +2525,11 @@ function addInstructor() {
   document.getElementById('addCourse').value = '';
   showToast(`✅ "${name}" 강사가 등록되었습니다.`, 'success');
 }
-function deleteInstructor(idx) {
+async function deleteInstructor(idx) {
   const name = adminInstructors[idx].name;
+  if (!confirm(`"${name}" 강사를 삭제하시겠습니까?`)) return;
+  // Firestore에서도 삭제
+  try { await db.collection('instructor_settings').doc(name).delete(); } catch(e) { console.error(e); }
   adminInstructors.splice(idx, 1);
   renderInstructorsTable();
   showToast(`"${name}" 강사가 삭제되었습니다.`, 'info');
@@ -2502,14 +2574,20 @@ function showInstructorDetail(idx) {
   document.getElementById('verifyModal').classList.add('open');
 }
 
-function saveInstructorEdit(idx) {
+async function saveInstructorEdit(idx) {
   const i = adminInstructors[idx];
+  const oldName = i.name;
   i.name = document.getElementById('editInstName').value.trim() || i.name;
   i.category = document.getElementById('editInstCategory').value.trim() || i.category;
   i.platform = document.getElementById('editInstPlatform').value.trim() || i.platform;
   i.course = document.getElementById('editInstCourse').value.trim();
   i.score = parseFloat(document.getElementById('editInstScore').value) || 0;
   i.hype = parseInt(document.getElementById('editInstHype').value) || 0;
+  // Firestore에 강사 설정 저장
+  try {
+    if (oldName !== i.name) await db.collection('instructor_settings').doc(oldName).delete();
+    await db.collection('instructor_settings').doc(i.name).set({ name: i.name, category: i.category, platform: i.platform, course: i.course });
+  } catch(e) { console.error(e); }
   renderInstructorsTable();
   closeVerifyModal();
   showToast(`✅ "${i.name}" 강사 정보가 수정되었습니다.`, 'success');
