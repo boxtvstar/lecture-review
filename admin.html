@@ -3335,13 +3335,35 @@ async function loadAdminPlatforms() {
     snap.forEach(doc => adminPlatforms.push({ id: doc.id, ...doc.data() }));
 
     // 기본 플랫폼 중 Firestore에 없는 것 자동 등록
-    const existingNames = adminPlatforms.map(p => p.name);
+    let existingNames = adminPlatforms.map(p => p.name);
     for (const dp of defaultPlatforms) {
       if (!existingNames.includes(dp.name)) {
         await db.collection('platform_settings').doc(dp.name).set({ name: dp.name, link: '', color: dp.color });
         adminPlatforms.push({ id: dp.name, name: dp.name, link: '', color: dp.color });
       }
     }
+
+    // 리뷰에서 등록된 플랫폼도 자동 추가
+    const defaultColors = ['#6366F1','#EC4899','#14B8A6','#F59E0B','#8B5CF6','#06B6D4','#EF4444','#84CC16','#F97316'];
+    try {
+      const revSnap = await db.collection('reviews').get();
+      const reviewPlatforms = new Set();
+      revSnap.forEach(doc => {
+        const p = doc.data().platform;
+        if (p && p.trim()) reviewPlatforms.add(p.trim());
+      });
+      existingNames = adminPlatforms.map(p => p.name);
+      let colorIdx = 0;
+      for (const pName of reviewPlatforms) {
+        if (!existingNames.includes(pName)) {
+          const color = defaultColors[colorIdx % defaultColors.length];
+          colorIdx++;
+          await db.collection('platform_settings').doc(pName).set({ name: pName, link: '', color });
+          adminPlatforms.push({ id: pName, name: pName, link: '', color });
+        }
+      }
+    } catch(e) { console.log('리뷰 플랫폼 스캔 실패:', e); }
+
     renderPlatformTable();
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--red)">로드 실패</td></tr>';
