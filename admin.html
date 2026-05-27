@@ -1665,6 +1665,20 @@ async function renderUsersTable(filter = 'all') {
           reviews: d.reviews || 0, verifiedCourses: d.verifiedCourses || [], verifiedDate: d.verifiedDate || ''
         };
       });
+
+      // 실제 리뷰 수를 Firestore reviews에서 세기
+      try {
+        const revSnap = await db.collection('reviews').get();
+        const reviewCounts = {};
+        revSnap.forEach(doc => {
+          const uid = doc.data().authorUid;
+          if (uid) reviewCounts[uid] = (reviewCounts[uid] || 0) + 1;
+        });
+        allUsers.forEach(u => {
+          if (reviewCounts[u.id]) u.reviews = reviewCounts[u.id];
+        });
+      } catch(e) { console.log('리뷰 카운트 실패:', e); }
+
       allUsersLoaded = true;
     } catch(e) { console.error('회원 로드 실패:', e); }
   }
@@ -1866,10 +1880,24 @@ async function manualVerify(userId) {
   showToast(`✅ ${user.name}님이 수동 인증되었습니다.`, 'success');
 }
 
-function openUserDetail(userId) {
+async function openUserDetail(userId) {
   const user = allUsers.find(u => u.id === userId);
   if (!user) return;
-  const userReviews = recentReviews.filter(r => r.authorUid === userId || r.email === user.email);
+
+  // Firestore에서 해당 유저의 리뷰를 직접 조회
+  let userReviews = recentReviews.filter(r => r.authorUid === userId || r.email === user.email);
+  if (userReviews.length === 0) {
+    try {
+      const revSnap = await db.collection('reviews').where('authorUid', '==', userId).get();
+      if (!revSnap.empty) {
+        userReviews = revSnap.docs.map(doc => {
+          const d = doc.data();
+          return { id: doc.id, author: d.author || '익명', authorUid: d.authorUid || '', instructor: d.instructor || '-', course: d.course || '', platform: d.platform || '', score: d.score || 0, text: d.text || '', verified: d.verified || false, date: d.date || '', blinded: d.blinded || false };
+        });
+      }
+    } catch(e) { console.log('유저 리뷰 조회 실패:', e); }
+  }
+
   const userVerifyReqs = verificationRequests.filter(v => v.userId === userId);
   const userComments = adminComments.filter(c => c.authorUid === userId || c.email === user.email);
   const userPosts = communityPosts.filter(p => p.authorUid === userId);
